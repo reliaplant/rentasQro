@@ -1,8 +1,7 @@
 "use client";
 
 import { motion } from 'framer-motion';
-import type { PropertyData } from '@/app/services/firebase';
-
+import type { PropertyData } from '@/app/interfaces';
 interface PropertyReviewProps {
   data: PropertyData;
 }
@@ -98,7 +97,7 @@ export default function PropertyReview({ data }: PropertyReviewProps) {
               </div>
             </div>
 
-            {data.includesUtilities && (
+            {/* {data.includesUtilities && (
               <div className="flex items-center gap-3">
                 <span className="text-2xl">🔌</span>
                 <div>
@@ -114,13 +113,13 @@ export default function PropertyReview({ data }: PropertyReviewProps) {
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         </section>
       )}
 
       {/* Amenities */}
-      {data.amenities && data.amenities.length > 0 && (
+      {/* {data.amenities && data.amenities.length > 0 && (
         <section className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Amenidades del Complejo</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -143,7 +142,7 @@ export default function PropertyReview({ data }: PropertyReviewProps) {
             })}
           </div>
         </section>
-      )}
+      )} */}
 
       {/* Photos */}
       <section className="bg-white rounded-lg shadow p-6">
