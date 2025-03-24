@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, Info } from 'lucide-react';
 
 interface WhatsAppButtonProps {
   propertyType: string;
@@ -8,7 +8,7 @@ interface WhatsAppButtonProps {
   zoneName?: string;
   advisorPhone: string;
   propertyId: string;
-//   onWhatsAppClick: (propertyId: string) => void;
+  price: number;
 }
 
 export default function WhatsAppButton({
@@ -18,47 +18,46 @@ export default function WhatsAppButton({
   zoneName,
   advisorPhone,
   propertyId,
-//   onWhatsAppClick
+  price
 }: WhatsAppButtonProps) {
-  const handleClick = () => {
-    // onWhatsAppClick(propertyId);
-    
+  const handleWhatsAppClick = () => {
     const message = `Hola, me interesa ${propertyType === 'casa' ? 'la casa' : 'el departamento'} ${transactionTypes.includes('renta') ? 'en renta' : 'en venta'} ${condoName ? `en ${condoName}` : ''} ${zoneName ? `en ${zoneName}` : ''}`;
     const url = `https://wa.me/${advisorPhone}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
 
   return (
-    <motion.button
-      onClick={handleClick}
-      className="md:hidden fixed bottom-6 right-6 bg-green-500 text-white p-4 rounded-full shadow-lg z-50"
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
+    <motion.div
+      className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm shadow-[0_-1px_12px_rgba(0,0,0,0.07)] px-4 py-3 z-50 border-t border-gray-300"
+      initial={{ y: 100 }}
+      animate={{ y: 0 }}
       transition={{ 
         type: "spring",
         stiffness: 260,
-        damping: 20,
-        delay: 1 
+        damping: 20
       }}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
     >
-      <MessageCircle className="w-6 h-6" />
-      <span className="sr-only">Contactar por WhatsApp</span>
-      
-      <motion.div
-        className="absolute inset-0 rounded-full bg-green-500"
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.6, 0, 0.6]
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          repeatType: "reverse"
-        }}
-        style={{ zIndex: -1 }}
-      />
-    </motion.button>
+      <div className="flex items-center justify-between max-w-6xl mx-auto">
+        <div>
+          {/* <p className="text-gray-500 text-sm">
+            {transactionTypes.includes('renta') ? 'Renta' : 'Venta'}
+          </p> */}
+          <p className="text-xl font-semibold">
+            {/* ${price.toLocaleString('es-MX')}
+            {transactionTypes.includes('renta') ? '/mes' : ''} */}
+          </p>
+        </div>
+        
+        <motion.button
+          onClick={handleWhatsAppClick}
+          className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <span className="font-medium text-sm py-2">Contactar por WhatsApp</span>
+          <MessageCircle className="w-5 h-5" />
+        </motion.button>
+      </div>
+    </motion.div>
   );
 }

@@ -14,13 +14,13 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
   if (!condoData) return null;
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl bg-red-500">
       {/* Modern Header with Logo & Title */}
-      <div className="bg-white overflow-hidden mb-12">
+      <div className="overflow-hidden mb-12">
         {/* Hero Banner */}
 
         {/* Content Area */}
-        <div className="flex gap-6 border  rounded-2xl border-gray-200 flex flex-row items-center p-4 bg-gradient-to-r from-blue-50 to-gray-50  ">
+        <div className="flex gap-6 border rounded-2xl border-gray-200 flex flex-row items-center p-0 md:p-4 bg-gradient-to-r from-blue-50 to-gray-50">
 
             <div className=''>
             {condoData.logoUrl ? (
@@ -311,107 +311,153 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
           <h3 className="text-lg font-semibold">Vista de calle</h3>
           <div className="aspect-video relative rounded-xl overflow-hidden flex-grow">
             {condoData.streetViewImage ? (
-              <Image
-                src={condoData.streetViewImage}
-                alt={`Vista de calle de ${condoData.name}`}
-                fill
-                className="object-cover"
-              />
+              <>
+          <Image
+            src={condoData.streetViewImage}
+            alt={`Vista de calle de ${condoData.name}`}
+            fill
+            className="object-cover"
+          />
+          <button 
+            className="absolute top-2 right-2 p-2 rounded-full border border-gray-200 bg-white shadow-xl hover:bg-gray-50"
+            onClick={() => window.open(condoData.streetViewLink, '_blank')}
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="16" 
+              height="16" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            >
+              <path d="M15 3h6v6"/>
+              <path d="M10 14 21 3"/>
+              <path d="M18 13v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6"/>
+            </svg>
+          </button>
+              </>
             ) : (
               <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                <span className="text-gray-400">No hay vista de calle disponible</span>
+          <span className="text-gray-400">No hay vista de calle disponible</span>
               </div>
             )}
           </div>
           <div className="mt-auto ">
             {condoData.streetViewLink && (
               <a
-                href={condoData.streetViewLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center text-sm text-gray-600 hover:text-gray-700"
+          href={condoData.streetViewLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center text-sm text-gray-600 hover:text-gray-700"
               >
-                <MapPin size={16} className="mr-1" />
-                Ver en Google Street View
+          <MapPin size={16} className="mr-1" />
+          Ver en Google Street View
               </a>
             )}
           </div>
         </div>
 
         {/* Global Review Stats */}
-        <div className="flex flex-col h-full space-y-4 ">
-          <h3 className="text-lg font-semibold ">Valoración</h3>
+        <div className="hidden md:flex flex-col h-full space-y-4">
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold">Valoración</h3>
+            <div className="flex items-center"></div></div>
           <div className="mt-1 rounded-xl bg-gray-50 flex flex-col items-center justify-between p-10 flex-grow ">
             <div className="flex flex-col items-center gap-3 my-auto">
               <div className="flex items-center gap-2">
-                <Star size={28} className="fill-yellow-400 text-yellow-400" />
-                <span className="text-4xl font-semibold">{condoData.googleRating}</span>
+          <Star size={28} className="fill-yellow-400 text-yellow-400" />
+          <span className="text-4xl font-semibold">{condoData.googleRating}</span>
               </div>
               <div className="text-gray-600">
-                <span className="font-medium">{condoData.totalRatings}</span> reseñas en Google
+          <span className="font-medium">{condoData.totalRatings}</span> reseñas en Google
               </div>
             </div>
 
             <div className="mt-4">
               {condoData.googlePlaceId && (
-                <a
-                  href={`https://www.google.com/maps/place/?q=place_id:${condoData.googlePlaceId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium text-gray-700 flex items-center gap-2"
-                >
-                  Ver en Google
-                  <span className="text-gray-400">↗</span>
-                </a>
+          <a
+            href={`https://www.google.com/maps/place/?q=place_id:${condoData.googlePlaceId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium text-gray-700 flex items-center gap-2"
+          >
+            Ver en Google
+            <span className="text-gray-400">↗</span>
+          </a>
               )}
             </div>
-
-
           </div>
-          <div className="h-6">
-
-
-          </div>
+          <div className="h-6"></div>
         </div>
-      </div>
+            </div>
 
-      {/* Reviews section */}
-      <div className="mt-2 md:mt-16 mt-8 rounded-2xl bg-gray-50 p-8">
+            {/* Reviews section */}
+            <div className="mt-2 md:mt-16 mt-8 bg-gray-50 p-8">
+            {/* Mobile layout: Overview + Recent Reviews */}
 
-        <h3 className="text-lg font-semibold mb-6">Reseñas de quienes viven en {condoData.name}</h3>
+            <h3 className="text-lg font-semibold mb-6">Reseñas de quienes viven en {condoData.name}</h3>
 
-        <div className="space-y-6">
-          {condoData.cachedReviews?.slice(0, 3).map((review) => (
-            <div key={review.time} className="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0">
-              <div className="flex items-center gap-3 mb-2">
-                {review.profile_photo_url ? (
-                  <Image
-                    src={review.profile_photo_url}
-                    alt={review.author_name}
-                    width={40}
-                    height={40}
-                    className="rounded-full"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
-                    <span className="text-blue-600 font-medium">
-                      {review.author_name.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                )}
-                <div>
-                  <p className="font-medium">{review.author_name}</p>
-                  <div className="flex items-center text-yellow-400">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        size={14}
-                        className={i < review.rating ? 'fill-yellow-400' : 'text-gray-200'}
-                      />
-                    ))}
-                    <span className="ml-2 text-xs text-gray-500">{review.relative_time_description}</span>
+            <div className="md:hidden">
+              {/* Rating Overview */}
+              <div className="flex items-center justify-between p-4 bg-white rounded-lg mb-4">
+                <div className="flex items-center gap-2">
+                  <Star size={24} className="fill-yellow-400 text-yellow-400" />
+                  <div>
+                    <div className="text-2xl font-semibold">{condoData.googleRating}</div>
+                    <div className="text-sm text-gray-500">{condoData.totalRatings} reseñas</div>
                   </div>
                 </div>
+                {condoData.googlePlaceId && (
+                  <a
+                    href={`https://www.google.com/maps/place/?q=place_id:${condoData.googlePlaceId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-gray-600 hover:text-gray-800"
+                  >
+                    Ver en Google ↗
+                  </a>
+                )}
+              </div>
+            </div>
+
+        <div className="flex overflow-x-auto snap-x snap-mandatory -mx-8 px-8 pb-4 gap-4 scrollbar-hide">
+          {condoData.cachedReviews?.slice(0, 3).map((review) => (
+            <div 
+              key={review.time} 
+              className="flex-shrink-0 w-[85vw] md:w-full snap-center bg-white rounded-xl p-6 shadow-lg"
+            >
+              <div className="flex items-center gap-3 mb-2">
+          {review.profile_photo_url ? (
+            <Image
+              src={review.profile_photo_url}
+              alt={review.author_name}
+              width={40}
+              height={40}
+              className="rounded-full"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
+              <span className="text-blue-600 font-medium">
+                {review.author_name.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          )}
+          <div>
+            <p className="font-medium">{review.author_name}</p>
+            <div className="flex items-center text-yellow-400">
+              {[...Array(5)].map((_, i) => (
+                <Star
+            key={i}
+            size={14}
+            className={i < review.rating ? 'fill-yellow-400' : 'text-gray-200'}
+                />
+              ))}
+              <span className="ml-2 text-xs text-gray-500">{review.relative_time_description}</span>
+            </div>
+          </div>
               </div>
               <p className="text-gray-600 text-sm">{review.text}</p>
             </div>
@@ -421,7 +467,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
             <p className="text-gray-500 italic">No hay reseñas disponibles</p>
           )}
         </div>
-      </div>
+            </div>
 
 
 
