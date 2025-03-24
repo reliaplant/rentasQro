@@ -2,7 +2,7 @@ import Image from 'next/image';
 import { Star, MapPin, Shield, X, CheckCircle, WashingMachine } from 'lucide-react';
 import { CondoData } from '@/app/interfaces';
 import { condoAmenities } from '@/app/constants/amenities';
-import Reviews from './reviews';
+// import Reviews from './reviews';
 import { CheckmarkFilled, CloseFilled, Misuse, WordCloud, Education, Building, Sprout, Tree, Box, Temperature, Fire, Restaurant } from '@carbon/icons-react';
 import { PiXFill } from 'react-icons/pi';
 
