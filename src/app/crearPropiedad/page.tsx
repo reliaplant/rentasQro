@@ -35,15 +35,12 @@ const initialFormData: PropertyData = {
   maintenanceIncluded: true,
   petsAllowed: false,
   status: 'publicada',
-  dealType: 'asesor',
   parkingSpots: 1,
   includesWifi: false,
-  includesUtilities: false,
-  includedUtilities: [],
-  amenities: [],
   advisor: '',
   views: 0,
-  whatsappClicks: 0
+  whatsappClicks: 0,
+  descripcion: ''
 };
 
 export default function PropertyForm() {
