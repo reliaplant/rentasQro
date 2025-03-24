@@ -166,16 +166,6 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
         <h3 className="text-lg font-medium border-b pb-2">Ubicación</h3>
         
         {/* Location within property */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Ubicación dentro del inmueble</label>
-          <input
-            type="text"
-            value={data.ubicacionInmueble || ''}
-            onChange={(e) => onChange('ubicacionInmueble', e.target.value)}
-            placeholder="Ej: Frente a áreas verdes, cerca de la alberca, etc."
-            className="border border-gray-300 rounded-lg px-3 py-2 w-full"
-          />
-        </div>
         
         {/* House Levels or Apartment Floor */}
         {isHouse ? (
@@ -202,23 +192,7 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
           </div>
         )}
         
-        {/* Elevator (for apartments) */}
-        {isApartment && (
-          <div>
-            <div className="flex items-center">
-              <input
-                id="elevador"
-                type="checkbox"
-                checked={data.elevador || false}
-                onChange={(e) => onChange('elevador', e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded"
-              />
-              <label htmlFor="elevador" className="ml-2 text-sm text-gray-700">
-                Cuenta con elevador
-              </label>
-            </div>
-          </div>
-        )}
+       
       </div>
 
       {/* Layout and spaces */}
@@ -238,18 +212,7 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
             />
           </div>
           
-          {isHouse && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Metros de terreno</label>
-              <input
-                type="number"
-                min="1"
-                value={data.terrenoM2 || ''}
-                onChange={(e) => onChange('terrenoM2', parseInt(e.target.value) || 0)}
-                className="border border-gray-300 rounded-lg px-3 py-2 w-full"
-              />
-            </div>
-          )}
+         
         </div>
         
         {/* Additional spaces */}
@@ -372,20 +335,7 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
         </div>
         
         {/* Water heater */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Calentador de agua</label>
-          <select
-            value={data.calentadorAgua || ''}
-            onChange={(e) => onChange('calentadorAgua', e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 w-full"
-          >
-            <option value="">Seleccionar...</option>
-            <option value="solar">Solar</option>
-            <option value="electrico">Eléctrico</option>
-            <option value="gas">Gas</option>
-            <option value="otro">Otro</option>
-          </select>
-        </div>
+
         
         {/* Gas type */}
         <div>
@@ -404,35 +354,7 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
         
         {/* Other features */}
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <div className="flex items-center">
-              <input
-                id="conexionLavadora"
-                type="checkbox"
-                checked={data.conexionLavadora || false}
-                onChange={(e) => onChange('conexionLavadora', e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded"
-              />
-              <label htmlFor="conexionLavadora" className="ml-2 text-sm text-gray-700">
-                Conexión para lavadora/secadora
-              </label>
-            </div>
-          </div>
           
-          <div>
-            <div className="flex items-center">
-              <input
-                id="instalacionFibraOptica"
-                type="checkbox"
-                checked={data.instalacionFibraOptica || false}
-                onChange={(e) => onChange('instalacionFibraOptica', e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded"
-              />
-              <label htmlFor="instalacionFibraOptica" className="ml-2 text-sm text-gray-700">
-                Instalación de fibra óptica
-              </label>
-            </div>
-          </div>
         </div>
       </div>
       
@@ -472,46 +394,8 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
           
           {/* Utilities */}
           <div>
-            <div className="flex items-center mb-2">
-              <input
-                id="includesUtilities"
-                type="checkbox"
-                checked={data.includesUtilities}
-                onChange={(e) => onChange('includesUtilities', e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded"
-              />
-              <label htmlFor="includesUtilities" className="ml-2 text-sm text-gray-700">
-                Servicios incluidos
-              </label>
-            </div>
             
-            {data.includesUtilities && (
-              <div className="ml-6 grid grid-cols-2 gap-2">
-                {['water', 'electricity', 'gas', 'wifi'].map(utility => (
-                  <div key={utility} className="flex items-center">
-                    <input
-                      id={utility}
-                      type="checkbox"
-                      checked={data.includedUtilities?.includes(utility) || false}
-                      onChange={(e) => {
-                        const current = data.includedUtilities || [];
-                        const updated = e.target.checked
-                          ? [...current, utility]
-                          : current.filter(u => u !== utility);
-                        onChange('includedUtilities', updated);
-                      }}
-                      className="h-4 w-4 text-blue-600 rounded"
-                    />
-                    <label htmlFor={utility} className="ml-2 text-sm text-gray-700">
-                      {utility === 'water' && 'Agua'}
-                      {utility === 'electricity' && 'Luz'}
-                      {utility === 'gas' && 'Gas'}
-                      {utility === 'wifi' && 'Internet'}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            )}
+
           </div>
           
           {/* Deposit */}
@@ -544,20 +428,7 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
           </div>
           
           {/* Guarantor */}
-          <div>
-            <div className="flex items-center">
-              <input
-                id="requiereAval"
-                type="checkbox"
-                checked={data.requiereAval || false}
-                onChange={(e) => onChange('requiereAval', e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded"
-              />
-              <label htmlFor="requiereAval" className="ml-2 text-sm text-gray-700">
-                Requiere aval
-              </label>
-            </div>
-          </div>
+          
         </div>
       )}
     </div>
