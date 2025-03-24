@@ -249,6 +249,7 @@ export default function PropertyPage() {
         zoneName={zoneData?.name}
         advisorPhone={advisor?.phone || ''}
         propertyId={property.id!}
+        price={property.price}
         // onWhatsAppClick={updateWhatsAppClicks}
       />
 
