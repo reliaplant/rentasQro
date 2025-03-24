@@ -10,7 +10,7 @@ import { Inter, Source_Serif_4, Literata, Big_Shoulders_Display, Sofia_Sans_Extr
 const sourceSerif4 = Source_Serif_4({ subsets: ["latin"] });
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: "400"
+  weight: ["400", "500", "600", "700"]
 });
 const literata = Literata({ subsets: ["latin"] });
 const bigShouldersDisplay = Big_Shoulders_Display({ subsets: ["latin"] }); // Nombre corregido

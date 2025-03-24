@@ -54,6 +54,7 @@ export default function PropertyPage() {
   const equipmentRef = useRef<HTMLDivElement>(null);
   const condoRef = useRef<HTMLDivElement>(null);
   const zibataRef = useRef<HTMLDivElement>(null);
+  const contactRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchPropertyData = async () => {
@@ -181,30 +182,7 @@ export default function PropertyPage() {
               condoData={condoData}
             />
 
-            {/* Services and Equipment */}
-            <section ref={equipmentRef}>
-              <h3 className="text-lg font-semibold mb-4">Equipmaneto</h3>
-              {property.cocinaEquipada && (
-                <div className="flex items-center gap-2">
-                  <Restaurant className="w-5 h-5 text-gray-500" />
-                  <span>Cocina equipada</span>
-                </div>
-              )}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {property.calentadorAgua && (
-                  <div className="flex items-center gap-2">
-                    <Fire className="w-5 h-5 text-gray-500" />
-                    <span>Calentador de agua{property.calentadorAgua}</span>
-                  </div>
-                )}
-                {property.tipoGas && (
-                  <div className="flex items-center gap-2">
-                    <RainDrop className="w-5 h-5 text-gray-500" />
-                    <span>Gas {property.tipoGas}</span>
-                  </div>
-                )}
-              </div>
-            </section>
+            
             {/* Condo Section */}
             {condoData && (
               <section ref={condoRef}>
@@ -218,7 +196,7 @@ export default function PropertyPage() {
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 "ref={contactRef}>
             <div className="sticky top-32">
               <Contacto
                 price={property.price}
@@ -238,21 +216,22 @@ export default function PropertyPage() {
           </div>
         </div>
        
+      
+
           <div ref={zibataRef} className="mt-24">
             <ZibataInfo />
           </div>
-
+          
           <WhatsAppButton
-        propertyType={property.propertyType}
-        transactionTypes={property.transactionTypes}
-        condoName={condoData?.name}
-        zoneName={zoneData?.name}
-        advisorPhone={advisor?.phone || ''}
-        propertyId={property.id!}
-        price={property.price}
-        // onWhatsAppClick={updateWhatsAppClicks}
-      />
-
+            propertyType={property.propertyType}
+            transactionTypes={property.transactionTypes}
+            condoName={condoData?.name}
+            zoneName={zoneData?.name}
+            advisorPhone={advisor?.phone || ''}
+            propertyId={property.id!}
+            price={property.price}
+            contactRef={contactRef as React.RefObject<HTMLDivElement>}
+          />
         
   
       </div>

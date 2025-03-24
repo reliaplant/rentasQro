@@ -21,15 +21,15 @@ export default function PropertyInfo({
 
 }: PropertyInfoProps) {
   return (
-    <div className="space-y-12">
+    <div className="space-y-12 px-6 py-3">
       <section>
-        <h1 className="text-xl md:text-2xl text-black font-bold mb-4">
-          {property.propertyType === 'casa' ? 'Casa' : property.propertyType === 'depa' ? 'Depa' : property.propertyType} {property.transactionTypes.includes('renta') ? 'en renta' : 'en venta'} {condoData?.name ? `en ${condoData.name}` : ''} {zoneData?.name ? `- ${zoneData.name}` : ''}
+        <h1 className="text-2xl md:text-3xl font-medium mb-4">
+            {property.propertyType === 'casa' ? 'Casa' : property.propertyType === 'depa' ? 'Depa' : property.propertyType} {property.transactionTypes.includes('renta') ? 'en renta' : 'en venta'} {condoData?.name ? `en ${condoData.name}`: ''}{zoneData?.name ? `, ${zoneData.name}` : ''}
         </h1>
         <div className="grid grid-cols-3 gap-4">
           <div className="flex flex-col items-center bg-blue-50 p-3 rounded-lg">
         <BedDouble className="w-8 h-8 text-gray-500 mb-2" />
-        <span className="text-sm">{property.bedrooms} {property.bedrooms === 1 ? 'habitación' : 'habitaciones'}</span>
+        <span className="text-sm">{property.bedrooms} {property.bedrooms === 1 ? 'hab' : 'habs'}</span>
           </div>
           <div className="flex flex-col items-center bg-blue-50 p-3 rounded-lg">
         <Bath className="w-8 h-8 text-gray-500 mb-2" />
@@ -48,11 +48,11 @@ export default function PropertyInfo({
           {property.furnished !== undefined && (
             <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
               <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                <Sofa className="w-5 h-5 text-gray-500" />
+          <Sofa className="w-5 h-5 text-gray-500" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Amueblado</p>
-                <p className="font-medium">{property.furnished ? "Si" : "No"}</p>
+          <p className="text-xs sm:text-sm text-gray-500">Amueblado</p>
+          <p className="text-sm sm:text-base font-medium">{property.furnished ? "Si" : "No"}</p>
               </div>
             </div>
           )}
@@ -60,11 +60,11 @@ export default function PropertyInfo({
           {property.petsAllowed !== undefined && (
             <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
               <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                <PawPrint className="w-5 h-5 text-gray-500" />
+          <PawPrint className="w-5 h-5 text-gray-500" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Acepta mascotas</p>
-                <p className="font-medium">{property.petsAllowed ? "Si" : "No"}</p>
+          <p className="text-xs sm:text-sm text-gray-500">Acepta mascotas</p>
+          <p className="text-sm sm:text-base font-medium">{property.petsAllowed ? "Si" : "No"}</p>
               </div>
             </div>
           )}
@@ -72,11 +72,11 @@ export default function PropertyInfo({
           {property.construccionM2 && (
             <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
               <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                <Home className="w-5 h-5 text-gray-500" />
+          <Home className="w-5 h-5 text-gray-500" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Construcción</p>
-                <p className="font-medium">{property.construccionM2}m²</p>
+          <p className="text-xs sm:text-sm text-gray-500">Construcción</p>
+          <p className="text-sm sm:text-base font-medium">{property.construccionM2}m²</p>
               </div>
             </div>
           )}
@@ -84,11 +84,11 @@ export default function PropertyInfo({
           {property.estadoConservacion && (
             <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
               <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-gray-500" />
+          <Building2 className="w-5 h-5 text-gray-500" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Estado</p>
-                <p className="font-medium capitalize">{property.estadoConservacion.replace('_', ' ')}</p>
+          <p className="text-xs sm:text-sm text-gray-500">Estado</p>
+          <p className="text-sm sm:text-base font-medium capitalize">{property.estadoConservacion.replace('_', ' ')}</p>
               </div>
             </div>
           )}
@@ -96,11 +96,11 @@ export default function PropertyInfo({
           {property.constructionYear && (
             <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
               <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                <CalendarIcon className="w-5 h-5 text-gray-500" />
+          <CalendarIcon className="w-5 h-5 text-gray-500" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Año construcción</p>
-                <p className="font-medium">{property.constructionYear}</p>
+          <p className="text-xs sm:text-sm text-gray-500">Año construcción</p>
+          <p className="text-sm sm:text-base font-medium">{property.constructionYear}</p>
               </div>
             </div>
           )}
@@ -108,11 +108,11 @@ export default function PropertyInfo({
           {property.nivelesCasa && (
             <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
               <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                <Building className="w-5 h-5 text-gray-500" />
+          <Building className="w-5 h-5 text-gray-500" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Niveles</p>
-                <p className="font-medium">{property.nivelesCasa}</p>
+          <p className="text-xs sm:text-sm text-gray-500">Niveles</p>
+          <p className="text-sm sm:text-base font-medium">{property.nivelesCasa}</p>
               </div>
             </div>
           )}
@@ -120,11 +120,11 @@ export default function PropertyInfo({
           {property.pisoDepto && (
             <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
               <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                <Building className="w-5 h-5 text-gray-500" />
+          <Building className="w-5 h-5 text-gray-500" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Piso</p>
-                <p className="font-medium">{property.pisoDepto}</p>
+          <p className="text-xs sm:text-sm text-gray-500">Piso</p>
+          <p className="text-sm sm:text-base font-medium">{property.pisoDepto}</p>
               </div>
             </div>
           )}
@@ -133,41 +133,41 @@ export default function PropertyInfo({
 
       <section className=''>
         <h3 className="text-lg font-semibold mb-4">Comodidades</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {property.cuartoEstudio && (
             <div className="flex items-center gap-2">
               <Tv className="w-5 h-5 text-gray-500" />
-              <span>Cuarto de estudio/TV</span>
+              <span className="text-sm">Cuarto de estudio/TV</span>
             </div>
           )}
           {property.cuartoLavado && (
             <div className="flex items-center gap-2">
               <WashingMachine className="w-5 h-5 text-gray-500" />
-              <span>Cuarto de lavado</span>
+              <span className="text-sm">Cuarto de lavado</span>
             </div>
           )}
           {property.balcon && (
             <div className="flex items-center gap-2">
               <MdBalcony className="w-5 h-5 text-gray-500" />
-              <span>Balcón/Terraza</span>
+              <span className="text-sm">Balcón/Terraza</span>
             </div>
           )}
           {property.jardin && (
             <div className="flex items-center gap-2">
               <Flower className="w-5 h-5 text-gray-500" />
-              <span>Jardín</span>
+              <span className="text-sm">Jardín</span>
             </div>
           )}
           {property.bodega && (
             <div className="flex items-center gap-2">
               <DoorOpen className="w-5 h-5 text-gray-500" />
-              <span>Bodega</span>
+              <span className="text-sm">Bodega</span>
             </div>
           )}
           {property.roofGarden && (
             <div className="flex items-center gap-2">
               <MdRoofing className="w-5 h-5 text-gray-500" />
-              <span>Roof Garden</span>
+              <span className="text-sm">Roof Garden</span>
             </div>
           )}
         </div>
@@ -175,23 +175,23 @@ export default function PropertyInfo({
 
       <section >
         <h3 className="text-lg font-semibold mb-4">Equipamiento</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {property.cocinaEquipada && (
             <div className="flex items-center gap-2">
               <ChefHat className="w-5 h-5 text-gray-500" />
-              <span>Cocina equipada</span>
+              <span className="text-sm">Cocina equipada</span>
             </div>
           )}
           {property.calentadorAgua && (
             <div className="flex items-center gap-2">
               <Flame className="w-5 h-5 text-gray-500" />
-              <span>Calentador de agua {property.calentadorAgua}</span>
+              <span className="text-sm">Calentador de agua {property.calentadorAgua}</span>
             </div>
           )}
           {property.tipoGas && (
             <div className="flex items-center gap-2">
               <Droplets className="w-5 h-5 text-gray-500" />
-              <span>Gas {property.tipoGas}</span>
+              <span className="text-sm">Gas {property.tipoGas}</span>
             </div>
           )}
         </div>
