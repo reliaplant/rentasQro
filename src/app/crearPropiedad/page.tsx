@@ -12,6 +12,9 @@ import PropertyPhotos from '@/app/crearPropiedad/components/propertyPhotos';
 import PropertyReview from '@/app/crearPropiedad/components/propertyReview';
 import FinishMessage from '@/app/crearPropiedad/components/finishMessage';
 
+// Add this export to specify this is a static page (no SSR)
+export const dynamic = 'force-static';
+
 const steps = [
   { id: 'type', label: 'Tipo' },
   { id: 'details', label: 'Detalles' },
