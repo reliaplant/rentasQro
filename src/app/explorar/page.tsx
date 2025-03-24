@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getProperties, PropertyData } from '@/app/services/firebase';
+import { getProperties } from '@/app/services/firebase';
+import {  PropertyData} from '@/app/interfaces';
 
 // Define Nubank-inspired color palette
 const colors = {
