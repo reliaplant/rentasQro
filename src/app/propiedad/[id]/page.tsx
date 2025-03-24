@@ -11,7 +11,7 @@ import FotosPropiedad from './components/fotosPropiedad';
 import Contacto from './components/contacto';
 import { Utensils, Dumbbell, TreePine, Users, Building2, ShieldCheck, Bath, Gamepad2 } from 'lucide-react';
 import { Fire, GasStation, ObjectStorage, RainDrop, Restaurant, Swim } from '@carbon/icons-react';
-import Reviews from './components/reviews';
+// import Reviews from './components/reviews';
 import CondoSection from './components/CondoSection';
 import { MdBalcony, MdRoofing } from 'react-icons/md';
 import { TbGardenCart } from 'react-icons/tb';
