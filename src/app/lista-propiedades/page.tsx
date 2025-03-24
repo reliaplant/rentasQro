@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { PropertyData, getProperties } from '../services/firebase';
+import { getProperties } from '../services/firebase';
+import { PropertyData } from '../interfaces';
 import Link from 'next/link';
 
 export default function ListaPropiedades() {
@@ -72,7 +73,7 @@ export default function ListaPropiedades() {
                     {property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1)}
                   </h2>
                   <span className="bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded">
-                    {property.transactionType}
+                    {property.transactionTypes}
                   </span>
                 </div>
                 
