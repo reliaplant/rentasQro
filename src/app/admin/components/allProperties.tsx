@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Eye, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
-import { getProperties, PropertyData } from '@/app/services/firebase';
+import { getProperties } from '@/app/services/firebase';
+import { PropertyData } from '@/app/interfaces';
+
 
 export default function AllProperties() {
   const [properties, setProperties] = useState<PropertyData[]>([]);
