@@ -6,15 +6,16 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { getCurrentUser, getProperty, updateProperty, addProperty } from '@/app/services/firebase';
 import { PropertyData } from '@/app/interfaces';
 import { Timestamp } from 'firebase/firestore';
-import PropertyType from '@/app/crearPropiedad/components/propertyType';
-import PropertyDetails from '@/app/crearPropiedad/components/propertyDetails';
-import PropertyPhotos from '@/app/crearPropiedad/components/propertyPhotos';
-import PropertyReview from '@/app/crearPropiedad/components/propertyReview';
-import FinishMessage from '@/app/crearPropiedad/components/finishMessage';
+import dynamic from 'next/dynamic';
 
-// Add this export to specify this is a static page (no SSR)
-export const dynamic = 'force-static';
+// Dynamically import components with no SSR
+const PropertyType = dynamic(() => import('@/app/crearPropiedad/components/propertyType'), { ssr: false });
+const PropertyDetails = dynamic(() => import('@/app/crearPropiedad/components/propertyDetails'), { ssr: false });
+const PropertyPhotos = dynamic(() => import('@/app/crearPropiedad/components/propertyPhotos'), { ssr: false });
+const PropertyReview = dynamic(() => import('@/app/crearPropiedad/components/propertyReview'), { ssr: false });
+const FinishMessage = dynamic(() => import('@/app/crearPropiedad/components/finishMessage'), { ssr: false });
 
+// Keep the steps definition and initialFormData the same
 const steps = [
   { id: 'type', label: 'Tipo' },
   { id: 'details', label: 'Detalles' },
@@ -22,9 +23,11 @@ const steps = [
   { id: 'review', label: 'Revisión' },
 ];
 
+// Default property data with all required fields
 const initialFormData: PropertyData = {
   propertyType: '',
   transactionTypes: [],
+  // transactionType: 'renta', // Add required field
   price: 0,
   bathrooms: 1,
   bedrooms: 1,
@@ -43,23 +46,33 @@ const initialFormData: PropertyData = {
   advisor: '',
   views: 0,
   whatsappClicks: 0,
-  descripcion: ''
+  descripcion: '',
+  // dealType: 'asesor' // Add required field
 };
 
 export default function PropertyForm() {
+  // Loading state should be true by default
+  const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  
+  // Rest of the component stays the same...
   const router = useRouter();
   const searchParams = useSearchParams();
-  const propertyId = searchParams.get('id');
+  const propertyId = searchParams?.get('id');
   
   const [formData, setFormData] = useState<PropertyData>(initialFormData);
   const [currentStep, setCurrentStep] = useState(0);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout>();
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [isFinishing, setIsFinishing] = useState(false);
+
+  // Add initialization on mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const loadProperty = async () => {
@@ -270,6 +283,11 @@ export default function PropertyForm() {
         return null;
     }
   };
+
+  // Don't render anything until component is mounted
+  if (!mounted) {
+    return null;
+  }
 
   if (loading) {
     return (
