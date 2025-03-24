@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { getCurrentUser, getPropertiesByAdvisor, updateProperty } from '@/app/services/firebase';
-import type { PropertyData } from '@/app/services/firebase';
+import type { PropertyData } from '@/app/interfaces'; 
 
 export default function MisPropiedades() {
   const router = useRouter();
