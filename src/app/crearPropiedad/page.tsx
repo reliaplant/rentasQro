@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { getCurrentUser, getProperty, updateProperty, addProperty, PropertyData } from '@/app/services/firebase';
+import { getCurrentUser, getProperty, updateProperty, addProperty } from '@/app/services/firebase';
+import { PropertyData } from '@/app/interfaces';
 import { Timestamp } from 'firebase/firestore';
 import PropertyType from '@/app/crearPropiedad/components/propertyType';
 import PropertyDetails from '@/app/crearPropiedad/components/propertyDetails';
@@ -20,7 +21,6 @@ const steps = [
 
 const initialFormData: PropertyData = {
   propertyType: '',
-  transactionType: '',
   transactionTypes: [],
   price: 0,
   bathrooms: 1,
