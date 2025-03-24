@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getProperties } from '@/app/services/firebase';
-import type { PropertyData } from '@/app/services/firebase';
+import type { PropertyData } from '@/app/interfaces';
 
 // Define Nubank-inspired color palette
 const colors = {
