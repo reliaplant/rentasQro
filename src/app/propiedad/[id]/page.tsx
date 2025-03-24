@@ -19,6 +19,9 @@ import { GrStorage } from 'react-icons/gr';
 import { GiWaterDrop } from 'react-icons/gi';
 import ZibataInfo from './components/zibata';
 import MenuPropiedad from './components/menuPropiedad';
+import PropertyInfo from './components/PropertyInfo';
+import WhatsAppButton from './components/WhatsAppButton';
+
 
 
 const amenityIcons = {
@@ -33,7 +36,7 @@ const amenityIcons = {
   'securityDoor': { icon: ShieldCheck, label: 'Vigilancia' }
 };
 
-export default function PropertyDetail() {
+export default function PropertyPage() {
   const router = useRouter();
   const params = useParams();
   const id = params?.id as string;
@@ -165,170 +168,18 @@ export default function PropertyDetail() {
       />
 
       {/* Rest of property detail content */}
-      <div className="max-w-6xl mx-auto px-4 py-12">
+      <div className="max-w-6xl mx-auto px-4 mt-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-12">
             {/* Property Info */}
-            <section ref={infoRef}>
-              <h1 className="text-2xl text-black font-bold mb-4">
-                {property.propertyType === 'casa' ? 'Casa' : property.propertyType === 'depa' ? 'Depa' : property.propertyType} {property.transactionTypes.includes('renta') ? 'en renta' : 'en venta'} {condoData?.name ? `en ${condoData.name}` : ''} {zoneData?.name ? `- ${zoneData.name}` : ''}
-              </h1>
-              <div className="flex items-baseline space-x-6">
-                <div className="flex items-center space-x-4 text-lg">
-                  <div className="flex items-center">
-                    <BedDouble className="w-5 h-5 mr-2 text-gray-500" />
-                    <span>{property.bedrooms} {property.bedrooms === 1 ? 'habitación' : 'habitaciones'}</span>
-                  </div>
-                  <span>·</span>
-                  <div className="flex items-center">
-                    <Bath className="w-5 h-5 mr-2 text-gray-500" />
-                    <span>{property.bathrooms} {property.bathrooms === 1 ? 'baño' : 'baños'}</span>
-                  </div>
-                  <span>·</span>
-                  <div className="flex items-center">
-                    <Car className="w-5 h-5 mr-2 text-gray-500" />
-                    <span>{property.parkingSpots} {property.parkingSpots === 1 ? 'estacionamiento' : 'estacionamientos'}</span>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* Basic Details */}
-            <section ref={characteristicsRef}>
-              <h3 className="text-lg font-semibold mb-4 property-photos">Características básicas</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
 
 
-                {property.furnished !== undefined && (
-                  <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                      <Sofa className="w-5 h-5 text-gray-500" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Amueblado</p>
-                      <p className="font-medium">{property.furnished ? "Si" : "No"}</p>
-                    </div>
-                  </div>
-                )}
-
-
-                {property.petsAllowed !== undefined && (
-                  <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                      <PawPrint className="w-5 h-5 text-gray-500" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Acepta mascotas</p>
-                      <p className="font-medium">{property.petsAllowed ? "Si" : "No"}</p>
-                    </div>
-                  </div>
-                )}
-
-
-                <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                    <Home className="w-5 h-5 text-gray-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Construcción</p>
-                    <p className="font-medium">{property.construccionM2}m²</p>
-                  </div>
-                </div>
-
-                {property.estadoConservacion && (
-                  <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                      <Building2 className="w-5 h-5 text-gray-500" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Estado</p>
-                      <p className="font-medium capitalize">{property.estadoConservacion.replace('_', ' ')}</p>
-                    </div>
-                  </div>
-                )}
-
-                {property.constructionYear && (
-                  <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                      <CalendarIcon className="w-5 h-5 text-gray-500" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Año construcción</p>
-                      <p className="font-medium">{property.constructionYear}</p>
-                    </div>
-                  </div>
-                )}
-
-
-                {property.nivelesCasa && (
-                  <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                      <Building className="w-5 h-5 text-gray-500" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Niveles</p>
-                      <p className="font-medium">{property.nivelesCasa}</p>
-                    </div>
-                  </div>
-                )}
-
-                {property.pisoDepto && (
-                  <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                      <Building className="w-5 h-5 text-gray-500" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Piso</p>
-                      <p className="font-medium">{property.pisoDepto}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </section>
-
-            {/* Additional Features */}
-            <section ref={amenitiesRef}>
-              <h3 className="text-lg font-semibold mb-4">Comodidades</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {property.cuartoEstudio && (
-                  <div className="flex items-center gap-2">
-                    <Tv className="w-5 h-5 text-gray-500" />
-                    <span>Cuarto de estudio/TV</span>
-                  </div>
-                )}
-                {property.cuartoLavado && (
-                  <div className="flex items-center gap-2">
-                    <WashingMachine className="w-5 h-5 text-gray-500" />
-                    <span>Cuarto de lavado</span>
-                  </div>
-                )}
-                {property.balcon && (
-                  <div className="flex items-center gap-2">
-                    <MdBalcony className="w-5 h-5 text-gray-500" />
-                    <span>Balcón/Terraza</span>
-                  </div>
-                )}
-                {property.jardin && (
-                  <div className="flex items-center gap-2">
-                    <Flower className="w-5 h-5 text-gray-500" />
-                    <span>Jardín</span>
-                  </div>
-                )}
-                {property.bodega && (
-                  <div className="flex items-center gap-2">
-                    <DoorOpen className="w-5 h-5 text-gray-500" />
-                    <span>Bodega</span>
-                  </div>
-                )}
-                {property.roofGarden && (
-                  <div className="flex items-center gap-2">
-                    <MdRoofing className="w-5 h-5 text-gray-500" />
-                    <span>Roof Garden</span>
-                  </div>
-                )}
-              </div>
-            </section>
+            <PropertyInfo 
+              property={property}
+              zoneData={zoneData}
+              condoData={condoData}
+            />
 
             {/* Services and Equipment */}
             <section ref={equipmentRef}>
@@ -390,6 +241,16 @@ export default function PropertyDetail() {
           <div ref={zibataRef} className="mt-24">
             <ZibataInfo />
           </div>
+
+          <WhatsAppButton
+        propertyType={property.propertyType}
+        transactionTypes={property.transactionTypes}
+        condoName={condoData?.name}
+        zoneName={zoneData?.name}
+        advisorPhone={advisor?.phone || ''}
+        propertyId={property.id!}
+        // onWhatsAppClick={updateWhatsAppClicks}
+      />
 
         
   

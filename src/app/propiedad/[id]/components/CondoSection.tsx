@@ -305,7 +305,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
         )}
       </div>
 
-      <div className="mt-16 grid grid-cols-2 gap-8">
+      <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Street View */}
         <div className="space-y-4 flex flex-col h-full">
           <h3 className="text-lg font-semibold">Vista de calle</h3>
@@ -376,7 +376,8 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
       </div>
 
       {/* Reviews section */}
-      <div className="mt-16 rounded-2xl bg-gray-50 p-8">
+      <div className="mt-2 md:mt-16 mt-8 rounded-2xl bg-gray-50 p-8">
+
         <h3 className="text-lg font-semibold mb-6">Reseñas de quienes viven en {condoData.name}</h3>
 
         <div className="space-y-6">

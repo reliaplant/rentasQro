@@ -12,19 +12,37 @@ interface FotosPropiedadProps {
 export default function FotosPropiedad({ images, propertyType }: FotosPropiedadProps) {
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
 
   if (!images?.length) return null;
 
   const handleDragEnd = (e: any, { offset, velocity }: any) => {
     const swipe = offset.x;
     
-    if (Math.abs(velocity.x) > 500 || Math.abs(swipe) > 100) {
+    if (Math.abs(velocity.x) > 500 || Math.abs(swipe) > 50) {
       if (swipe < 0 && currentIndex < images.length - 1) {
+        setDirection(1);
         setCurrentIndex(prev => prev + 1);
       } else if (swipe > 0 && currentIndex > 0) {
+        setDirection(-1);
         setCurrentIndex(prev => prev - 1);
       }
     }
+  };
+
+  const variants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? '100%' : '-100%',
+      opacity: 0
+    }),
+    center: {
+      x: 0,
+      opacity: 1
+    },
+    exit: (direction: number) => ({
+      x: direction > 0 ? '-100%' : '100%',
+      opacity: 0
+    })
   };
 
   return (
@@ -39,13 +57,18 @@ export default function FotosPropiedad({ images, propertyType }: FotosPropiedadP
             dragElastic={0.2}
             onDragEnd={handleDragEnd}
           >
-            <AnimatePresence initial={false}>
+            <AnimatePresence initial={false} custom={direction}>
               <motion.div
                 key={currentIndex}
-                initial={{ x: "100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: "-100%" }}
-                transition={{ type: "spring", damping: 20 }}
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{
+                  x: { type: "spring", stiffness: 500, damping: 30 },
+                  opacity: { duration: 0.15 }
+                }}
                 className="absolute inset-0"
               >
                 <Image
