@@ -1,11 +1,55 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Jost, Kumbh_Sans, Montserrat } from "next/font/google";
 import "./globals.css";
+import Menu from '@/app/components/menu';
+
+import { Inter, Source_Serif_4, Literata, Big_Shoulders_Display, Sofia_Sans_Extra_Condensed, Sofia_Sans, Sofia_Sans_Condensed, Sunflower, Zen_Dots, IBM_Plex_Sans, Poppins, Gabarito, Instrument_Sans, Quicksand, Outfit } from "next/font/google";
+// import "@carbon/styles/css/styles.css";
+
+
+const sourceSerif4 = Source_Serif_4({ subsets: ["latin"] });
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: "400"
+});
+const literata = Literata({ subsets: ["latin"] });
+const bigShouldersDisplay = Big_Shoulders_Display({ subsets: ["latin"] }); // Nombre corregido
+const SofiaSansExtraCondensed = Sofia_Sans_Extra_Condensed({ subsets: ["latin"] }); // Nombre corregido
+const SofiaSans = Sofia_Sans({ subsets: ["latin"] }); // Nombre corregido
+const SofiaSansCondensed = Sofia_Sans_Condensed({ subsets: ["latin"] }); // Nombre corregido
+const instrumentSans = Instrument_Sans({ subsets: ["latin"] });
+const quicksand = Quicksand({ subsets: ["latin"] });
+const montserrat = Montserrat({ 
+  subsets: ["latin"],
+  weight: ["400", "500", "700"] // Common weights, adjust as needed
+});
+const jost = Jost({
+  
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"] // Adjust weights as needed
+});
+
+const outfit = Outfit({ 
+  subsets: ["latin"],
+  weight: ["400", "700"] // You can adjust weights as needed
+});
+const gabarito = Gabarito({ subsets: ["latin"] });
+
+const IbmPlexSans = IBM_Plex_Sans({
+  subsets: ["latin"],
+  weight: "400"
+}); // Nombre corregido
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
+
+const kumbhSans = Kumbh_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"]
+});
+
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -23,10 +67,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html lang="es">
+      <body className={`${poppins.className} ${geistMono.variable} antialiased`}>
+        <Menu />
         {children}
       </body>
     </html>

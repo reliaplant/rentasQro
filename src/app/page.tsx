@@ -1,440 +1,275 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { getProperties } from '@/app/services/firebase';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { PropertyData } from '@/app/services/firebase';
+import { useRouter } from 'next/navigation';
+import { getProperties } from '@/app/services/firebase';
+import type { PropertyData } from '@/app/services/firebase';
 
-// Icons
-import { 
-  HiOutlineHome, 
-  HiOutlineOfficeBuilding, 
-  HiOutlineCash, 
-  HiOutlineShoppingCart,
-  HiOutlineBadgeCheck, 
-  HiChevronLeft, 
-  HiChevronRight, 
-  HiOutlineCurrencyDollar,
-  HiOutlineLocationMarker,
-  HiOutlineUserGroup
-} from 'react-icons/hi';
-
-// Price formatter
-const formatPrice = (price: number) => {
-  return price.toLocaleString('es-MX', {
-    style: 'currency',
-    currency: 'MXN',
-    minimumFractionDigits: 0
-  });
+// Define Nubank-inspired color palette
+const colors = {
+  primary: '#8A05BE', // Main purple color
+  primaryLight: '#A64FD5', // Lighter purple for hover states
+  primaryDark: '#6D039A', // Darker purple for active states
+  background: '#F5F5F7', // Very light gray background
+  white: '#FFFFFF', // Pure white
+  textDark: '#333333', // Dark text for readability
+  textLight: '#666666', // Light text for secondary info
+  border: '#E0E0E0', // Light border color
 };
 
 export default function Home() {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<'renta' | 'venta'>('renta');
   const [properties, setProperties] = useState<PropertyData[]>([]);
-  const [filteredProperties, setFilteredProperties] = useState<PropertyData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Filter states
-  const [propertyType, setPropertyType] = useState<string | null>(null);
-  const [transactionType, setTransactionType] = useState<string | null>(null);
-  const [furnished, setFurnished] = useState<boolean | null>(null);
-  const [bedroomsMin, setBedroomsMin] = useState<number>(0);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000000]);
-  const [selectedZones, setSelectedZones] = useState<string[]>([]);
-  
-  // Zones list
-  const zones = [
-    { id: 'zakia', name: 'Zakia' },
-    { id: 'refugio', name: 'El Refugio' },
-    { id: 'zibata', name: 'Zibatá' }
-  ];
+  const [searchLocation, setSearchLocation] = useState('');
 
   useEffect(() => {
-    const fetchProperties = async () => {
+    const loadProperties = async () => {
       try {
-        const data = await getProperties();
-        setProperties(data);
-        setFilteredProperties(data);
-        
-        // Set initial price range based on actual properties
-        if (data.length > 0) {
-          const prices = data.map(p => p.price);
-          const min = Math.min(...prices);
-          const max = Math.max(...prices);
-          setPriceRange([min, max]);
-        }
-      } catch (err) {
-        setError('Error al cargar las propiedades');
+        // Only load published properties with status 'publicada'
+        const allProperties = await getProperties();
+        const publishedProperties = allProperties.filter(p => p.status === 'publicada');
+        setProperties(publishedProperties);
+      } catch (error) {
+        console.error('Error loading properties:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProperties();
+    loadProperties();
   }, []);
 
-  useEffect(() => {
-    // Apply filters
-    let results = [...properties];
-    
-    if (propertyType) {
-      results = results.filter(p => p.propertyType === propertyType);
-    }
-    
-    if (transactionType) {
-      results = results.filter(p => p.transactionType === transactionType);
-    }
-    
-    if (furnished !== null) {
-      results = results.filter(p => p.furnished === furnished);
-    }
-    
-    if (bedroomsMin > 0) {
-      results = results.filter(p => p.bedrooms >= bedroomsMin);
-    }
-    
-    results = results.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
-    
-    if (selectedZones.length > 0) {
-      results = results.filter(p => selectedZones.includes(p.zone));
-    }
-    
-    setFilteredProperties(results);
-  }, [properties, propertyType, transactionType, furnished, bedroomsMin, priceRange, selectedZones]);
-
-  // Image carousel handling
-  const [activeImageIndex, setActiveImageIndex] = useState<Record<string, number>>({});
-
-  const handleNextImage = (propertyId: string, imagesLength: number) => {
-    setActiveImageIndex(prev => ({
-      ...prev,
-      [propertyId]: ((prev[propertyId] || 0) + 1) % imagesLength
-    }));
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    router.push(`/propiedades?type=${activeTab}${searchLocation ? `&zone=${encodeURIComponent(searchLocation)}` : ''}`);
   };
 
-  const handlePrevImage = (propertyId: string, imagesLength: number) => {
-    setActiveImageIndex(prev => ({
-      ...prev,
-      [propertyId]: ((prev[propertyId] || 0) - 1 + imagesLength) % imagesLength
-    }));
-  };
-
-  const handleZoneToggle = (zoneId: string) => {
-    setSelectedZones(prev => {
-      if (prev.includes(zoneId)) {
-        return prev.filter(z => z !== zoneId);
-      } else {
-        return [...prev, zoneId];
-      }
-    });
-  };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="text-red-500 text-center p-4">{error}</div>;
-  }
+  // Filter properties based on active tab (rent or sale)
+  const filteredProperties = properties.filter(property => 
+    property.transactionTypes?.includes(activeTab === 'renta' ? 'renta' : 'venta')
+  );
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      {/* Filter Section - First Row */}
-      <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-        <h2 className="text-lg font-semibold mb-4">Filtrar propiedades</h2>
+    <main className="min-h-screen" style={{ backgroundColor: colors.background, fontFamily: 'Montserrat, sans-serif' }}>
+      {/* Hero Section with Search */}
+      <section className="relative flex flex-col items-center justify-center py-32 px-4 overflow-hidden bg-gradient-to-r from-purple-800 to-purple-900">
+        <div className="absolute inset-0 opacity-10">
+          <Image 
+            src="/images/hero-bg.jpg" 
+            alt="Background" 
+            layout="fill" 
+            objectFit="cover"
+            priority
+          />
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-          {/* Property Type Toggle */}
-          <div className="flex flex-col">
-            <label className="text-sm text-gray-600 mb-2">Tipo de inmueble</label>
-            <div className="flex rounded-lg overflow-hidden border">
-              <button 
-                onClick={() => setPropertyType('casa')}
-                className={`flex-1 py-2 px-3 flex items-center justify-center gap-1 ${propertyType === 'casa' ? 'bg-blue-500 text-white' : 'bg-white'}`}
-              >
-                <HiOutlineHome /> Casa
-              </button>
-              <button 
-                onClick={() => setPropertyType('departamento')}
-                className={`flex-1 py-2 px-3 flex items-center justify-center gap-1 ${propertyType === 'departamento' ? 'bg-blue-500 text-white' : 'bg-white'}`}
-              >
-                <HiOutlineOfficeBuilding /> Depa
-              </button>
-              {propertyType && (
-                <button 
-                  onClick={() => setPropertyType(null)}
-                  className="py-2 px-3 bg-gray-100 text-gray-500 hover:bg-gray-200"
-                >
-                  ×
-                </button>
-              )}
-            </div>
-          </div>
+        <div className="relative z-10 text-center max-w-4xl mx-auto">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6">
+            Encuentra tu próximo hogar
+          </h1>
+          <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
+            La manera más sencilla de encontrar el espacio perfecto para vivir o invertir
+          </p>
 
-          {/* Transaction Type Toggle */}
-          <div className="flex flex-col">
-            <label className="text-sm text-gray-600 mb-2">Operación</label>
-            <div className="flex rounded-lg overflow-hidden border">
-              <button 
-                onClick={() => setTransactionType('renta')}
-                className={`flex-1 py-2 px-3 flex items-center justify-center gap-1 ${transactionType === 'renta' ? 'bg-blue-500 text-white' : 'bg-white'}`}
-              >
-                <HiOutlineCash /> Renta
-              </button>
-              <button 
-                onClick={() => setTransactionType('venta')}
-                className={`flex-1 py-2 px-3 flex items-center justify-center gap-1 ${transactionType === 'venta' ? 'bg-blue-500 text-white' : 'bg-white'}`}
-              >
-                <HiOutlineShoppingCart /> Compra
-              </button>
-              {transactionType && (
-                <button 
-                  onClick={() => setTransactionType(null)}
-                  className="py-2 px-3 bg-gray-100 text-gray-500 hover:bg-gray-200"
-                >
-                  ×
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Furnished Toggle */}
-          <div className="flex flex-col">
-            <label className="text-sm text-gray-600 mb-2">Amueblado</label>
-            <div className="flex rounded-lg overflow-hidden border">
-              <button 
-                onClick={() => setFurnished(true)}
-                className={`flex-1 py-2 px-3 flex items-center justify-center gap-1 ${furnished === true ? 'bg-blue-500 text-white' : 'bg-white'}`}
-              >
-                <HiOutlineBadgeCheck /> Sí
-              </button>
-              <button 
-                onClick={() => setFurnished(false)}
-                className={`flex-1 py-2 px-3 flex items-center justify-center gap-1 ${furnished === false ? 'bg-blue-500 text-white' : 'bg-white'}`}
-              >
-                No
-              </button>
-              {furnished !== null && (
-                <button 
-                  onClick={() => setFurnished(null)}
-                  className="py-2 px-3 bg-gray-100 text-gray-500 hover:bg-gray-200"
-                >
-                  ×
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Bedrooms Filter */}
-          <div className="flex flex-col">
-            <label className="text-sm text-gray-600 mb-2">Recámaras (min.)</label>
-            <div className="flex items-center">
-              <input
-                type="range"
-                min="0"
-                max="5"
-                value={bedroomsMin}
-                onChange={(e) => setBedroomsMin(parseInt(e.target.value))}
-                className="flex-1 mr-2"
-              />
-              <span className="bg-blue-100 text-blue-800 rounded-full h-8 w-8 flex items-center justify-center">
-                {bedroomsMin}+
-              </span>
-            </div>
-          </div>
-
-          {/* Price Range */}
-          <div className="flex flex-col">
-            <label className="text-sm text-gray-600 mb-2">Precio</label>
-            <div className="flex items-center gap-2">
-              <span className="text-xs">{formatPrice(priceRange[0])}</span>
-              <input
-                type="range"
-                min={properties.length > 0 ? Math.min(...properties.map(p => p.price)) : 0}
-                max={properties.length > 0 ? Math.max(...properties.map(p => p.price)) : 100000000}
-                value={priceRange[1]}
-                onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                className="flex-1"
-              />
-              <span className="text-xs">{formatPrice(priceRange[1])}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Zone Chips */}
-        <div>
-          <label className="text-sm text-gray-600 mb-2 block">Zonas</label>
-          <div className="flex flex-wrap gap-2">
-            {zones.map(zone => (
-              <button
-                key={zone.id}
-                onClick={() => handleZoneToggle(zone.id)}
-                className={`px-4 py-2 rounded-full text-sm ${
-                  selectedZones.includes(zone.id)
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                }`}
-              >
-                {zone.name}
-              </button>
-            ))}
-            {selectedZones.length > 0 && (
-              <button
-                onClick={() => setSelectedZones([])}
-                className="px-4 py-2 rounded-full text-sm bg-gray-100 text-gray-500 hover:bg-gray-200"
-              >
-                Limpiar
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Results Section */}
-      <div className="mb-6 flex justify-between items-center">
-        <h2 className="text-xl font-bold">
-          {filteredProperties.length} {filteredProperties.length === 1 ? 'propiedad' : 'propiedades'} encontradas
-        </h2>
-        <Link
-          href="/lista-propiedades"
-          className="text-blue-500 hover:text-blue-700"
-        >
-          Ver todas
-        </Link>
-      </div>
-
-      {filteredProperties.length === 0 ? (
-        <div className="bg-gray-50 rounded-xl p-8 text-center">
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">No hay propiedades que coincidan con los filtros</h3>
-          <p className="text-gray-500">Intenta modificar los filtros para ver más resultados</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-5 gap-6">
-          {filteredProperties.map((property) => (
-            <Link 
-              href={`/propiedad/${property.id}`} 
-              className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow group"
-              key={property.id}
-            >
-              {/* Image Carousel */}
-              <div className="relative h-48">
-                {property.imageUrls && property.imageUrls.length > 0 ? (
-                  <>
-                    <img
-                      src={property.imageUrls[activeImageIndex[property.id || ''] || 0]}
-                      alt={`${property.propertyType} en ${property.zone}`}
-                      className="w-full h-full object-cover"
-                    />
-                    
-                    {/* Image Navigation */}
-                    {property.imageUrls.length > 1 && (
-                      <>
-                        <button 
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePrevImage(property.id || '', property.imageUrls.length);
-                          }}
-                          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 rounded-full p-2 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <HiChevronLeft size={20} />
-                        </button>
-                        <button 
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleNextImage(property.id || '', property.imageUrls.length);
-                          }}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 rounded-full p-2 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <HiChevronRight size={20} />
-                        </button>
-                        
-                        {/* Image Indicators */}
-                        <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
-                          {property.imageUrls.map((_, idx) => (
-                            <div 
-                              key={idx}
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                (activeImageIndex[property.id || ''] || 0) === idx 
-                                  ? 'bg-white' 
-                                  : 'bg-white/50'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                      </>
-                    )}
-                    
-                    {/* Property Type Badge */}
-                    <div className="absolute top-3 left-3">
-                      <span className={`
-                        px-2 py-1 rounded-md text-xs font-medium
-                        ${property.transactionType === 'renta' ? 'bg-blue-500 text-white' : 'bg-green-500 text-white'}
-                      `}>
-                        {property.transactionType === 'renta' ? 'Renta' : 'Venta'}
-                      </span>
-                    </div>
-                    
-                  </>
-                ) : (
-                  <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                    <span className="text-gray-400">Sin imagen</span>
-                  </div>
-                )}
+          {/* Search Form */}
+          <div className="bg-white rounded-xl shadow-lg p-4 max-w-3xl mx-auto">
+            <div className="flex flex-col md:flex-row gap-3">
+              {/* Tabs */}
+              <div className="inline-flex rounded-lg p-1 bg-gray-100 self-start">
+                {['renta', 'venta'].map((tab) => (
+                  <button
+                    key={tab}
+                    className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                      activeTab === tab 
+                        ? 'bg-white text-purple-800 shadow-sm' 
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                    onClick={() => setActiveTab(tab as 'renta' | 'venta')}
+                  >
+                    {tab === 'renta' ? 'Renta' : 'Venta'}
+                  </button>
+                ))}
               </div>
               
-              {/* Property Info */}
-              <div className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-lg font-semibold line-clamp-1">
-                    {property.propertyType === 'casa' ? 'Casa' : 'Departamento'}
-                    {property.privateComplex && ` en ${property.privateComplex}`}
-                  </h3>
+              {/* Search input */}
+              <form onSubmit={handleSearch} className="flex-1 flex">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    placeholder="¿Dónde quieres vivir?"
+                    value={searchLocation}
+                    onChange={(e) => setSearchLocation(e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg bg-gray-100 border-0 focus:ring-2 focus:ring-purple-500 text-gray-900"
+                  />
                 </div>
-                
-                <div className="flex items-center gap-1 text-gray-500 text-sm mb-2">
-                  <HiOutlineLocationMarker />
-                  <span>{property.zone}</span>
-                </div>
-                
-                <p className="text-xl font-bold text-blue-600 mb-3">
-                  <HiOutlineCurrencyDollar className="inline align-text-top" size={20} />
-                  {formatPrice(property.price)}
-                </p>
-                
-                <div className="flex items-center justify-between text-sm text-gray-600">
-                  <div className="flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>{property.bedrooms} recám</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>{property.bathrooms} baños</span>
-                  </div>
-                  
-                  {property.furnished && (
-                    <div className="flex items-center gap-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>Amueblado</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Link>
-          ))}
+                <button
+                  type="submit"
+                  className="ml-2 px-6 py-3 bg-purple-700 text-white font-medium rounded-lg hover:bg-purple-800 transition-colors shadow-sm"
+                  style={{ backgroundColor: colors.primary }}
+                >
+                  Buscar
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
-      )}
+      </section>
+
+      {/* Featured Properties Section */}
+      <section className="py-16 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">Propiedades destacadas</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Explora nuestras propiedades cuidadosamente seleccionadas que podrían ser tu próximo hogar
+            </p>
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center items-center p-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2" style={{ borderColor: colors.primary }}></div>
+            </div>
+          ) : filteredProperties.length === 0 ? (
+            <div className="text-center p-12 bg-white rounded-lg shadow-sm">
+              <p className="text-gray-600">No hay propiedades disponibles en este momento.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredProperties.slice(0, 6).map((property) => (
+                <Link
+                  href={`/propiedad/${property.id}`}
+                  key={property.id}
+                  className="group block"
+                >
+                  <div className="bg-white rounded-xl overflow-hidden shadow-sm transition-shadow hover:shadow-md">
+                    <div className="relative aspect-[4/3]">
+                      {property.imageUrls && property.imageUrls.length > 0 ? (
+                        <Image
+                          src={property.imageUrls[0]}
+                          alt={property.propertyType || 'Propiedad'}
+                          layout="fill"
+                          objectFit="cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
+                          <span className="text-gray-400">Sin imagen</span>
+                        </div>
+                      )}
+                      <div className="absolute top-3 right-3 bg-white px-2.5 py-1 rounded-full text-xs font-medium text-purple-800" style={{ color: colors.primary }}>
+                        {property.transactionTypes?.includes('renta') ? 'Renta' : 'Venta'}
+                      </div>
+                    </div>
+                    <div className="p-5">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-bold text-gray-900 mb-1 group-hover:text-purple-800 transition-colors">
+                            {property.propertyType}
+                          </h3>
+                          <p className="text-gray-600 text-sm mb-2">
+                            {property.zone || 'Ubicación no especificada'}
+                          </p>
+                        </div>
+                        <p className="text-xl font-bold" style={{ color: colors.primary }}>
+                          ${property.price?.toLocaleString('es-MX')}
+                          {property.transactionTypes?.includes('renta') && <span className="text-xs font-normal text-gray-600">/mes</span>}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-4 mt-4 text-sm text-gray-600">
+                        <div className="flex items-center">
+                          <span className="mr-1">🛏️</span>
+                          <span>{property.bedrooms}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="mr-1">🚿</span>
+                          <span>{property.bathrooms}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="mr-1">🚗</span>
+                          <span>{property.parkingSpots}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {filteredProperties.length > 6 && (
+            <div className="text-center mt-12">
+              <Link
+                href={`/propiedades?type=${activeTab}`}
+                className="inline-flex items-center px-6 py-3 border border-purple-600 text-purple-600 bg-white rounded-lg hover:bg-purple-50 transition-colors font-medium"
+                style={{ color: colors.primary, borderColor: colors.primary }}
+              >
+                Ver todas las propiedades
+                <svg className="ml-2 w-4 h-4" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Link>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Why Choose Us Section */}
+      <section className="py-16 px-4" style={{ backgroundColor: colors.white }}>
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">Por qué elegirnos</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Simplificamos el proceso de encontrar tu espacio ideal con un enfoque centrado en la experiencia
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: '🔍',
+                title: 'Búsqueda simplificada',
+                description: 'Encuentra propiedades que coincidan exactamente con tus necesidades de forma rápida y sencilla.'
+              },
+              {
+                icon: '🏠',
+                title: 'Propiedades verificadas',
+                description: 'Todas nuestras propiedades son verificadas por nuestro equipo para garantizar calidad y precisión.'
+              },
+              {
+                icon: '📱',
+                title: 'Proceso sin complicaciones',
+                description: 'Desde la búsqueda hasta la firma, hacemos que todo el proceso sea transparente y sin sorpresas.'
+              }
+            ].map((feature, index) => (
+              <div key={index} className="bg-white p-8 rounded-xl shadow-sm">
+                <div className="text-4xl mb-4">{feature.icon}</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
+                <p className="text-gray-600">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Call to Action */}
+      <section className="py-20 px-4 text-center" style={{ backgroundColor: colors.primary }}>
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-3xl font-bold text-white mb-4">¿Listo para encontrar tu hogar ideal?</h2>
+          <p className="text-white/90 text-lg mb-8">
+            Comienza tu búsqueda ahora y descubre el espacio perfecto que se adapte a tu estilo de vida.
+          </p>
+          <Link 
+            href="/propiedades" 
+            className="inline-flex items-center px-8 py-4 bg-white text-purple-700 font-bold rounded-lg hover:bg-gray-100 transition-colors"
+            style={{ color: colors.primary }}
+          >
+            Explorar propiedades
+          </Link>
+        </div>
+      </section>
     </main>
   );
 }

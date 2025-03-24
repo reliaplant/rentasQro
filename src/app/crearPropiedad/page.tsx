@@ -1,93 +1,81 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import dynamic from 'next/dynamic';
-import { addProperty, getProperty, updateProperty, deleteProperty } from '@/app/services/firebase';
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { getCurrentUser, getProperty, updateProperty, addProperty, PropertyData } from '@/app/services/firebase';
+import { Timestamp } from 'firebase/firestore';
+import PropertyType from '@/app/crearPropiedad/components/propertyType';
+import PropertyDetails from '@/app/crearPropiedad/components/propertyDetails';
+import PropertyPhotos from '@/app/crearPropiedad/components/propertyPhotos';
+import PropertyReview from '@/app/crearPropiedad/components/propertyReview';
+import FinishMessage from '@/app/crearPropiedad/components/finishMessage';
 
-interface PropertyFormData {
-  propertyType: 'casa' | 'departamento' | '';
-  transactionType: 'renta' | 'venta' | '';
-  price: number | '';
-  bathrooms: number | '';
-  bedrooms: number | '';
-  furnished: boolean;
-  zone: string;
-  privateComplex: string;
-  advisor: string;
-  publicationDate: string;
-  maintenanceCost: number | '';
-  maintenanceIncluded: boolean;
-  constructionYear: number | '';
-  petsAllowed: boolean;
-  status: 'disponible' | 'no disponible' | 'apartada' | '';
-  dealType: 'directo' | 'asesor' | '';
-}
+const steps = [
+  { id: 'type', label: 'Tipo' },
+  { id: 'details', label: 'Detalles' },
+  { id: 'photos', label: 'Fotos' },
+  { id: 'review', label: 'Revisión' },
+];
 
-// Export the component with dynamic import to disable SSR
-export default dynamic(() => Promise.resolve(CrearPropiedad), {
-  ssr: false
-});
+const initialFormData: PropertyData = {
+  propertyType: '',
+  transactionType: '',
+  transactionTypes: [],
+  price: 0,
+  bathrooms: 1,
+  bedrooms: 1,
+  furnished: false,
+  zone: '',
+  privateComplex: '',
+  publicationDate: Timestamp.fromDate(new Date()),
+  imageUrls: [],
+  constructionYear: new Date().getFullYear(),
+  maintenanceCost: 0,
+  maintenanceIncluded: true,
+  petsAllowed: false,
+  status: 'publicada',
+  dealType: 'asesor',
+  parkingSpots: 1,
+  includesWifi: false,
+  includesUtilities: false,
+  includedUtilities: [],
+  amenities: [],
+  advisor: '',
+  views: 0,
+  whatsappClicks: 0
+};
 
-// Create the actual component
-function CrearPropiedad() {
+export default function PropertyForm() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const propertyId = searchParams.get('id');
-  const isEditMode = Boolean(propertyId);
-  const router = useRouter();
-
-  const [formData, setFormData] = useState<PropertyFormData>({
-    propertyType: '',
-    transactionType: '',
-    price: '',
-    bathrooms: '',
-    bedrooms: '',
-    furnished: false,
-    zone: '',
-    privateComplex: '',
-    advisor: '',
-    publicationDate: new Date().toISOString().split('T')[0],
-    maintenanceCost: '',
-    maintenanceIncluded: false,
-    constructionYear: '',
-    petsAllowed: false,
-    status: '',
-    dealType: '',
-  });
-
-  const [images, setImages] = useState<File[]>([]);
-  const [loading, setLoading] = useState(false);
+  
+  const [formData, setFormData] = useState<PropertyData>(initialFormData);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const [initialImageUrls, setInitialImageUrls] = useState<string[]>([]);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout>();
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [isFinishing, setIsFinishing] = useState(false);
 
   useEffect(() => {
     const loadProperty = async () => {
-      if (!propertyId) return;
-
       try {
-        setLoading(true);
-        const property = await getProperty(propertyId);
-        setFormData({
-          propertyType: property.propertyType as 'casa' | 'departamento',
-          transactionType: property.transactionType as 'renta' | 'venta',
-          price: property.price,
-          bathrooms: property.bathrooms,
-          bedrooms: property.bedrooms,
-          furnished: property.furnished,
-          zone: property.zone,
-          privateComplex: property.privateComplex,
-          advisor: property.advisor,
-          publicationDate: property.publicationDate,
-          maintenanceCost: property.maintenanceCost ?? '',
-          maintenanceIncluded: property.maintenanceIncluded ?? false,
-          constructionYear: property.constructionYear,
-          petsAllowed: property.petsAllowed ?? false,
-          status: property.status,
-          dealType: property.dealType,
-        });
-        setInitialImageUrls(property.imageUrls || []);
+        const user = await getCurrentUser();
+        if (!user) {
+          router.push('/login');
+          return;
+        }
+
+        if (propertyId) {
+          const property = await getProperty(propertyId);
+          setFormData(property);
+        } else {
+          setFormData(prev => ({ ...prev, advisor: user.uid }));
+        }
       } catch (error) {
         setError('Error al cargar la propiedad');
       } finally {
@@ -96,465 +84,306 @@ function CrearPropiedad() {
     };
 
     loadProperty();
-  }, [propertyId]);
+  }, [propertyId, router]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-
-    if (type === 'checkbox') {
-      const target = e.target as HTMLInputElement;
-      setFormData({
-        ...formData,
-        [name]: target.checked,
-      });
-    } else if (name === 'price' || name === 'bathrooms' || name === 'bedrooms' || name === 'maintenanceCost' || name === 'constructionYear') {
-      setFormData({
-        ...formData,
-        [name]: value === '' ? '' : Number(value),
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
+  useEffect(() => {
+    if (isDirty && propertyId) {
+      clearTimeout(autoSaveTimer);
+      const timer = setTimeout(() => handleSave(true), 3000);
+      setAutoSaveTimer(timer);
     }
-  };
+    return () => clearTimeout(autoSaveTimer);
+  }, [formData, isDirty, propertyId]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setImages(Array.from(e.target.files));
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleChange = useCallback((field: keyof PropertyData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    setIsDirty(true);
     setError(null);
-    setSuccess(false);
+  }, []);
 
+  const handleSave = async (autosave = false) => {
     try {
-      const propertyData = {
-        propertyType: formData.propertyType as 'casa' | 'departamento',
-        transactionType: formData.transactionType as 'renta' | 'venta',
-        price: formData.price as number,
-        bathrooms: formData.bathrooms as number,
-        bedrooms: formData.bedrooms as number,
-        furnished: formData.furnished,
-        zone: formData.zone,
-        privateComplex: formData.privateComplex,
-        advisor: formData.advisor,
-        publicationDate: formData.publicationDate,
-        maintenanceCost: formData.maintenanceCost as number,
-        maintenanceIncluded: formData.maintenanceIncluded,
-        constructionYear: formData.constructionYear as number,
-        petsAllowed: formData.petsAllowed,
-        status: formData.status as 'disponible' | 'no disponible' | 'apartada',
-        dealType: formData.dealType as 'directo' | 'asesor',
-        imageUrls: initialImageUrls
-      };
-
-      if (isEditMode && propertyId) {
-        await updateProperty(propertyId, propertyData, images);
-      } else {
-        if (images.length === 0) {
-          throw new Error('Por favor, selecciona al menos una imagen');
+      if (!autosave && currentStep === steps.length - 1) {
+        setIsFinishing(true);
+        setSaving(true);
+        
+        console.log('Saving with files:', imageFiles.length);
+        
+        // Add slight delay to ensure animation feels smooth
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        if (propertyId) {
+          await updateProperty(propertyId, formData, imageFiles);
+        } else {
+          await addProperty(formData, imageFiles);
         }
-        await addProperty(propertyData, images);
+        
+        setIsDirty(false);
+        // Don't redirect immediately, let the finish animation play out
+      } else if (autosave && propertyId) {
+        setSaving(true);
+        await updateProperty(propertyId, formData);
+        setIsDirty(false);
+        setSaving(false);
       }
-
-      setSuccess(true);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Error desconocido');
-    } finally {
-      setLoading(false);
+      console.error('Save error:', error);
+      setError('Error al guardar los cambios');
+      setIsFinishing(false);
+      setSaving(false);
     }
   };
 
-  const handleDelete = async () => {
-    if (!propertyId) return;
-    
+  const handleUploadImages = async (files: File[]) => {
     try {
-      setLoading(true);
-      await deleteProperty(propertyId);
-      router.push('/lista-propiedades');
+      // Create data URLs for preview
+      const dataUrls = await Promise.all(
+        files.map(file => 
+          new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              if (typeof reader.result === 'string') {
+                resolve(reader.result);
+              } else {
+                reject(new Error('Failed to read file'));
+              }
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          })
+        )
+      );
+      
+      console.log('Adding files:', files.length); // Debug logging
+      
+      // Update both states
+      setImageFiles(prev => [...prev, ...files]);
+      handleChange('imageUrls', [...formData.imageUrls, ...dataUrls]);
     } catch (error) {
-      setError('Error al eliminar la propiedad');
-    } finally {
-      setLoading(false);
+      console.error('Upload error:', error);
+      setError('Error al procesar las imágenes');
     }
   };
 
-  if (isEditMode && loading) {
-    return <div className="flex justify-center items-center min-h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-    </div>;
+  const handleDeleteImage = (index: number) => {
+    const newImageFiles = [...imageFiles];
+    newImageFiles.splice(index, 1);
+    setImageFiles(newImageFiles);
+    
+    const newImageUrls = [...formData.imageUrls];
+    newImageUrls.splice(index, 1);
+    handleChange('imageUrls', newImageUrls);
+  };
+
+  const handleReorderImages = (newOrder: string[]) => {
+    // Get the mapping from old to new positions
+    const oldToNewMap = new Map();
+    newOrder.forEach((url, newIndex) => {
+      const oldIndex = formData.imageUrls.indexOf(url);
+      oldToNewMap.set(oldIndex, newIndex);
+    });
+    
+    // Reorder the actual files based on the mapping
+    const newFiles: File[] = [];
+    oldToNewMap.forEach((newIndex, oldIndex) => {
+      newFiles[newIndex] = imageFiles[oldIndex];
+    });
+    
+    // Update state
+    setImageFiles(newFiles.filter(Boolean));
+    handleChange('imageUrls', newOrder);
+  };
+
+  const canProceedFromStep = (step: number, data: PropertyData): boolean => {
+    switch (step) {
+      case 0: // Type
+        return Boolean(
+          data.propertyType && 
+          data.transactionTypes?.length > 0 &&
+          data.price > 0
+        );
+
+      case 1: // Details
+        const baseValidation = 
+          data.bedrooms >= 1 && 
+          data.bathrooms >= 1 && 
+          data.parkingSpots >= 0;
+
+        if (data.transactionTypes?.includes('renta')) {
+          return baseValidation;  // Remove unnecessary boolean checks
+        }
+        return baseValidation;
+        
+      case 2: // Photos
+        return data.imageUrls.length > 0;
+        
+      case 3: // Review
+        return true;
+
+      default:
+        return false;
+    }
+  };
+
+  const getStepError = (step: number, data: PropertyData): string | null => {
+    switch (step) {
+      case 1:
+        if (data.bedrooms < 1) {
+          return 'Debes especificar al menos 1 recámara';
+        }
+        if (data.bathrooms < 1) {
+          return 'Debes especificar al menos 1 baño';
+        }
+        if (data.parkingSpots < 0) {
+          return 'El número de estacionamientos debe ser válido';
+        }
+        return null;
+      default:
+        return null;
+    }
+  };
+
+  const renderContent = () => {
+    if (isFinishing) {
+      return <FinishMessage propertyId={propertyId} />;
+    }
+
+    switch (currentStep) {
+      case 0:
+        return <PropertyType data={formData} onChange={handleChange} error={error} />;
+      case 1:
+        return <PropertyDetails data={formData} onChange={handleChange} error={error} />;
+      case 2:
+        return (
+          <PropertyPhotos 
+            data={formData} 
+            onChange={handleChange} 
+            onUploadImages={handleUploadImages}
+            onDeleteImage={handleDeleteImage}
+            onReorderImages={handleReorderImages}
+            error={error} 
+          />
+        );
+      case 3:
+        return <PropertyReview data={formData} />;
+      default:
+        return null;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 z-[100] bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-8">
-      <div className="flex justify-between items-center mb-8">
-        <button
-          onClick={() => router.push('/lista-propiedades')}
-          className="flex items-center text-gray-600 hover:text-gray-800"
-        >
-          <span className="mr-2">←</span> Volver
-        </button>
-        
-        {isEditMode && (
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
-          >
-            Eliminar
-          </button>
-        )}
-      </div>
-
-      <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
-        {isEditMode ? 'Editar Propiedad' : 'Crear Nueva Propiedad'}
-      </h1>
-
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-          Propiedad creada exitosamente!
-        </div>
-      )}
-
-      <form className="bg-white shadow-md rounded-lg p-6" onSubmit={handleSubmit}>
-        <div className="mb-6">
-          <label className="block text-gray-700 mb-2">Tipo de Inmueble:</label>
-          <div className="flex gap-6">
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="radio"
-                name="propertyType"
-                value="casa"
-                checked={formData.propertyType === 'casa'}
-                onChange={handleChange}
-                required
-                className="mr-2"
-              />
-              <span>Casa</span>
-            </label>
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="radio"
-                name="propertyType"
-                value="departamento"
-                checked={formData.propertyType === 'departamento'}
-                onChange={handleChange}
-                className="mr-2"
-              />
-              <span>Departamento</span>
-            </label>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-gray-700 mb-2">Tipo de Operación:</label>
-          <div className="flex gap-6">
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="radio"
-                name="transactionType"
-                value="renta"
-                checked={formData.transactionType === 'renta'}
-                onChange={handleChange}
-                required
-                className="mr-2"
-              />
-              <span>Renta</span>
-            </label>
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="radio"
-                name="transactionType"
-                value="venta"
-                checked={formData.transactionType === 'venta'}
-                onChange={handleChange}
-                className="mr-2"
-              />
-              <span>Venta</span>
-            </label>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <label htmlFor="price" className="block text-gray-700 mb-2">Precio ($):</label>
-          <input
-            type="number"
-            id="price"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-            min="0"
-            required
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div className="flex gap-4 mb-6">
-          <div className="w-1/2">
-            <label htmlFor="bathrooms" className="block text-gray-700 mb-2">Baños:</label>
-            <input
-              type="number"
-              id="bathrooms"
-              name="bathrooms"
-              value={formData.bathrooms}
-              onChange={handleChange}
-              min="0"
-              step="0.5"
-              required
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="w-1/2">
-            <label htmlFor="bedrooms" className="block text-gray-700 mb-2">Recámaras:</label>
-            <input
-              type="number"
-              id="bedrooms"
-              name="bedrooms"
-              value={formData.bedrooms}
-              onChange={handleChange}
-              min="0"
-              required
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <label className="flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              name="furnished"
-              checked={formData.furnished}
-              onChange={handleChange}
-              className="mr-2 h-5 w-5"
-            />
-            <span>Amueblado</span>
-          </label>
-        </div>
-
-        <div className="mb-6">
-          <label htmlFor="zone" className="block text-gray-700 mb-2">Zona:</label>
-          <select
-            id="zone"
-            name="zone"
-            value={formData.zone}
-            onChange={handleChange}
-            required
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Selecciona una zona</option>
-            <option value="zakia">Zakia</option>
-            <option value="refugio">El Refugio</option>
-            <option value="zibata">Zibatá</option>
-          </select>
-        </div>
-
-        <div className="mb-6">
-          <label htmlFor="privateComplex" className="block text-gray-700 mb-2">Privada:</label>
-          <select
-            id="privateComplex"
-            name="privateComplex"
-            value={formData.privateComplex}
-            onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Selecciona una privada</option>
-            <option value="thandi">Thandi</option>
-            <option value="sensi">Sensi</option>
-            <option value="azhala">Azhala</option>
-          </select>
-        </div>
-
-        <div className="mb-6">
-          <label htmlFor="advisor" className="block text-gray-700 mb-2">Asesor:</label>
-          <input
-            type="text"
-            id="advisor"
-            name="advisor"
-            value={formData.advisor}
-            onChange={handleChange}
-            required
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div className="mb-6">
-          <label htmlFor="publicationDate" className="block text-gray-700 mb-2">Fecha de Publicación:</label>
-          <input
-            type="date"
-            id="publicationDate"
-            name="publicationDate"
-            value={formData.publicationDate}
-            onChange={handleChange}
-            required
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div className="mb-6">
-          <label htmlFor="constructionYear" className="block text-gray-700 mb-2">Año de construcción:</label>
-          <input
-            type="number"
-            id="constructionYear"
-            name="constructionYear"
-            value={formData.constructionYear}
-            onChange={handleChange}
-            min="1900"
-            max={new Date().getFullYear()}
-            required
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div className="mb-6">
-          <label htmlFor="status" className="block text-gray-700 mb-2">Estatus:</label>
-          <select
-            id="status"
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            required
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Seleccionar estatus</option>
-            <option value="disponible">Disponible</option>
-            <option value="no disponible">No disponible</option>
-            <option value="apartada">Apartada</option>
-          </select>
-        </div>
-
-        <div className="mb-6">
-          <label htmlFor="dealType" className="block text-gray-700 mb-2">Tipo de trato:</label>
-          <select
-            id="dealType"
-            name="dealType"
-            value={formData.dealType}
-            onChange={handleChange}
-            required
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Seleccionar tipo de trato</option>
-            <option value="directo">Directo con dueño</option>
-            <option value="asesor">Con asesor</option>
-          </select>
-        </div>
-
-        {formData.transactionType === 'renta' && (
-          <>
-            <div className="mb-6">
-              <label htmlFor="maintenanceCost" className="block text-gray-700 mb-2">Costo de mantenimiento:</label>
-              <input
-                type="number"
-                id="maintenanceCost"
-                name="maintenanceCost"
-                value={formData.maintenanceCost}
-                onChange={handleChange}
-                min="0"
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+    <div className="fixed inset-0 z-[100] bg-white flex flex-col">
+      <header className="py-4 border-b border-gray-200 bg-white sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            {/* Left side - Title */}
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => router.push('/misObras')}
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <h1 className="text-lg font-medium text-gray-900">
+                {propertyId ? 'Editar Propiedad' : 'Nueva Propiedad'}
+              </h1>
             </div>
-
-            <div className="mb-6">
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="maintenanceIncluded"
-                  checked={formData.maintenanceIncluded}
-                  onChange={handleChange}
-                  className="mr-2 h-5 w-5"
-                />
-                <span>Mantenimiento incluido en la renta</span>
-              </label>
-            </div>
-
-            <div className="mb-6">
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="petsAllowed"
-                  checked={formData.petsAllowed}
-                  onChange={handleChange}
-                  className="mr-2 h-5 w-5"
-                />
-                <span>Acepta mascotas</span>
-              </label>
-            </div>
-          </>
-        )}
-
-        <div className="mb-6">
-          <label className="block text-gray-700 mb-2">
-            Imágenes de la propiedad:
-          </label>
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={handleImageChange}
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          {images.length > 0 && (
-            <div className="mt-2 text-sm text-gray-600">
-              {images.length} {images.length === 1 ? 'imagen seleccionada' : 'imágenes seleccionadas'}
-            </div>
-          )}
-        </div>
-
-        {isEditMode && initialImageUrls.length > 0 && (
-          <div className="mb-6">
-            <label className="block text-gray-700 mb-2">Imágenes actuales:</label>
-            <div className="grid grid-cols-3 gap-4">
-              {initialImageUrls.map((url, index) => (
-                <img key={index} src={url} alt={`Property ${index + 1}`} className="w-full h-24 object-cover rounded" />
+            
+            {/* Center - Steps */}
+            <div className="flex items-center space-x-6">
+              {steps.map((step, index) => (
+                <div 
+                  key={step.id}
+                  className={`text-sm font-medium py-1 ${
+                    index === currentStep
+                      ? 'text-blue-600 border-b-2 border-blue-600'
+                      : index < currentStep
+                        ? 'text-gray-700'
+                        : 'text-gray-400'
+                  }`}
+                >
+                  {step.label}
+                </div>
               ))}
             </div>
-          </div>
-        )}
-
-        <button 
-          type="submit" 
-          className={`w-full py-3 px-6 rounded-md text-white ${
-            loading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
-          } transition-colors`}
-          disabled={loading}
-        >
-          {loading ? 'Guardando...' : isEditMode ? 'Actualizar Propiedad' : 'Crear Propiedad'}
-        </button>
-      </form>
-
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-            <h3 className="text-lg font-semibold mb-4">¿Confirmar eliminación?</h3>
-            <p className="text-gray-600 mb-6">Esta acción no se puede deshacer.</p>
-            <div className="flex justify-end gap-4">
+            
+            {/* Right side - Save indicator */}
+            <div className="flex items-center space-x-2">
+              {isDirty && (
+                <span className="text-sm text-gray-500">
+                  {saving ? 'Guardando...' : 'Sin guardar'}
+                </span>
+              )}
               <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                onClick={() => router.push('/misObras')}
+                className="ml-2 text-gray-400 hover:text-gray-500"
               >
-                Cancelar
-              </button>
-              <button
-                onClick={handleDelete}
-                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
-                disabled={loading}
-              >
-                {loading ? 'Eliminando...' : 'Eliminar'}
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
           </div>
         </div>
+      </header>
+
+      <main className="flex-1 overflow-auto">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentStep}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {renderContent()}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </main>
+
+      {!isFinishing && (
+        <footer className="bg-white border-t border-gray-200 py-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center">
+              <button
+                onClick={() => setCurrentStep(prev => prev - 1)}
+                disabled={currentStep === 0}
+                className={`px-4 py-2 text-sm font-medium rounded-lg ${
+                  currentStep === 0
+                    ? 'text-gray-400 cursor-not-allowed'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                Anterior
+              </button>
+              <button
+                onClick={() => {
+                  if (currentStep === steps.length - 1) {
+                    handleSave();
+                  } else {
+                    setCurrentStep(prev => prev + 1);
+                  }
+                }}
+                disabled={!canProceedFromStep(currentStep, formData) || saving}
+                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {currentStep === steps.length - 1 ? 'Guardar' : 'Siguiente'}
+              </button>
+            </div>
+          </div>
+        </footer>
       )}
     </div>
   );
