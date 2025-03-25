@@ -26,6 +26,7 @@ export default function PropertyInfo({
         <h1 className="text-2xl md:text-3xl font-medium mb-4">
             {property.propertyType === 'casa' ? 'Casa' : property.propertyType === 'depa' ? 'Depa' : property.propertyType} {property.transactionTypes.includes('renta') ? 'en renta' : 'en venta'} {condoData?.name ? `en ${condoData.name}`: ''}{zoneData?.name ? `, ${zoneData.name}` : ''}
         </h1>
+        <br />
         <div className="grid grid-cols-3 gap-4">
           <div className="flex flex-col items-center bg-blue-50 p-3 rounded-lg">
         <BedDouble className="w-8 h-8 text-gray-500 mb-2" />

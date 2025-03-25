@@ -153,8 +153,8 @@ export default function PropertyPage() {
   }
 
   return (
-    <div className="bg-white min-h-screen mt-24 md:px-0">
-      <div className="max-w-6xl mx-auto">
+    <div className="bg-white min-h-screen md:px-0">
+      <div className="max-w-8xl mx-auto">
         <FotosPropiedad
           images={property.imageUrls}
           propertyType={property.propertyType}
@@ -169,7 +169,7 @@ export default function PropertyPage() {
       />
 
       {/* Rest of property detail content */}
-      <div className="max-w-6xl mx-auto px-0 md:px-4 mt-4">
+      <div className="max-w-6xl mx-auto px-0 md:px-4 mt-24">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-12">
@@ -192,7 +192,9 @@ export default function PropertyPage() {
               </section>
             )}
 
-            
+<div ref={zibataRef} className="mt-24">
+            <ZibataInfo />
+          </div>
           </div>
 
           {/* Sidebar */}
@@ -218,9 +220,7 @@ export default function PropertyPage() {
        
       
 
-          <div ref={zibataRef} className="mt-24">
-            <ZibataInfo />
-          </div>
+
           
           <WhatsAppButton
             propertyType={property.propertyType}

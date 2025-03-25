@@ -98,7 +98,7 @@ export default function FotosPropiedad({ images, propertyType }: FotosPropiedadP
         </div>
 
         {/* Desktop Grid View */}
-        <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-2 h-[50vh] relative rounded-2xl overflow-hidden">
+        <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-2 h-[50vh] relative border-b overflow-hidden">
           {/* Main large image */}
           <div 
             className="col-span-2 row-span-2 relative cursor-pointer"
@@ -116,33 +116,40 @@ export default function FotosPropiedad({ images, propertyType }: FotosPropiedadP
           </div>
           
           {/* Side images grid */}
-          <div className="grid grid-cols-2 col-span-2 row-span-2 gap-2 ">
-              {images.slice(1, 5).map((url, i) => (
-                  <div 
-                      key={i} 
-                      className="relative cursor-pointer overflow-hidden"
-                      onClick={() => setShowAllPhotos(true)}
-                  >
-                      <Image
-                          src={url}
-                          alt={`Foto ${i + 2}`}
-                          fill
-                          sizes="(max-width: 768px) 50vw, 25vw"
-                          className="object-cover "
-                      />
-                      <div className="absolute inset-0 bg-black/0 hover:bg-black/30 transition-colors" />
-                  </div>
+            <div className="grid grid-cols-2 col-span-2 row-span-2 gap-2 ">
+              {images.slice(1, 5).map((url, i, arr) => (
+              <div 
+              key={i} 
+              className="relative cursor-pointer overflow-hidden"
+              onClick={() => setShowAllPhotos(true)}
+              >
+              <Image
+              src={url}
+              alt={`Foto ${i + 2}`}
+              fill
+              sizes="(max-width: 768px) 50vw, 25vw"
+              className="object-cover"
+              />
+              <div className="absolute inset-0 bg-black/0 hover:bg-black/50 transition-colors" />
+              {i === arr.length - 1 && images.length > 5 && (
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                <span className="text-white font-medium">
+                Ver las {images.length} fotos
+                </span>
+              </div>
+              )}
+              </div>
               ))}
           </div>
 
           {/* Show all photos button */}
-          <button
+          {/* <button
             onClick={() => setShowAllPhotos(true)}
             className="cursor-pointer text-sm absolute bottom-0 right-0 bg-black/80 backdrop-blur-sm rounded-tl-lg rounded-br-lg px-6 py-3 font-semibold text-white border-black border-1  
              shadow-lg z-10"
           >
             Mostrar todas las {images.length} fotos
-          </button>
+          </button> */}
         </div>
       </section>
 
