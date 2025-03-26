@@ -18,11 +18,11 @@ interface PropertyHeaderProps {
 
 export default function PropertyHeader({ property, zoneData, condoData }: PropertyHeaderProps) {
   // Format property details
-  const isRental = property.transactionTypes.includes('renta');
+  const isRental = ['renta', 'ventaRenta'].includes(property.transactionType);
   const propertyTypeFormatted = 
     property.propertyType === 'casa' ? 'Casa' : 
     property.propertyType === 'depa' ? 'Departamento' : 
-    property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1);
+    property.propertyType;
     
   // Format price as currency but more minimal
   const formatter = new Intl.NumberFormat('es-MX', {

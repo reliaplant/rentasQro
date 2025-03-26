@@ -3,9 +3,6 @@ import { Timestamp } from 'firebase/firestore';
 export interface ZoneData {
   id?: string;
   name: string;
-  description?: string;
-  imageUrl?: string; 
-  createdAt?: Timestamp;
 }
 
 export interface CondoData {

@@ -60,15 +60,15 @@ export default function Zones() {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-800">Zonas y Condominios</h2>
+    <div className="">
+      <div className="flex justify-between items-center px-4 py-2 border-b border-b-gray-300">
+        <h2 className="text-lg font-semibold text-gray-800">Zonas y Condominios</h2>
         <button
           onClick={handleAddZone}
-          className="px-4 py-2 bg-[#D2B48C] text-white rounded-lg hover:bg-[#C0A070] flex items-center gap-2"
+          className="px-4 py-1.5 bg-black text-white font-medium text-sm rounded-lg flex items-center gap-2 hover:opacity-90 border-2 border-[#6981d3] hover:border-[#1856e7] transition-colors cursor-pointer"
         >
-          <Plus size={18} />
-          Nueva Zona
+          <Plus size={18} className="text-white" />
+          <span className="font-medium">Nueva Zona</span>
         </button>
       </div>
 
@@ -77,10 +77,10 @@ export default function Zones() {
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#D2B48C]"></div>
         </div>
       ) : (
-        <div className="grid gap-6">
+        <div className="grid border-b border-gray-200">
           {zones.length > 0 ? (
             zones.map(zone => (
-              <div key={zone.id} className="bg-white rounded-lg shadow">
+              <div key={zone.id} className="bg-white shadow border-b border-gray-200">
                 <div 
                   className="p-4 flex items-center justify-between hover:bg-gray-50 cursor-pointer"
                   onClick={() => setExpandedZones(prev => ({ ...prev, [zone.id!]: !prev[zone.id!] }))}
@@ -109,32 +109,32 @@ export default function Zones() {
                 </div>
 
                 {expandedZones[zone.id!] && (
-                  <div className="border-t border-gray-100 p-4">
-                    <div className="flex justify-between items-center mb-4">
+                  <div className="border-t border-gray-100 p-10 bg-gray-100">
+                    <div className="flex items-center mb-4">
                       <h4 className="text-sm font-medium text-gray-500">Condominios</h4>
-                      <button
-                        onClick={() => handleAddCondo(zone.id!)}
-                        className="text-sm text-[#D2B48C] hover:text-[#BC8F8F] flex items-center gap-1"
-                      >
-                        <Plus size={16} />
-                        Agregar Condominio
-                      </button>
+                            <button
+                            onClick={() => handleAddCondo(zone.id!)}
+                            className="ml-4 px-2 py-1 text-[#1856e7] text-sm rounded flex items-center gap-1 hover:bg-gray-100 transition-colors cursor-pointer"
+                            >
+                            <Plus size={14} />
+                            <span>Agregar</span>
+                            </button>
                     </div>
                     
-                    <div className="space-y-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       {condos[zone.id!]?.length > 0 ? (
-                        condos[zone.id!].map(condo => (
-                          <div 
-                            key={condo.id} 
-                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer"
-                            onClick={() => handleEditCondo(condo)}
-                          >
-                            <span>{condo.name}</span>
-                            <Edit2 size={16} className="text-gray-500" />
-                          </div>
-                        ))
+                      condos[zone.id!].map(condo => (
+                        <div 
+                        key={condo.id} 
+                        className="flex items-center justify-between p-5 bg-white rounded-lg hover:outline-2 hover:outline-blue-700 hover:bg-blue-50 cursor-pointer"
+                        onClick={() => handleEditCondo(condo)}
+                        >
+                        <span>{condo.name}</span>
+                        <Edit2 size={16} className="text-gray-500" />
+                        </div>
+                      ))
                       ) : (
-                        <p className="text-sm text-gray-500 italic">No hay condominios en esta zona</p>
+                      <p className="text-sm text-gray-500 italic">No hay condominios en esta zona</p>
                       )}
                     </div>
                   </div>
@@ -151,14 +151,16 @@ export default function Zones() {
 
       {/* Modal de edición de zona */}
       {isEditZoneOpen && (
-        <EditZone
-          zone={selectedZone}
-          onClose={() => setIsEditZoneOpen(false)}
-          onSave={() => {
-            fetchZones();
-            setIsEditZoneOpen(false);
-          }}
-        />
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+          <EditZone
+            zone={selectedZone}
+            onClose={() => setIsEditZoneOpen(false)}
+            onSave={() => {
+              fetchZones();
+              setIsEditZoneOpen(false);
+            }}
+          />
+        </div>
       )}
     </div>
   );

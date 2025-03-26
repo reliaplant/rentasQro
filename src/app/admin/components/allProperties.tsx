@@ -97,14 +97,14 @@ export default function AllProperties() {
                       {property.propertyType}
                     </div>
                     <div className="text-sm text-gray-500">
-                      {property.transactionTypes.join(', ')}
+                      {property.propertyType}
                     </div>
                   </div>
                 </div>
               </td>
               <td className="px-6 py-4">
                 <div className="text-sm text-gray-900">{property.zone}</div>
-                <div className="text-sm text-gray-500">{property.privateComplex}</div>
+                <div className="text-sm text-gray-500">{property.condo}</div>
               </td>
               <td className="px-6 py-4">
                 <div className="text-sm font-medium">${property.price.toLocaleString()}</div>

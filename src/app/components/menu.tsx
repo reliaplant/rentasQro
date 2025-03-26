@@ -15,6 +15,11 @@ export default function Menu() {
   const pathname = usePathname();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Don't render the menu if we're in the admin section
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
+
   useEffect(() => {
     const unsubscribe = onAuthStateChange((user) => {
       setUser(user);

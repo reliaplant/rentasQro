@@ -323,15 +323,10 @@ export const incrementWhatsappClicks = async (propertyId: string): Promise<void>
 };
 
 // Add new functions for zones and condos
-export const addZone = async (zoneData: ZoneData, imageFile: File): Promise<string> => {
+export const addZone = async (zoneData: ZoneData): Promise<string> => {
   try {
-    // Upload image first
-    const imageUrl = await uploadZoneImage(imageFile);
-    
     const docRef = await addDoc(collection(db, "zones"), {
-      ...zoneData,
-      imageUrl,
-      createdAt: Timestamp.now()
+      name: zoneData.name
     });
     return docRef.id;
   } catch (error) {
@@ -340,24 +335,14 @@ export const addZone = async (zoneData: ZoneData, imageFile: File): Promise<stri
   }
 };
 
-const uploadZoneImage = async (file: File): Promise<string> => {
-  const filename = `zones/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
-  const storageRef = ref(storage, filename);
-  await uploadBytes(storageRef, file);
-  return await getDownloadURL(storageRef);
-};
-
 export const updateZone = async (
   id: string, 
-  data: Partial<ZoneData>, 
-  newImage?: File
+  data: Partial<ZoneData>
 ): Promise<void> => {
   try {
-    const updateData = { ...data };
-    if (newImage) {
-      updateData.imageUrl = await uploadZoneImage(newImage);
-    }
-    await updateDoc(doc(db, "zones", id), updateData);
+    await updateDoc(doc(db, "zones", id), {
+      name: data.name
+    });
   } catch (error) {
     console.error("Error updating zone:", error);
     throw error;
@@ -369,13 +354,14 @@ export const getZones = async (): Promise<ZoneData[]> => {
     const querySnapshot = await getDocs(collection(db, "zones"));
     return querySnapshot.docs.map(doc => ({ 
       id: doc.id, 
-      ...doc.data() 
-    })) as ZoneData[];
+      name: doc.data().name 
+    }));
   } catch (error) {
     console.error("Error fetching zones:", error);
     throw error;
   }
 };
+
 
 export const deleteZone = async (id: string): Promise<void> => {
   try {

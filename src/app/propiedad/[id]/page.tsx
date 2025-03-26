@@ -85,8 +85,8 @@ export default function PropertyPage() {
           const zoneInfo = await getZoneById(property.zone);
           setZoneData(zoneInfo);
 
-          if (property.privateComplex) { // privateComplex is condoId
-            const condoInfo = await getCondoById(property.privateComplex);
+          if (property.condo) { // privateComplex is condoId
+            const condoInfo = await getCondoById(property.condo);
             setCondoData(condoInfo);
           }
         } catch (error) {
@@ -239,6 +239,6 @@ export default function PropertyPage() {
         />
       </div>
     </div>
-  );
+  )
 }
 
