@@ -21,8 +21,7 @@ import ZibataInfo from './components/zibata';
 import MenuPropiedad from './components/menuPropiedad';
 import PropertyInfo from './components/PropertyInfo';
 import WhatsAppButton from './components/WhatsAppButton';
-
-
+import PropertyHeader from './components/PropertyHeader';
 
 const amenityIcons = {
   'pool': { icon: Swim, label: 'Alberca' },
@@ -154,35 +153,45 @@ export default function PropertyPage() {
 
   return (
     <div className="bg-white min-h-screen md:px-0">
-      <div className="max-w-8xl mx-auto">
-        <FotosPropiedad
-          images={property.imageUrls}
-          propertyType={property.propertyType}
-        />
-      </div>
 
       {/* Menu after photos */}
-      <MenuPropiedad 
+      <MenuPropiedad
         property={property}
         zoneData={zoneData}
         condoData={condoData}
       />
 
       {/* Rest of property detail content */}
-      <div className="max-w-6xl mx-auto px-0 md:px-4 mt-24">
+      <div className="max-w-7xl mx-auto px-0 md:px-4 mt-24">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-12">
-            {/* Property Info */}
+            {/* Property Header */}
 
 
-            <PropertyInfo 
+<div className=''>
+            <PropertyHeader
               property={property}
               zoneData={zoneData}
               condoData={condoData}
             />
 
-            
+
+            <div >
+              <FotosPropiedad
+                images={property.imageUrls}
+                propertyType={property.propertyType}
+              />
+            </div>
+            </div>
+
+            {/* Property Info */}
+            <PropertyInfo
+              property={property}
+              zoneData={zoneData}
+              condoData={condoData}
+            />
+
             {/* Condo Section */}
             {condoData && (
               <section ref={condoRef}>
@@ -192,14 +201,14 @@ export default function PropertyPage() {
               </section>
             )}
 
-<div ref={zibataRef} className="mt-24">
-            <ZibataInfo />
-          </div>
+            <div ref={zibataRef} className="mt-24">
+              <ZibataInfo />
+            </div>
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-1 "ref={contactRef}>
-            <div className="sticky top-32">
+          <div className="lg:col-span-1 " ref={contactRef}>
+            <div className="sticky top-66">
               <Contacto
                 price={property.price}
                 advisor={{
@@ -217,26 +226,18 @@ export default function PropertyPage() {
             </div>
           </div>
         </div>
-       
-      
 
-
-          
-          <WhatsAppButton
-            propertyType={property.propertyType}
-            transactionTypes={property.transactionTypes}
-            condoName={condoData?.name}
-            zoneName={zoneData?.name}
-            advisorPhone={advisor?.phone || ''}
-            propertyId={property.id!}
-            price={property.price}
-            contactRef={contactRef as React.RefObject<HTMLDivElement>}
-          />
-        
-  
+        <WhatsAppButton
+          propertyType={property.propertyType}
+          transactionTypes={property.transactionTypes}
+          condoName={condoData?.name}
+          zoneName={zoneData?.name}
+          advisorPhone={advisor?.phone || ''}
+          propertyId={property.id!}
+          price={property.price}
+          contactRef={contactRef as React.RefObject<HTMLDivElement>}
+        />
       </div>
-
-
     </div>
   );
 }

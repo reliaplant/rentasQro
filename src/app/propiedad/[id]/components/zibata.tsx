@@ -50,390 +50,310 @@ export default function ZibataInfo() {
   ];
 
   return (
-    <div className="p-4 md:p-0 shadow-md">
-      <div className="relative h-64 md:h-80">
+    <div className="bg-white rounded-lg shadow-sm">
+      {/* Hero Section */}
+      <div className="relative h-[280px] md:h-[400px] w-full overflow-hidden rounded-t-lg">
         <Image
           src="/assets/zibata/zibata.jpg"
           alt="Zibatá - Vista aérea"
           fill
-          className="object-cover rounded-2xl"
+          className="object-cover"
+          priority
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
-          <div className="p-6 text-white">
-            <p className="text-gray-200 font-semibold text-xl">Estilo de vida incomparable en Querétaro</p>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+          <div className="p-6">
+            <p className="text-white/90 text-base md:text-lg">Estilo de vida incomparable en Querétaro</p>
           </div>
         </div>
       </div>
 
-      <div className="p-6">
+      <div className="p-5 md:p-6">
+        {/* About Section */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4">Acerca de Zibatá</h3>
-          <p className="text-gray-700 leading-relaxed">
+          <h3 className="text-xl font-semibold mb-3 text-gray-800">Acerca de Zibatá</h3>
+          <p className="text-gray-600">
             Zibatá se ha convertido en uno de los mejores lugares para vivir en Querétaro, destacando por su calidad de vida, seguridad y comodidades. Este desarrollo cuenta con más de 30 condominios residenciales exclusivos, rodeados de amplias áreas verdes y con un enfoque sustentable, incluyendo su propia planta de tratamiento de agua.
           </p>
         </div>
 
+        {/* Amenities Section */}
         <div className="mb-8">
-          <h3 className="text-lg md:text-xl font-semibold mb-4">Amenidades</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            <div className="flex items-start gap-3 p-3 md:p-4 bg-white rounded-xl shadow-sm">
-              <div className="w-8 md:w-10 h-8 md:h-10 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Trees className="w-4 md:w-5 h-4 md:h-5 text-green-600" />
+          <h3 className="text-xl font-semibold mb-3 text-gray-800">Amenidades</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="flex flex-col items-center text-center p-3 bg-gray-50 rounded-lg">
+              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mb-2">
+                <Trees className="w-5 h-5 text-green-600" />
               </div>
-              <div>
-                <h4 className="font-medium text-sm md:text-base">Áreas verdes</h4>
-                <p className="text-xs md:text-sm text-gray-600">Más de 40 hectáreas de áreas verdes y parques</p>
-              </div>
+              <h4 className="font-medium text-sm mb-1">Áreas verdes</h4>
+              <p className="text-xs text-gray-500">40+ hectáreas de parques</p>
             </div>
 
-            <div className="flex items-start gap-3">
-              <div>
-                <h4 className="font-medium">Instalaciones deportivas</h4>
-                <p className="text-sm text-gray-600">Canchas de pádel, fútbol, básquetbol y campo de golf</p>
+            <div className="flex flex-col items-center text-center p-3 bg-gray-50 rounded-lg">
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-2">
+                <IoGolf className="w-5 h-5 text-blue-600" />
               </div>
+              <h4 className="font-medium text-sm mb-1">Campo de golf</h4>
+              <p className="text-xs text-gray-500">18 hoyos profesionales</p>
             </div>
             
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                <Dog className="w-5 h-5 text-blue-600" />
+            <div className="flex flex-col items-center text-center p-3 bg-gray-50 rounded-lg">
+              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mb-2">
+                <Dog className="w-5 h-5 text-amber-600" />
               </div>
-              <div>
-                <h4 className="font-medium">Pet-friendly</h4>
-                <p className="text-sm text-gray-600">Espacios amigables para mascotas, veterinarias y pet shops</p>
-              </div>
+              <h4 className="font-medium text-sm mb-1">Pet-friendly</h4>
+              <p className="text-xs text-gray-500">Espacios para mascotas</p>
             </div>
             
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                <Globe className="w-5 h-5 text-blue-600" />
+            <div className="flex flex-col items-center text-center p-3 bg-gray-50 rounded-lg">
+              <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mb-2">
+                <Globe className="w-5 h-5 text-indigo-600" />
               </div>
-              <div>
-                <h4 className="font-medium">Sustentabilidad</h4>
-                <p className="text-sm text-gray-600">Propia planta de tratamiento de agua y enfoque ecológico</p>
-              </div>
+              <h4 className="font-medium text-sm mb-1">Sustentable</h4>
+              <p className="text-xs text-gray-500">Planta de tratamiento</p>
             </div>
+          </div>
 
-            {/* Park Images Grid */}
-            <div className="col-span-full mt-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 rounded-xl overflow-hidden">
-                {parkImages.map((src, index) => (
-                  <div key={index} className="relative aspect-square">
-                    <Image
-                      src={src}
-                      alt={`Parque Zibatá ${index + 1}`}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 50vw, 25vw"
-                    />
-                  </div>
-                ))}
-              </div>
+          {/* Park Images Grid */}
+          <div className="mt-5">
+            <h4 className="font-medium text-sm text-gray-600 mb-2">Parques de Zibatá</h4>
+            <div className="grid grid-cols-4 gap-2">
+              {parkImages.map((src, index) => (
+                <div key={index} className="relative aspect-square rounded-md overflow-hidden">
+                  <Image
+                    src={src}
+                    alt={`Parque Zibatá ${index + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 25vw, 20vw"
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
+        {/* Services Section */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4">Servicios y Comercios</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                <ShoppingBag className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <h4 className="font-medium">Supermercados</h4>
-                <p className="text-sm text-gray-600">HEB, Walmart Express y comercios locales</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                <HeartPulse className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <h4 className="font-medium">Servicios médicos</h4>
-                <p className="text-sm text-gray-600">Centro Médico Zibatá (próximamente) y clínicas</p>
+          <h3 className="text-xl font-semibold mb-3 text-gray-800">Servicios y Comercios</h3>
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="p-3 border border-gray-100 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-emerald-50 rounded-full flex items-center justify-center flex-shrink-0">
+                  <ShoppingBag className="w-4 h-4 text-emerald-600" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium">Supermercados</h4>
+                  <p className="text-xs text-gray-500">HEB, Walmart Express</p>
+                </div>
               </div>
             </div>
             
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                <Store className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <h4 className="font-medium">Plazas comerciales</h4>
-                <p className="text-sm text-gray-600">Plaza Zielo, Xentric, Paseo Zibatá, Condesa y Centro Zibatá</p>
+            <div className="p-3 border border-gray-100 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-red-50 rounded-full flex items-center justify-center flex-shrink-0">
+                  <HeartPulse className="w-4 h-4 text-red-600" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium">Servicios médicos</h4>
+                  <p className="text-xs text-gray-500">Centro Médico Zibatá</p>
+                </div>
               </div>
             </div>
             
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                <Building className="w-5 h-5 text-green-600" />
+            <div className="p-3 border border-gray-100 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-cyan-50 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Store className="w-4 h-4 text-cyan-600" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium">Plazas comerciales</h4>
+                  <p className="text-xs text-gray-500">5+ centros comerciales</p>
+                </div>
               </div>
-              <div>
-                <h4 className="font-medium">Servicios bancarios</h4>
-                <p className="text-sm text-gray-600">Banregio, Santander y otros servicios financieros</p>
+            </div>
+            
+            <div className="p-3 border border-gray-100 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-violet-50 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Building className="w-4 h-4 text-violet-600" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium">Bancos</h4>
+                  <p className="text-xs text-gray-500">Banregio, Santander</p>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Mall Images Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 rounded-xl overflow-hidden mt-4">
-            {mallImages.map((src, index) => (
-              <div key={index} className="relative aspect-square">
+          {/* Mall Images */}
+          <h4 className="font-medium text-sm text-gray-600 mb-2">Plazas Comerciales</h4>
+          <div className="grid grid-cols-2 gap-2">
+            {mallImages.slice(0, 2).map((src, index) => (
+              <div key={index} className="relative aspect-video rounded-md overflow-hidden">
                 <Image
                   src={src}
                   alt={`Plaza comercial Zibatá ${index + 1}`}
                   fill
-                  className="object-cover hover:scale-105 transition-transform duration-300"
-                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 40vw"
                 />
+                <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
+                  <p className="text-white text-xs">
+                    {index === 0 ? "Plaza Centro Zibatá" : "Paseo Zibatá"}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
+        {/* Sports Facilities */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4">Educación</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-yellow-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                <School className="w-5 h-5 text-yellow-600" />
+          <h3 className="text-xl font-semibold mb-3 text-gray-800">Instalaciones Deportivas</h3>
+          <div className="grid grid-cols-2 gap-2">
+            {sportsImages.slice(0, 2).map((src, index) => (
+              <div key={index} className="relative aspect-video rounded-md overflow-hidden">
+                <Image
+                  src={src}
+                  alt={`Instalación deportiva ${index + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 40vw"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
+                  <p className="text-white text-xs">
+                    {index === 0 ? "Campo de Golf" : "Canchas de Padel"}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h4 className="font-medium">Colegios</h4>
-                <p className="text-sm text-gray-600">Colegio NWL Newland Zibatá y otros centros educativos</p>
+            ))}
+          </div>
+        </div>
+
+        {/* Education */}
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold mb-3 text-gray-800">Educación</h3>
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="p-3 border border-gray-100 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-yellow-50 rounded-full flex items-center justify-center flex-shrink-0">
+                  <School className="w-4 h-4 text-yellow-600" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium">Colegios</h4>
+                  <p className="text-xs text-gray-500">NWL Newland Zibatá</p>
+                </div>
               </div>
             </div>
             
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-yellow-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                <GraduationCap className="w-5 h-5 text-yellow-600" />
-              </div>
-              <div>
-                <h4 className="font-medium">Universidad</h4>
-                <p className="text-sm text-gray-600">Universidad Anáhuac y acceso a instituciones educativas de prestigio</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Education Section */}
-        <div className="mb-8">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-start gap-3 p-3 md:p-4 bg-white rounded-xl shadow-sm">
-              <div className="w-8 md:w-10 h-8 md:h-10 bg-yellow-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                <School className="w-4 md:w-5 h-4 md:h-5 text-yellow-600" />
-              </div>
-              <div>
-                <h4 className="font-medium text-sm md:text-base">Centros Educativos</h4>
-                <p className="text-xs md:text-sm text-gray-600">Universidad Anáhuac, MomTots y más</p>
-              </div>
-            </div>
-
-            {/* Education Images Grid */}
-            <div className="grid grid-cols-2 gap-2 rounded-xl overflow-hidden">
-              {educationImages.map((src, index) => (
-                <div key={index} className="relative aspect-video">
-                  <Image
-                    src={src}
-                    alt={`Centro educativo ${index === 0 ? 'MomTots' : 'Universidad Anáhuac'}`}
-                    fill
-                    className="object-cover hover:scale-105 transition-transform duration-300"
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                  />
+            <div className="p-3 border border-gray-100 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-yellow-50 rounded-full flex items-center justify-center flex-shrink-0">
+                  <GraduationCap className="w-4 h-4 text-yellow-600" />
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Healthcare Section */}
-        <div className="mb-8">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-start gap-3 p-3 md:p-4 bg-white rounded-xl shadow-sm">
-              <div className="w-8 md:w-10 h-8 md:h-10 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                <HeartPulse className="w-4 md:w-5 h-4 md:h-5 text-red-600" />
-              </div>
-              <div>
-                <h4 className="font-medium text-sm md:text-base">Centro Médico</h4>
-                <p className="text-xs md:text-sm text-gray-600">Servicios médicos de primer nivel</p>
-              </div>
-            </div>
-
-            {/* Healthcare Image */}
-            <div className="relative aspect-video rounded-xl overflow-hidden">
-              <Image
-                src={healthImages[0]}
-                alt="Centro Médico Zibatá"
-                fill
-                className="object-cover hover:scale-105 transition-transform duration-300"
-                sizes="(max-width: 768px) 100vw, 50vw"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Sports Section */}
-        <div className="mb-8">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-start gap-3 p-3 md:p-4 bg-white rounded-xl shadow-sm">
-              <div className="w-8 md:w-10 h-8 md:h-10 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                <IoGolf className="w-4 md:w-5 h-4 md:h-5 text-green-600" />
-              </div>
-              <div>
-                <h4 className="font-medium text-sm md:text-base">Campo de Golf</h4>
-                <p className="text-xs md:text-sm text-gray-600">Campo de golf profesional de 18 hoyos</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 p-3 md:p-4 bg-white rounded-xl shadow-sm mb-4">
-              <div className="w-8 md:w-10 h-8 md:h-10 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                <BiBall className="w-4 md:w-5 h-4 md:h-5 text-green-600" />
-              </div>
-              <div>
-                <h4 className="font-medium text-sm md:text-base">Canchas de Padel</h4>
-                <p className="text-xs md:text-sm text-gray-600">Modernas instalaciones deportivas</p>
-              </div>
-            </div>
-
-            {/* Sports Images Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 rounded-xl overflow-hidden">
-              {sportsImages.map((src, index) => (
-                <div key={index} className="relative aspect-square">
-                  <Image
-                    src={src}
-                    alt={`Instalaciones deportivas Zibatá ${index + 1}`}
-                    fill
-                    className="object-cover hover:scale-105 transition-transform duration-300"
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                  />
+                <div>
+                  <h4 className="text-sm font-medium">Universidad</h4>
+                  <p className="text-xs text-gray-500">Universidad Anáhuac</p>
                 </div>
-              ))}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Retail Section */}
-        <div className="mb-8">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-start gap-3 p-3 md:p-4 bg-white rounded-xl shadow-sm">
-              <div className="w-8 md:w-10 h-8 md:h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                <ShoppingCart className="w-4 md:w-5 h-4 md:h-5 text-blue-600" />
-              </div>
-              <div>
-                <h4 className="font-medium text-sm md:text-base">Supermercados</h4>
-                <p className="text-xs md:text-sm text-gray-600">HEB y Walmart a solo 5 minutos</p>
-              </div>
-            </div>
-
-            {/* Retail Images Grid */}
-            <div className="grid grid-cols-2 gap-2 rounded-xl overflow-hidden">
-              {retailImages.map((src, index) => (
-                <div key={index} className="relative aspect-video">
-                  <Image
-                    src={src}
-                    alt={`Supermercado ${index === 0 ? 'HEB' : 'Walmart'} Zibatá`}
-                    fill
-                    className="object-cover hover:scale-105 transition-transform duration-300"
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                  />
+          {/* Education Images */}
+          <div className="grid grid-cols-2 gap-2">
+            {educationImages.map((src, index) => (
+              <div key={index} className="relative aspect-video rounded-md overflow-hidden">
+                <Image
+                  src={src}
+                  alt={`Centro educativo ${index + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 40vw"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
+                  <p className="text-white text-xs">{index === 0 ? 'MomTots' : 'Universidad Anáhuac'}</p>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Banking Section */}
+        {/* Map Section */}
         <div className="mb-8">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-start gap-3 p-3 md:p-4 bg-white rounded-xl shadow-sm">
-              <div className="w-8 md:w-10 h-8 md:h-10 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Building className="w-4 md:w-5 h-4 md:h-5 text-purple-600" />
-              </div>
-              <div>
-                <h4 className="font-medium text-sm md:text-base">Servicios bancarios</h4>
-                <p className="text-xs md:text-sm text-gray-600">Banregio, Santander y otros servicios financieros</p>
-              </div>
-            </div>
-
-            {/* Bank Images Grid */}
-            <div className="grid grid-cols-2 gap-2 rounded-xl overflow-hidden">
-              {bankImages.map((src, index) => (
-                <div key={index} className="relative aspect-video">
-                  <Image
-                    src={src}
-                    alt={`Banco ${index === 0 ? 'Santander' : 'Banregio'} Zibatá`}
-                    fill
-                    className="object-cover hover:scale-105 transition-transform duration-300"
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        
-
-        <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4">Mapa del desarrollo</h3>
-            <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden">
+          <h3 className="text-xl font-semibold mb-3 text-gray-800">Mapa del desarrollo</h3>
+          <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden border border-gray-200">
             <Image
               src="/assets/condos/ZibataMapa.png"
               alt="Mapa de Zibatá"
               fill
               className="object-contain"
             />
-            </div>
+          </div>
         </div>
 
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <p className="text-sm text-gray-600 italic">
+        {/* Location Information */}
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold mb-3 text-gray-800">Ubicación</h3>
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="p-3 border border-gray-100 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-indigo-50 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Car className="w-4 h-4 text-indigo-600" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium">Centro histórico</h4>
+                  <p className="text-xs text-gray-500">A 20 minutos</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-3 border border-gray-100 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-indigo-50 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Plane className="w-4 h-4 text-indigo-600" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium">Aeropuerto</h4>
+                  <p className="text-xs text-gray-500">A 25 minutos</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Location Images */}
+          <div className="grid grid-cols-2 gap-2">
+            {locationImages.map((src, index) => (
+              <div key={index} className="relative aspect-video rounded-md overflow-hidden">
+                <Image
+                  src={src}
+                  alt={`${index === 0 ? 'Centro histórico' : 'Aeropuerto'}`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 40vw"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
+                  <p className="text-white text-xs">{index === 0 ? 'Centro histórico' : 'Aeropuerto Internacional'}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Quote Section */}
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
+          <p className="text-gray-600 text-sm italic">
             "Vivir en Zibatá significa elegir comodidad, seguridad y estilo de vida en un solo lugar, 
             disfrutando de la mejor mezcla entre naturaleza y desarrollo urbano planificado que Querétaro ofrece."
           </p>
         </div>
 
-        {/* Location Section */}
-        <div className="mb-8">
-          <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-start gap-3 p-3 md:p-4 bg-white rounded-xl shadow-sm">
-                <div className="w-8 md:w-10 h-8 md:h-10 bg-indigo-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Car className="w-4 md:w-5 h-4 md:h-5 text-indigo-600" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm md:text-base">Centro histórico</h4>
-                  <p className="text-xs md:text-sm text-gray-600">A 20 minutos del centro de Querétaro</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 p-3 md:p-4 bg-white rounded-xl shadow-sm">
-                <div className="w-8 md:w-10 h-8 md:h-10 bg-indigo-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Plane className="w-4 md:w-5 h-4 md:h-5 text-indigo-600" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm md:text-base">Aeropuerto</h4>
-                  <p className="text-xs md:text-sm text-gray-600">A 25 minutos del Aeropuerto Internacional</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Location Images Grid */}
-            <div className="grid grid-cols-2 gap-2 rounded-xl overflow-hidden">
-              {locationImages.map((src, index) => (
-                <div key={index} className="relative aspect-video">
-                  <Image
-                    src={src}
-                    alt={`${index === 0 ? 'Centro histórico' : 'Aeropuerto'} de Querétaro`}
-                    fill
-                    className="object-cover hover:scale-105 transition-transform duration-300"
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+        {/* Contact CTA */}
+        <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-center">
+          <h3 className="text-lg font-medium mb-2 text-blue-800">¿Te gustaría vivir aquí?</h3>
+          <p className="text-sm text-blue-600 mb-4">Contacta a nuestros agentes para conocer las propiedades disponibles</p>
+          <button className="bg-blue-600 text-white font-medium py-2 px-6 rounded-md hover:bg-blue-700 transition-colors duration-300 text-sm">
+            Contactar ahora
+          </button>
         </div>
       </div>
     </div>

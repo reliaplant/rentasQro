@@ -21,27 +21,8 @@ export default function PropertyInfo({
 
 }: PropertyInfoProps) {
   return (
-    <div className="space-y-12 px-6 py-3">
-      <section>
-        <h1 className="text-2xl md:text-3xl font-medium mb-4">
-            {property.propertyType === 'casa' ? 'Casa' : property.propertyType === 'depa' ? 'Depa' : property.propertyType} {property.transactionTypes.includes('renta') ? 'en renta' : 'en venta'} {condoData?.name ? `en ${condoData.name}`: ''}{zoneData?.name ? `, ${zoneData.name}` : ''}
-        </h1>
-        <br />
-        <div className="grid grid-cols-3 gap-4">
-          <div className="flex flex-col items-center bg-blue-50 p-3 rounded-lg">
-        <BedDouble className="w-8 h-8 text-gray-500 mb-2" />
-        <span className="text-sm">{property.bedrooms} {property.bedrooms === 1 ? 'hab' : 'habs'}</span>
-          </div>
-          <div className="flex flex-col items-center bg-blue-50 p-3 rounded-lg">
-        <Bath className="w-8 h-8 text-gray-500 mb-2" />
-        <span className="text-sm">{property.bathrooms} {property.bathrooms === 1 ? 'baño' : 'baños'}</span>
-          </div>
-          <div className="flex flex-col items-center bg-blue-50 p-3 rounded-lg">
-        <Car className="w-8 h-8 text-gray-500 mb-2" />
-        <span className="text-sm">{property.parkingSpots} {property.parkingSpots === 1 ? 'puesto' : 'puestos'}</span>
-          </div>
-        </div>
-      </section>
+    <div className="space-y-12 py-3">
+
 
       <section >
         <h3 className="text-lg font-semibold mb-4">Características básicas</h3>

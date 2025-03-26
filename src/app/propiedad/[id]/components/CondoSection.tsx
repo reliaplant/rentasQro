@@ -16,7 +16,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
   return (
     <div className="max-w-7xl">
       {/* Modern Header with Logo & Title */}
-      <div className="overflow-hidden mb-12 p-6">
+      <div className="overflow-hidden mb-12">
         {/* Hero Banner */}
 
         {/* Content Area */}
@@ -83,7 +83,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
       </div>
 
       {/* Description Section */}
-      <div className="mb-8 pb-8 border-b border-gray-100 px-6">
+      <div className="mb-8 pb-8 border-b border-gray-100">
         <p className="text-black max-w-xl font-bold text-lg ">
           {condoData.shortDescription}
         </p>
@@ -93,9 +93,9 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
 
       {/* Amenities Section */}
       <div>
-        <h3 className="text-lg font-semibold mb-4 px-6">Amenidades de este lugar</h3>
+        <h3 className="text-lg font-semibold mb-4 ">Amenidades de este lugar</h3>
 
-        <div className="grid grid-cols-2 gap-2 px-6">
+        <div className="grid grid-cols-2 gap-2">
           {/* Included Amenities */}
           <div className="rounded-xl p-4 bg-gray-50">
             <h4 className="text-base font-bold mb-3 text-black flex items-center gap-2">

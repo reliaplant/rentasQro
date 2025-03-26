@@ -102,16 +102,33 @@ export default function EditCondoPage() {
   const handleSave = async (autosave = false) => {
     try {
       setSaving(true);
+      setError(null);
       
       if (!autosave) {
         // Add slight delay for smooth animation
         await new Promise(resolve => setTimeout(resolve, 300));
       }
       
+      // Validar campos obligatorios
+      if (!formData.name) {
+        throw new Error('El nombre del condominio es obligatorio');
+      }
+      
+      if (!formData.zoneId) {
+        throw new Error('La zona del condominio es obligatoria');
+      }
+      
+      console.log('Datos a guardar:', formData);
+      console.log('Archivos de imágenes:', imageFiles.length, 'imágenes');
+      
       if (id !== 'new') {
-        await updateCondo(id as string, formData, imageFiles, logoFile);
+        // Actualizar condominio existente
+        await updateCondo(id as string, formData, imageFiles.length > 0 ? imageFiles : undefined, logoFile);
+        console.log('Condominio actualizado con éxito');
       } else {
-        await addCondo(formData as CondoData, imageFiles, logoFile);
+        // Crear nuevo condominio
+        const newId = await addCondo(formData as CondoData, imageFiles, logoFile);
+        console.log('Nuevo condominio creado con ID:', newId);
       }
       
       setIsDirty(false);

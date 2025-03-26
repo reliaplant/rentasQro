@@ -396,22 +396,47 @@ export const addCondo = async (
   logoFile?: File | null
 ): Promise<string> => {
   try {
-    const imageUrls = await uploadCondoImages(imageFiles);
-    let logoUrl;
+    // Verificar los campos obligatorios
+    if (!condoData.name || !condoData.zoneId) {
+      throw new Error('El nombre y la zona del condominio son obligatorios');
+    }
+    
+    // Subir imágenes y logo
+    let imageUrls: string[] = [];
+    let logoUrl: string | undefined;
+    
+    if (imageFiles && imageFiles.length > 0) {
+      console.log(`Subiendo ${imageFiles.length} imágenes`);
+      imageUrls = await uploadCondoImagesInternal(imageFiles);
+      console.log('URLs de imágenes subidas:', imageUrls);
+    }
     
     if (logoFile) {
+      console.log('Subiendo logo');
       logoUrl = await uploadCondoLogo(logoFile);
+      console.log('URL de logo:', logoUrl);
     }
 
-    const docRef = await addDoc(collection(db, "condominiums"), {
-      ...condoData,
-      imageUrls,
-      logoUrl,
+    // Preparar datos a guardar
+    const dataToSave = {
+      name: condoData.name,
+      description: condoData.description || '',
+      shortDescription: condoData.shortDescription || '',
+      zoneId: condoData.zoneId,
+      status: condoData.status || 'active',
+      amenities: condoData.amenities || [],
+      imageUrls: imageUrls,
+      logoUrl: logoUrl || null,
       googlePlaceId: condoData.googlePlaceId || null,
       cachedReviews: [],
       reviewsLastUpdated: null,
       createdAt: Timestamp.now()
-    });
+    };
+    
+    console.log('Guardando en Firestore:', dataToSave);
+    
+    const docRef = await addDoc(collection(db, "condominiums"), dataToSave);
+    console.log('Condominio creado con ID:', docRef.id);
     
     return docRef.id;
   } catch (error) {
@@ -421,37 +446,44 @@ export const addCondo = async (
 };
 
 const uploadCondoLogo = async (file: File): Promise<string> => {
+  if (!file) {
+    throw new Error('No logo file provided');
+  }
+  
   const filename = `condominiums/logos/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
   const storageRef = ref(storage, filename);
-  await uploadBytes(storageRef, file);
-  return await getDownloadURL(storageRef);
-};
-
-export const uploadCondoImages = async (files: File[], portadaFile?: File | null): Promise<{ urls: string[], portadaUrl?: string }> => {
-  const urls: string[] = [];
-  let portadaUrl;
-
-  if (portadaFile) {
-    const filename = `condominiums/portadas/${Date.now()}-${portadaFile.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
-    const storageRef = ref(storage, filename);
-    await uploadBytes(storageRef, portadaFile);
-    portadaUrl = await getDownloadURL(storageRef);
+  
+  try {
+    await uploadBytes(storageRef, file);
+    return await getDownloadURL(storageRef);
+  } catch (error) {
+    console.error('Error uploading logo:', error);
+    throw new Error('Error al subir el logo');
   }
-
-  // ...existing image upload code...
-
-  return { urls, portadaUrl };
 };
 
 const uploadCondoImagesInternal = async (files: File[]): Promise<string[]> => {
-  const urls: string[] = [];
-  for (const file of files) {
-    const filename = `condominiums/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
-    const storageRef = ref(storage, filename);
-    await uploadBytes(storageRef, file);
-    const url = await getDownloadURL(storageRef);
-    urls.push(url);
+  if (!files || files.length === 0) {
+    return [];
   }
+  
+  const urls: string[] = [];
+  
+  for (const file of files) {
+    if (!file) continue;
+    
+    try {
+      const filename = `condominiums/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
+      const storageRef = ref(storage, filename);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      urls.push(url);
+    } catch (error) {
+      console.error(`Error al subir imagen ${file.name}:`, error);
+      // Continuar con las siguientes imágenes
+    }
+  }
+  
   return urls;
 };
 
