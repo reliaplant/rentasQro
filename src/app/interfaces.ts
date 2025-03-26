@@ -69,22 +69,19 @@ export interface PropertyData {
   advisor: string;
   createdAt?: Timestamp;
   publicationDate: Timestamp;
-  privateComplex: string;
   zone: string;
+  condo: string;
   imageUrls: string[];
   propertyType: string; // 'casa', 'departamento', etc.
   price: number;
-  transactionTypes: string[]; // 'venta', 'renta'
-  status: 'borrador' | 'publicada' | 'en_cierre' | 'vendida' | 'descartada';
-
-
-  //detalles
+  transactionType: 'renta' | 'venta' | 'ventaRenta';
   descripcion: string;
-  construccionM2?: number;
-  constructionYear: number;
+  status: 'borrador' | 'publicada' | 'en_cierre' | 'vendida' | 'descartada';
   bedrooms: number;
   bathrooms: number;
   parkingSpots: number;
+  constructionYear?: number | null; // Make it optional and nullable
+  construccionM2?: number;
   cuartoEstudio?: boolean;
   cuartoLavado?: boolean;   
   nivelesCasa?: number;
@@ -97,12 +94,10 @@ export interface PropertyData {
   calentadorAgua?: boolean;
   tipoGas?: 'estacionario' | 'natural' ;
   cocinaEquipada?: boolean;
-
-  
-  // Rent-specific
   maintenanceCost?: number;
   maintenanceIncluded?: boolean;
   furnished: boolean;
+  servicesIncluded: boolean;
   includesWifi?: boolean;
   includesWater?:boolean;
   includesGas?:boolean;
@@ -110,8 +105,6 @@ export interface PropertyData {
   petsAllowed?: boolean;
   contratoMinimo?: number;  
   depositoRenta?: number;
-
-  // Stats
   views: number;
   whatsappClicks: number;
 }

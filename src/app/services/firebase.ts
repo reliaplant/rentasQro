@@ -143,12 +143,10 @@ export const uploadImages = async (
   }
 };
 
-export const addProperty = async (propertyData: PropertyData, images: File[]): Promise<string> => {
+export const addProperty = async (propertyData: PropertyData): Promise<string> => {
   try {
-    const imageUrls = await uploadImages(images);
     const dataToSave = {
       ...propertyData,
-      imageUrls,
       createdAt: Timestamp.now(),
       publicationDate: Timestamp.now(),
       views: 0,
@@ -202,15 +200,13 @@ export const getProperty = async (id: string): Promise<PropertyData> => {
   }
 };
 
-export const updateProperty = async (id: string, propertyData: Partial<PropertyData>, newImages?: File[]): Promise<void> => {
+export const updateProperty = async (id: string, propertyData: Partial<PropertyData>): Promise<void> => {
   try {
     const docRef = doc(db, "properties", id);
-    let updateData = { ...propertyData };
-    
-    if (newImages?.length) {
-      const newImageUrls = await uploadImages(newImages);
-      updateData.imageUrls = [...(propertyData.imageUrls || []), ...newImageUrls];
-    }
+    const updateData = {
+      ...propertyData,
+      updatedAt: Timestamp.now(),
+    };
     
     await updateDoc(docRef, updateData);
   } catch (error) {

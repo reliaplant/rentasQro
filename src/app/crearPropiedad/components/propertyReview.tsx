@@ -1,174 +1,143 @@
 "use client";
 
-import { motion } from 'framer-motion';
-import type { PropertyData } from '@/app/interfaces';
+import { PropertyData } from '@/app/interfaces';
+import { formatCurrency } from '@/app/utils/format';
+
 interface PropertyReviewProps {
   data: PropertyData;
+  onChange: (newData: Partial<PropertyData>) => void;
 }
 
-export default function PropertyReview({ data }: PropertyReviewProps) {
+export default function PropertyReview({ data, onChange }: PropertyReviewProps) {
+  // Helper function to format transaction type
+  const getTransactionTypeLabel = (type: 'renta' | 'venta' | 'ventaRenta'): string => {
+    switch (type) {
+      case 'renta':
+        return 'Renta';
+      case 'venta':
+        return 'Venta';
+      case 'ventaRenta':
+        return 'Venta y Renta';
+      default:
+        return '';
+    }
+  };
+
   return (
-    <div className="space-y-8">
-      {/* Property Type & Price (Most important) */}
-      <section className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Tipo de Propiedad</h3>
-        <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <dt className="text-sm font-medium text-gray-500">Tipo</dt>
-            <dd className="mt-1 text-sm text-gray-900">{data.propertyType}</dd>
-          </div>
-          <div>
-            <dt className="text-sm font-medium text-gray-500">Transacción</dt>
-            <dd className="mt-1 text-sm text-gray-900">
-              {data.transactionTypes.join(', ')}
-            </dd>
-          </div>
-          <div className="md:col-span-2">
-            <dt className="text-sm font-medium text-gray-500">Precio</dt>
-            <dd className="mt-1 text-xl font-bold text-gray-900">
-              ${data.price.toLocaleString('es-MX')} 
-              {data.transactionTypes.includes('renta') ? '/mes' : ''}
-            </dd>
-          </div>
-          {data.transactionTypes.includes('renta') && (
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Mantenimiento</dt>
-              <dd className="mt-1 text-sm text-gray-900">
-                {data.maintenanceIncluded ? 'Incluido en renta' : 'No incluido'}
-                {!data.maintenanceIncluded && (data.maintenanceCost ?? 0) > 0 && 
-                  ` - $${(data.maintenanceCost ?? 0).toLocaleString('es-MX')}/mes`
-                }
+    <div className="space-y-6">
+      <h2 className="text-xl font-medium">Revisa los detalles de la propiedad</h2>
+      
+      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div className="px-4 py-5 sm:px-6">
+          <h3 className="text-lg leading-6 font-medium text-gray-900">Información General</h3>
+        </div>
+        
+        <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
+          <dl className="sm:divide-y sm:divide-gray-200">
+            <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt className="text-sm font-medium text-gray-500">Tipo de Propiedad</dt>
+              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                {data.propertyType}
               </dd>
             </div>
-          )}
-        </dl>
-      </section>
+            
+            <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt className="text-sm font-medium text-gray-500">Tipo de Transacción</dt>
+              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                {getTransactionTypeLabel(data.transactionType)}
+              </dd>
+            </div>
+            
+            <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt className="text-sm font-medium text-gray-500">Precio</dt>
+              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                {formatCurrency(data.price)}
+              </dd>
+            </div>
 
-      {/* Basic Counts */}
-      <section className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Características Principales</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🛏</span>
-            <div>
-              <div className="font-medium">Recámaras</div>
-              <div className="text-2xl font-semibold">{data.bedrooms}</div>
+            <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt className="text-sm font-medium text-gray-500">Ubicación</dt>
+              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                {data.zone} {data.condo ? `- ${data.condo}` : ''}
+              </dd>
             </div>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🚿</span>
-            <div>
-              <div className="font-medium">Baños</div>
-              <div className="text-2xl font-semibold">{data.bathrooms}</div>
+            
+            {/* Basic Details */}
+            <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt className="text-sm font-medium text-gray-500">Detalles Básicos</dt>
+              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>{data.bedrooms} Recámara(s)</li>
+                  <li>{data.bathrooms} Baño(s)</li>
+                  <li>{data.parkingSpots} Estacionamiento(s)</li>
+                  {data.construccionM2 && <li>{data.construccionM2} m² de construcción</li>}
+                  {data.furnished && <li>Amueblado</li>}
+                  {data.petsAllowed && <li>Mascotas permitidas</li>}
+                  {data.constructionYear ? (
+                    <li>Año de construcción: {data.constructionYear}</li>
+                  ) : (
+                    <li>Año de construcción: Desconocido</li>
+                  )}
+                </ul>
+              </dd>
             </div>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🚗</span>
-            <div>
-              <div className="font-medium">Estacionamientos</div>
-              <div className="text-2xl font-semibold">{data.parkingSpots}</div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Rental Features */}
-      {data.transactionTypes?.includes('renta') && (
-        <section className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Características de Renta</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">🛋</span>
-              <div>
-                <div className="font-medium">Amueblado</div>
-                <div className="text-sm text-gray-500">¿Incluye muebles?</div>
-                <div className="mt-1 font-medium">{data.furnished ? 'Sí' : 'No'}</div>
+            {/* Additional Features */}
+            {(data.cuartoEstudio || data.cuartoLavado || data.balcon || data.jardin || data.roofGarden || data.bodega) && (
+              <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500">Características Adicionales</dt>
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                  <ul className="list-disc pl-5 space-y-1">
+                    {data.cuartoEstudio && <li>Cuarto de estudio/TV</li>}
+                    {data.cuartoLavado && <li>Cuarto de lavado</li>}
+                    {data.balcon && <li>Balcón/Terraza</li>}
+                    {data.jardin && <li>Jardín/Patio</li>}
+                    {data.roofGarden && <li>Roof garden</li>}
+                    {data.bodega && <li>Bodega</li>}
+                  </ul>
+                </dd>
               </div>
-            </div>
+            )}
 
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">🐾</span>
-              <div>
-                <div className="font-medium">Mascotas</div>
-                <div className="text-sm text-gray-500">¿Se permiten mascotas?</div>
-                <div className="mt-1 font-medium">{data.petsAllowed ? 'Sí' : 'No'}</div>
+            {/* Rental Specific Details */}
+            {(data.transactionType === 'renta' || data.transactionType === 'ventaRenta') && (
+              <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500">Detalles de Renta</dt>
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                  <ul className="list-disc pl-5 space-y-1">
+                    {data.depositoRenta && <li>Depósito: {data.depositoRenta} mes(es)</li>}
+                    {data.contratoMinimo && <li>Contrato mínimo: {data.contratoMinimo} mes(es)</li>}
+                    {data.maintenanceIncluded ? (
+                      <li>Mantenimiento incluido</li>
+                    ) : (
+                      data.maintenanceCost && <li>Mantenimiento: {formatCurrency(data.maintenanceCost)}/mes</li>
+                    )}
+                    {data.servicesIncluded && (
+                      <li>
+                        Servicios incluidos:
+                        <ul className="list-disc pl-5 mt-1">
+                          {data.includesWater && <li>Agua</li>}
+                          {data.includesElectricity && <li>Electricidad</li>}
+                          {data.includesGas && <li>Gas</li>}
+                          {data.includesWifi && <li>Internet/WiFi</li>}
+                        </ul>
+                      </li>
+                    )}
+                  </ul>
+                </dd>
               </div>
+            )}
+
+            {/* Description */}
+            <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt className="text-sm font-medium text-gray-500">Descripción</dt>
+              <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 whitespace-pre-line">
+                {data.descripcion}
+              </dd>
             </div>
-
-            {/* {data.includesUtilities && (
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">🔌</span>
-                <div>
-                  <div className="font-medium">Servicios Incluidos</div>
-                  <div className="text-sm text-gray-500">¿El precio incluye servicios?</div>
-                  <div className="mt-1 font-medium">
-                    {data.includedUtilities?.map(util => ({
-                      'wifi': 'WiFi 📶',
-                      'water': 'Agua 💧',
-                      'electricity': 'Luz ⚡',
-                      'gas': 'Gas 🔥'
-                    }[util])).join(', ') || 'No'}
-                  </div>
-                </div>
-              </div>
-            )} */}
-          </div>
-        </section>
-      )}
-
-      {/* Amenities */}
-      {/* {data.amenities && data.amenities.length > 0 && (
-        <section className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Amenidades del Complejo</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {data.amenities.map(amenity => {
-              const amenityInfo = {
-                'pool': { icon: '🏊‍♂️', label: 'Alberca', desc: 'Área de alberca' },
-                'gym': { icon: '💪', label: 'Gimnasio', desc: 'Gimnasio equipado' },
-                'workCenter': { icon: '💻', label: 'Work Center', desc: 'Sala de trabajo compartido' }
-              }[amenity];
-
-              return amenityInfo ? (
-                <div key={amenity} className="flex items-start gap-3">
-                  <span className="text-2xl">{amenityInfo.icon}</span>
-                  <div>
-                    <div className="font-medium">{amenityInfo.label}</div>
-                    <div className="text-sm text-gray-500">{amenityInfo.desc}</div>
-                  </div>
-                </div>
-              ) : null;
-            })}
-          </div>
-        </section>
-      )} */}
-
-      {/* Photos */}
-      <section className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Fotos</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {data.imageUrls.map((url, index) => (
-            <div key={url} className="relative aspect-square rounded-lg overflow-hidden">
-              <img
-                src={url}
-                alt={`Foto ${index + 1}`}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          ))}
+          </dl>
         </div>
-      </section>
-
-      {/* Move construction year to the end and make it less prominent */}
-      <section className="bg-white rounded-lg p-4 border border-gray-200">
-        <div className="flex items-center gap-3">
-          <span className="text-gray-400">Año de Construcción:</span>
-          <span className="text-gray-700">
-            {data.constructionYear || 'Desconocido'}
-          </span>
-        </div>
-      </section>
+      </div>
     </div>
   );
 }

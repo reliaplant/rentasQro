@@ -2,21 +2,47 @@
 
 import { motion } from 'framer-motion';
 import type { PropertyData } from '@/app/interfaces'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface PropertyDetailsProps {
   data: PropertyData;
-  onChange: (field: keyof PropertyData, value: any) => void;
+  onChange: (newData: Partial<PropertyData>) => void;
   error?: string | null;
+  onError?: (error: string | null) => void; // Add this prop
 }
 
-export default function PropertyDetails({ data, onChange, error }: PropertyDetailsProps) {
+export default function PropertyDetails({ data, onChange, error, onError }: PropertyDetailsProps) {
   // State for showing/hiding advanced fields
   const [showAdvanced, setShowAdvanced] = useState(false);
   
-  const isRental = data.transactionTypes.includes('renta');
+  // Fix the transactionTypes error by using transactionType instead
+  const isRental = data.transactionType === 'renta' || data.transactionType === 'ventaRenta';
   const isHouse = data.propertyType === 'casa';
   const isApartment = data.propertyType === 'departamento';
+
+  // Fix the onChange handler to match the parent component
+  const handleChange = (field: keyof PropertyData, value: any) => {
+    onChange({ [field]: value });
+  };
+
+  // Helper function to safely get boolean values
+  const getBooleanValue = (value: boolean | undefined): boolean => {
+    return value ?? false;
+  };
+
+  // Helper function to safely get number values with default
+  const getNumberValue = (value: number | undefined, defaultValue: number): number => {
+    return value ?? defaultValue;
+  };
+
+  // Add validation for construccionM2
+  useEffect(() => {
+    if (!data.construccionM2 || data.construccionM2 <= 0) {
+      onError?.('Los metros de construcción son requeridos');
+    } else {
+      onError?.(null);
+    }
+  }, [data.construccionM2, onError]);
 
   return (
     <div className="space-y-8">
@@ -28,6 +54,26 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
         </div>
       )}
 
+      {/* Description Section - Add this before Basic Information */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+        <h3 className="text-lg font-medium border-b pb-2">Descripción</h3>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Describe la propiedad
+          </label>
+          <textarea
+            value={data.descripcion || ''}
+            onChange={(e) => handleChange('descripcion', e.target.value)}
+            rows={4}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Describe las características principales de la propiedad..."
+          />
+          <p className="mt-2 text-sm text-gray-500">
+            Incluye detalles importantes como acabados, orientación, vista, etc.
+          </p>
+        </div>
+      </div>
+
       {/* Basic Information Section */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
         <h3 className="text-lg font-medium border-b pb-2">Información Básica</h3>
@@ -38,7 +84,7 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
           <div className="flex items-center">
             <button
               type="button"
-              onClick={() => onChange('bedrooms', Math.max(1, data.bedrooms - 1))}
+              onClick={() => handleChange('bedrooms', Math.max(1, data.bedrooms - 1))}
               className="border border-gray-300 rounded-l-lg px-3 py-2 text-lg"
             >
               -
@@ -47,12 +93,12 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
               type="number"
               min="1"
               value={data.bedrooms}
-              onChange={(e) => onChange('bedrooms', parseInt(e.target.value) || 1)}
+              onChange={(e) => handleChange('bedrooms', parseInt(e.target.value) || 1)}
               className="border-y border-gray-300 py-2 px-3 text-center w-16"
             />
             <button
               type="button"
-              onClick={() => onChange('bedrooms', data.bedrooms + 1)}
+              onClick={() => handleChange('bedrooms', data.bedrooms + 1)}
               className="border border-gray-300 rounded-r-lg px-3 py-2 text-lg"
             >
               +
@@ -66,7 +112,7 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
           <div className="flex items-center">
             <button
               type="button"
-              onClick={() => onChange('bathrooms', Math.max(1, data.bathrooms - 0.5))}
+              onClick={() => handleChange('bathrooms', Math.max(1, data.bathrooms - 0.5))}
               className="border border-gray-300 rounded-l-lg px-3 py-2 text-lg"
             >
               -
@@ -76,12 +122,12 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
               min="1"
               step="0.5"
               value={data.bathrooms}
-              onChange={(e) => onChange('bathrooms', parseFloat(e.target.value) || 1)}
+              onChange={(e) => handleChange('bathrooms', parseFloat(e.target.value) || 1)}
               className="border-y border-gray-300 py-2 px-3 text-center w-16"
             />
             <button
               type="button"
-              onClick={() => onChange('bathrooms', data.bathrooms + 0.5)}
+              onClick={() => handleChange('bathrooms', data.bathrooms + 0.5)}
               className="border border-gray-300 rounded-r-lg px-3 py-2 text-lg"
             >
               +
@@ -95,7 +141,7 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
           <div className="flex items-center">
             <button
               type="button"
-              onClick={() => onChange('parkingSpots', Math.max(0, data.parkingSpots - 1))}
+              onClick={() => handleChange('parkingSpots', Math.max(0, data.parkingSpots - 1))}
               className="border border-gray-300 rounded-l-lg px-3 py-2 text-lg"
             >
               -
@@ -104,12 +150,12 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
               type="number"
               min="0"
               value={data.parkingSpots}
-              onChange={(e) => onChange('parkingSpots', parseInt(e.target.value) || 0)}
+              onChange={(e) => handleChange('parkingSpots', parseInt(e.target.value) || 0)}
               className="border-y border-gray-300 py-2 px-3 text-center w-16"
             />
             <button
               type="button"
-              onClick={() => onChange('parkingSpots', data.parkingSpots + 1)}
+              onClick={() => handleChange('parkingSpots', data.parkingSpots + 1)}
               className="border border-gray-300 rounded-r-lg px-3 py-2 text-lg"
             >
               +
@@ -120,86 +166,90 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
         {/* Construction Year */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Año de construcción</label>
-          <input
-            type="number"
-            value={data.constructionYear}
-            onChange={(e) => onChange('constructionYear', parseInt(e.target.value) || new Date().getFullYear())}
-            className="border border-gray-300 rounded-lg px-3 py-2 w-full"
-          />
-        </div>
-        
-        {/* Furnished */}
-        <div>
-          <div className="flex items-center">
-            <input
-              id="furnished"
-              type="checkbox"
-              checked={data.furnished}
-              onChange={(e) => onChange('furnished', e.target.checked)}
-              className="h-4 w-4 text-blue-600 rounded"
-            />
-            <label htmlFor="furnished" className="ml-2 text-sm text-gray-700">
-              Amueblado
-            </label>
+          <div className="space-y-2">
+            <div className="flex items-center">
+              <input
+                id="unknownYear"
+                type="checkbox"
+                checked={!data.constructionYear}
+                onChange={(e) => handleChange('constructionYear', e.target.checked ? null : new Date().getFullYear())}
+                className="h-4 w-4 text-blue-600 rounded"
+              />
+              <label htmlFor="unknownYear" className="ml-2 text-sm text-gray-700">
+                Año desconocido
+              </label>
+            </div>
+            
+            {data.constructionYear !== null && (
+              <input
+                type="number"
+                min="1900"
+                max={new Date().getFullYear()}
+                value={data.constructionYear || ''}
+                onChange={(e) => handleChange('constructionYear', parseInt(e.target.value) || null)}
+                className="border border-gray-300 rounded-lg px-3 py-2 w-full"
+              />
+            )}
           </div>
         </div>
-        
-        {/* Pets Allowed */}
-        <div>
-          <div className="flex items-center">
-            <input
-              id="petsAllowed"
-              type="checkbox"
-              checked={data.petsAllowed}
-              onChange={(e) => onChange('petsAllowed', e.target.checked)}
-              className="h-4 w-4 text-blue-600 rounded"
-            />
-            <label htmlFor="petsAllowed" className="ml-2 text-sm text-gray-700">
-              Mascotas permitidas
-            </label>
-          </div>
-        </div>
-      </div>
 
-      {/* Property Location Section */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
-        <h3 className="text-lg font-medium border-b pb-2">Ubicación</h3>
+         {/* Conservation state */}
+         <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Estado de conservación</label>
+          <select
+            value={data.estadoConservacion || ''}
+            onChange={(e) => handleChange('estadoConservacion', e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-2 w-full"
+          >
+            <option value="nuevo">A estrenar</option>
+            <option value="como_nuevo">Como nuevo</option>
+            <option value="remodelado">Remodelado</option>
+            <option value="usado">Usado</option>
+            <option value="requiere_renovacion">Requiere renovación</option>
+          </select>
+        </div>
         
-        {/* Location within property */}
-        
-        {/* House Levels or Apartment Floor */}
-        {isHouse ? (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Niveles de la casa</label>
-            <input
-              type="number"
-              min="1"
-              value={data.nivelesCasa || 1}
-              onChange={(e) => onChange('nivelesCasa', parseInt(e.target.value) || 1)}
-              className="border border-gray-300 rounded-lg px-3 py-2 w-full"
-            />
-          </div>
-        ) : isApartment && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Piso del departamento</label>
-            <input
-              type="number"
-              min="1"
-              value={data.pisoDepto || 1}
-              onChange={(e) => onChange('pisoDepto', parseInt(e.target.value) || 1)}
-              className="border border-gray-300 rounded-lg px-3 py-2 w-full"
-            />
-          </div>
+        {/* Only show furnished and pets allowed for rentals */}
+        {(data.transactionType === 'renta' || data.transactionType === 'ventaRenta') && (
+          <>
+            {/* Furnished */}
+            <div>
+              <div className="flex items-center">
+                <input
+                  id="furnished"
+                  type="checkbox"
+                  checked={data.furnished}
+                  onChange={(e) => handleChange('furnished', e.target.checked)}
+                  className="h-4 w-4 text-blue-600 rounded"
+                />
+                <label htmlFor="furnished" className="ml-2 text-sm text-gray-700">
+                  Amueblado
+                </label>
+              </div>
+            </div>
+            
+            {/* Pets Allowed */}
+            <div className="flex items-center">
+              <input
+                id="petsAllowed"
+                type="checkbox"
+                checked={getBooleanValue(data.petsAllowed)}
+                onChange={(e) => handleChange('petsAllowed', e.target.checked)}
+                className="h-4 w-4 text-blue-600 rounded"
+              />
+              <label htmlFor="petsAllowed" className="ml-2 text-sm text-gray-700">
+                Mascotas permitidas
+              </label>
+            </div>
+          </>
         )}
-        
-       
       </div>
 
       {/* Layout and spaces */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
         <h3 className="text-lg font-medium border-b pb-2">Distribución y Espacios</h3>
         
-        {/* Square meters */}
+        {/* Square meters and Levels */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Metros de construcción</label>
@@ -207,14 +257,95 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
               type="number"
               min="1"
               value={data.construccionM2 || ''}
-              onChange={(e) => onChange('construccionM2', parseInt(e.target.value) || 0)}
-              className="border border-gray-300 rounded-lg px-3 py-2 w-full"
+              onChange={(e) => handleChange('construccionM2', parseInt(e.target.value) || 0)}
+              className={`border rounded-lg px-3 py-2 w-full ${
+                !data.construccionM2 ? 'border-red-500' : 'border-gray-300'
+              }`}
+              required
             />
+            {!data.construccionM2 && (
+              <p className="text-sm text-red-600 mt-1">
+                Este campo es requerido
+              </p>
+            )}
           </div>
-          
-         
+
+          {/* House Levels or Apartment Floor */}
+          {isHouse ? (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Niveles de la casa</label>
+              <input
+                type="number"
+                min="1"
+                value={data.nivelesCasa || 1}
+                onChange={(e) => handleChange('nivelesCasa', parseInt(e.target.value) || 1)}
+                className="border border-gray-300 rounded-lg px-3 py-2 w-full"
+              />
+            </div>
+          ) : isApartment && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Piso del departamento</label>
+              <input
+                type="number"
+                min="1"
+                value={data.pisoDepto || 1}
+                onChange={(e) => handleChange('pisoDepto', parseInt(e.target.value) || 1)}
+                className="border border-gray-300 rounded-lg px-3 py-2 w-full"
+              />
+            </div>
+          )}
         </div>
+
+        {/* Appliances Section */}
+        <div className="mt-4">
+          <h4 className="text-sm font-medium text-gray-700 mb-3">Equipamiento</h4>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center">
+              <input
+                id="cocinaEquipada"
+                type="checkbox"
+                checked={getBooleanValue(data.cocinaEquipada)}
+                onChange={(e) => handleChange('cocinaEquipada', e.target.checked)}
+                className="h-4 w-4 text-blue-600 rounded"
+              />
+              <label htmlFor="cocinaEquipada" className="ml-2 text-sm text-gray-700">
+                Cocina equipada
+              </label>
+            </div>
+
+             {/* State and Characteristics */}
+    
+       
         
+        {/* Gas type */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de gas</label>
+          <select
+            value={data.tipoGas || ''}
+            onChange={(e) => handleChange('tipoGas', e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-2 w-full"
+          >
+            <option value="">Seleccionar...</option>
+            <option value="estacionario">Estacionario</option>
+            <option value="natural">Natural</option>
+          </select>
+        </div>
+
+            <div className="flex items-center">
+              <input
+                id="calentadorAgua"
+                type="checkbox"
+                checked={getBooleanValue(data.calentadorAgua)}
+                onChange={(e) => handleChange('calentadorAgua', e.target.checked)}
+                className="h-4 w-4 text-blue-600 rounded"
+              />
+              <label htmlFor="calentadorAgua" className="ml-2 text-sm text-gray-700">
+                Calentador de agua
+              </label>
+            </div>
+          </div>
+        </div>
+
         {/* Additional spaces */}
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -222,8 +353,8 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
               <input
                 id="cuartoEstudio"
                 type="checkbox"
-                checked={data.cuartoEstudio || false}
-                onChange={(e) => onChange('cuartoEstudio', e.target.checked)}
+                checked={getBooleanValue(data.cuartoEstudio)}
+                onChange={(e) => handleChange('cuartoEstudio', e.target.checked)}
                 className="h-4 w-4 text-blue-600 rounded"
               />
               <label htmlFor="cuartoEstudio" className="ml-2 text-sm text-gray-700">
@@ -237,8 +368,8 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
               <input
                 id="cuartoLavado"
                 type="checkbox"
-                checked={data.cuartoLavado || false}
-                onChange={(e) => onChange('cuartoLavado', e.target.checked)}
+                checked={getBooleanValue(data.cuartoLavado)}
+                onChange={(e) => handleChange('cuartoLavado', e.target.checked)}
                 className="h-4 w-4 text-blue-600 rounded"
               />
               <label htmlFor="cuartoLavado" className="ml-2 text-sm text-gray-700">
@@ -252,8 +383,8 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
               <input
                 id="balcon"
                 type="checkbox"
-                checked={data.balcon || false}
-                onChange={(e) => onChange('balcon', e.target.checked)}
+                checked={getBooleanValue(data.balcon)}
+                onChange={(e) => handleChange('balcon', e.target.checked)}
                 className="h-4 w-4 text-blue-600 rounded"
               />
               <label htmlFor="balcon" className="ml-2 text-sm text-gray-700">
@@ -267,8 +398,8 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
               <input
                 id="jardin"
                 type="checkbox"
-                checked={data.jardin || false}
-                onChange={(e) => onChange('jardin', e.target.checked)}
+                checked={getBooleanValue(data.jardin)}
+                onChange={(e) => handleChange('jardin', e.target.checked)}
                 className="h-4 w-4 text-blue-600 rounded"
               />
               <label htmlFor="jardin" className="ml-2 text-sm text-gray-700">
@@ -282,8 +413,8 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
               <input
                 id="roofGarden"
                 type="checkbox"
-                checked={data.roofGarden || false}
-                onChange={(e) => onChange('roofGarden', e.target.checked)}
+                checked={getBooleanValue(data.roofGarden)}
+                onChange={(e) => handleChange('roofGarden', e.target.checked)}
                 className="h-4 w-4 text-blue-600 rounded"
               />
               <label htmlFor="roofGarden" className="ml-2 text-sm text-gray-700">
@@ -297,8 +428,8 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
               <input
                 id="bodega"
                 type="checkbox"
-                checked={data.bodega || false}
-                onChange={(e) => onChange('bodega', e.target.checked)}
+                checked={getBooleanValue(data.bodega)}
+                onChange={(e) => handleChange('bodega', e.target.checked)}
                 className="h-4 w-4 text-blue-600 rounded"
               />
               <label htmlFor="bodega" className="ml-2 text-sm text-gray-700">
@@ -313,124 +444,7 @@ export default function PropertyDetails({ data, onChange, error }: PropertyDetai
         </div>
       </div>
       
-      {/* State and Characteristics */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
-        <h3 className="text-lg font-medium border-b pb-2">Estado y Características</h3>
-        
-        {/* Conservation state */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Estado de conservación</label>
-          <select
-            value={data.estadoConservacion || ''}
-            onChange={(e) => onChange('estadoConservacion', e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 w-full"
-          >
-            <option value="">Seleccionar...</option>
-            <option value="nuevo">Nuevo</option>
-            <option value="como_nuevo">Como nuevo</option>
-            <option value="remodelado">Remodelado</option>
-            <option value="usado">Usado</option>
-            <option value="requiere_renovacion">Requiere renovación</option>
-          </select>
-        </div>
-        
-        {/* Water heater */}
-
-        
-        {/* Gas type */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de gas</label>
-          <select
-            value={data.tipoGas || ''}
-            onChange={(e) => onChange('tipoGas', e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 w-full"
-          >
-            <option value="">Seleccionar...</option>
-            <option value="estacionario">Estacionario</option>
-            <option value="natural">Natural</option>
-            <option value="ninguno">Ninguno</option>
-          </select>
-        </div>
-        
-        {/* Other features */}
-        <div className="grid grid-cols-2 gap-4">
-          
-        </div>
-      </div>
-      
-      {/* Rental Specific Fields */}
-      {isRental && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
-          <h3 className="text-lg font-medium border-b pb-2">Requisitos de Renta</h3>
-          
-          {/* Maintenance */}
-          <div>
-            <div className="flex items-center mb-2">
-              <input
-                id="maintenanceIncluded"
-                type="checkbox"
-                checked={data.maintenanceIncluded}
-                onChange={(e) => onChange('maintenanceIncluded', e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded"
-              />
-              <label htmlFor="maintenanceIncluded" className="ml-2 text-sm text-gray-700">
-                Mantenimiento incluido
-              </label>
-            </div>
-            
-            {!data.maintenanceIncluded && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Costo de mantenimiento (mensual)</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={data.maintenanceCost || 0}
-                  onChange={(e) => onChange('maintenanceCost', parseInt(e.target.value) || 0)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 w-full"
-                />
-              </div>
-            )}
-          </div>
-          
-          {/* Utilities */}
-          <div>
-            
-
-          </div>
-          
-          {/* Deposit */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Depósito (número de mensualidades)
-            </label>
-            <input
-              type="number"
-              min="0"
-              step="0.5"
-              value={data.depositoRenta || 1}
-              onChange={(e) => onChange('depositoRenta', parseFloat(e.target.value) || 1)}
-              className="border border-gray-300 rounded-lg px-3 py-2 w-full"
-            />
-          </div>
-          
-          {/* Contract */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Contrato mínimo (meses)
-            </label>
-            <input
-              type="number"
-              min="1"
-              value={data.contratoMinimo || 12}
-              onChange={(e) => onChange('contratoMinimo', parseInt(e.target.value) || 12)}
-              className="border border-gray-300 rounded-lg px-3 py-2 w-full"
-            />
-          </div>
-          
-          {/* Guarantor */}
-          
-        </div>
-      )}
+     
     </div>
   );
 }

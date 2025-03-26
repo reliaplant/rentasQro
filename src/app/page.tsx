@@ -49,9 +49,13 @@ export default function Home() {
   };
 
   // Filter properties based on active tab (rent or sale)
-  const filteredProperties = properties.filter(property => 
-    property.transactionTypes?.includes(activeTab === 'renta' ? 'renta' : 'venta')
-  );
+  const filteredProperties = properties.filter(property => {
+    if (activeTab === 'renta') {
+      return ['renta', 'ventaRenta'].includes(property.transactionType);
+    } else {
+      return ['venta', 'ventaRenta'].includes(property.transactionType);
+    }
+  });
 
   return (
     <main className="min-h-screen" style={{ backgroundColor: colors.background, fontFamily: 'Montserrat, sans-serif' }}>
@@ -160,7 +164,11 @@ export default function Home() {
                         </div>
                       )}
                       <div className="absolute top-3 right-3 bg-white px-2.5 py-1 rounded-full text-xs font-medium text-purple-800" style={{ color: colors.primary }}>
-                        {property.transactionTypes?.includes('renta') ? 'Renta' : 'Venta'}
+                        {property.transactionType === 'ventaRenta' 
+                          ? 'Venta/Renta' 
+                          : property.transactionType === 'renta' 
+                            ? 'Renta' 
+                            : 'Venta'}
                       </div>
                     </div>
                     <div className="p-5">
