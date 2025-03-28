@@ -3,7 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { signIn, getCurrentUser } from '@/app/services/firebase';
+import { 
+  signIn, 
+  getCurrentUser, 
+  checkIfUserIsAdmin, 
+  checkIfUserIsAdvisor,
+  createOrUpdateUser
+} from '@/app/shared/firebase';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -17,12 +23,50 @@ export default function Login() {
     const checkAuth = async () => {
       const user = await getCurrentUser();
       if (user) {
-        router.push('/lista-propiedades');
+        await routeUserBasedOnRole(user);
       }
     };
 
     checkAuth();
   }, [router]);
+
+  // Function to route a user based on their role
+  const routeUserBasedOnRole = async (user: any) => {
+    try {
+      console.log('Routing user based on role:', user.uid);
+      
+      // Store or update the user in the users collection
+      await createOrUpdateUser(user);
+      
+      // Check roles and route accordingly
+      console.log('Checking if user is admin...');
+      const isAdmin = await checkIfUserIsAdmin(user.uid);
+      console.log('Is admin:', isAdmin);
+      
+      if (isAdmin) {
+        console.log('Redirecting to admin dashboard');
+        router.push('/admin');
+        return;
+      }
+      
+      console.log('Checking if user is advisor...');
+      const isAdvisor = await checkIfUserIsAdvisor(user.uid);
+      console.log('Is advisor:', isAdvisor);
+      
+      if (isAdvisor) {
+        console.log('Redirecting to advisor dashboard');
+        router.push('/asesor');
+        return;
+      }
+      
+      // Regular user
+      console.log('Redirecting to regular user page');
+      router.push('/lista-propiedades');
+    } catch (error) {
+      console.error('Error routing user:', error);
+      router.push('/lista-propiedades');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,8 +74,8 @@ export default function Login() {
     setError('');
 
     try {
-      await signIn(email, password);
-      router.push('/lista-propiedades');
+      const user = await signIn(email, password);
+      await routeUserBasedOnRole(user);
     } catch (error: any) {
       let errorMessage = 'Error al iniciar sesión';
       

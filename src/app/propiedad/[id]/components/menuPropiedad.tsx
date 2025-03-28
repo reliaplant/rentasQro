@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { ChevronRight, MapPin, Home, Building } from 'lucide-react';
-import { PropertyData, ZoneData, CondoData } from '@/app/interfaces';
+import { PropertyData, ZoneData, CondoData } from '@/app/shared/interfaces';
 
 interface MenuPropiedadProps {
   property: PropertyData;

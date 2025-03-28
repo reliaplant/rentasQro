@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { Star, MapPin, Shield, X, CheckCircle, WashingMachine, ArrowUpRight, ArrowUpRightIcon } from 'lucide-react';
-import { CondoData } from '@/app/interfaces';
+import { CondoData } from '@/app/shared/interfaces';
 import { condoAmenities } from '@/app/constants/amenities';
 // import Reviews from './reviews';
 import { CheckmarkFilled, CloseFilled, Misuse, WordCloud, Education, Building, Sprout, Tree, Box, Temperature, Fire, Restaurant } from '@carbon/icons-react';

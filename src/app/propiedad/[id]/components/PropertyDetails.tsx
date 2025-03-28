@@ -1,4 +1,4 @@
-import { PropertyData, ZoneData, CondoData } from '@/app/interfaces';
+import { PropertyData, ZoneData, CondoData } from '@/app/shared/interfaces';
 import { BedDouble, Bath, Car, Sofa, PawPrint, Home, Building2, CalendarIcon, Building, 
   Tv, WashingMachine, Flower, DoorOpen } from 'lucide-react';
 import { MdBalcony, MdRoofing } from 'react-icons/md';

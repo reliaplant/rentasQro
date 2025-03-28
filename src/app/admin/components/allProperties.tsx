@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Eye, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
-import { getProperties } from '@/app/services/firebase';
-import { PropertyData } from '@/app/interfaces';
+import { getProperties } from '@/app/shared/firebase';
+import { PropertyData } from '@/app/shared/interfaces';
 
 
 export default function AllProperties() {
@@ -84,13 +84,19 @@ export default function AllProperties() {
               <td className="px-6 py-4">
                 <div className="flex items-center">
                   <div className="h-16 w-16 flex-shrink-0">
-                    <Image
-                      src={property.imageUrls[0]}
-                      alt=""
-                      width={64}
-                      height={64}
-                      className="rounded-lg object-cover"
-                    />
+                    {property.imageUrls && property.imageUrls[0] ? (
+                      <Image
+                        src={property.imageUrls[0]}
+                        alt={`Imagen de ${property.propertyType}`}
+                        width={64}
+                        height={64}
+                        className="h-16 w-16 object-cover rounded-lg"
+                      />
+                    ) : (
+                      <div className="h-16 w-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <span className="text-gray-400 text-xs">Sin imagen</span>
+                      </div>
+                    )}
                   </div>
                   <div className="ml-4">
                     <div className="text-sm font-medium text-gray-900">

@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { Heart, Share2, CheckCircle, Eye, MessageSquare, Home, Star, Clock } from 'lucide-react';
 import { Timestamp } from 'firebase/firestore';
-import { incrementWhatsappClicks } from '@/app/services/firebase';
+import { incrementWhatsappClicks } from '@/app/shared/firebase';
 
 interface ContactoProps {
   price: number;

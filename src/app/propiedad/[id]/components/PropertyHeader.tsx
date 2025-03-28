@@ -1,4 +1,4 @@
-import { PropertyData, ZoneData, CondoData } from '@/app/interfaces';
+import { PropertyData, ZoneData, CondoData } from '@/app/shared/interfaces';
 import { 
   BiDoorOpen, 
   BiBath, 

@@ -3,26 +3,60 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { getCurrentUser, signOut, onAuthStateChange } from '@/app/services/firebase';
+import { 
+  getCurrentUser, 
+  signOut, 
+  onAuthStateChange, 
+  checkIfUserIsAdmin, 
+  checkIfUserIsAdvisor 
+} from '@/app/shared/firebase';
 import type { User } from 'firebase/auth';
 
 export default function Menu() {
   const [user, setUser] = useState<User | null>(null);
+  const [userRole, setUserRole] = useState<string>('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
   const router = useRouter();
   const pathname = usePathname();
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Don't render the menu if we're in the admin section
-  if (pathname?.startsWith('/admin')) {
+  
+  // Skip rendering menu on admin pages
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/asesor')) {
     return null;
   }
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChange((user) => {
-      setUser(user);
+    const checkUserRole = async (user: User | null) => {
+      if (user) {
+        try {
+          const isAdmin = await checkIfUserIsAdmin(user.uid);
+          if (isAdmin) {
+            setUserRole('admin');
+            return;
+          }
+          
+          const isAdvisor = await checkIfUserIsAdvisor(user.uid);
+          if (isAdvisor) {
+            setUserRole('advisor');
+            return;
+          }
+          
+          setUserRole('user');
+        } catch (error) {
+          console.error('Error checking user role:', error);
+          setUserRole('user');
+        }
+      } else {
+        setUserRole('');
+      }
+    };
+    
+    const unsubscribe = onAuthStateChange((currentUser) => {
+      setUser(currentUser);
+      checkUserRole(currentUser);
       setLoading(false);
     });
 
@@ -63,168 +97,202 @@ export default function Menu() {
   }
 
   return (
-    <nav className="bg-white  z-50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          {/* Left side */}
-          <div className="flex">
-            <Link 
-              href="/"
-              className="flex items-center"
-            >
-              <div className="flex items-center">
-                <div className="bg-gradient-to-r from-blue-600 to-blue-400 text-white font-bold p-2 rounded-lg mr-2">
-                  RQ
-                </div>
-                <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400">
-                  RentasQro
-                </span>
-              </div>
+    <nav className="bg-white z-[9999] shadow-sm">
+      <div className="px-16 flex flex-row items-center justify-between">
+        {/* Left side with logo and navigation */}
+        <div className="flex flex-row gap-5 items-center">
+          <div className="cursor-pointer">
+            <Link href="/" className="flex items-center">
+              <img
+                src="/assets/logos/logoRQ.svg"
+                alt="Rentas Queretaro Logo"
+                className="h-12 w-auto hover:opacity-80"
+              />
             </Link>
-            
-            <div className="hidden sm:ml-8 sm:flex sm:items-center space-x-6">
-              <Link 
-                href="/?type=renta"
-                className={`px-1 py-1 text-sm font-medium border-b-2 ${
-                  pathname?.includes('type=renta') 
-                    ? 'border-blue-500 text-blue-600' 
-                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-                } transition-colors duration-200`}
-              >
-                Rentar
-              </Link>
-              <Link 
-                href="/?type=venta"
-                className={`px-1 py-1 text-sm font-medium border-b-2 ${
-                  pathname?.includes('type=venta') 
-                    ? 'border-blue-500 text-blue-600' 
-                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-                } transition-colors duration-200`}
-              >
-                Comprar
-              </Link>
-            </div>
           </div>
-
-          {/* Right side */}
-          <div className="flex items-center space-x-6">
-            <Link
-              href={user ? "/crearPropiedad" : "/login"}
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg hover:from-blue-700 hover:to-blue-600 transition-all duration-200 shadow-sm hover:shadow"
-            >
-              <svg 
-                className="w-4 h-4 mr-2" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Nueva Propiedad
-            </Link>
-
-            {user && (
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center focus:outline-none"
-                >
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-400 flex items-center justify-center text-white font-medium shadow-sm transition-transform hover:scale-105">
-                    {user.email?.charAt(0).toUpperCase()}
-                  </div>
-                </button>
-
-                {isDropdownOpen && (
-                  <div className="origin-top-right absolute right-0 mt-3 w-64 rounded-xl shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-900">
-                        {user.email?.split('@')[0]}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1 truncate">
-                        {user.email}
-                      </p>
-                    </div>
-                    <div className="py-1">
-                      <Link
-                        href="/mis-propiedades"
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                        onClick={() => setIsDropdownOpen(false)}
-                      >
-                        <svg className="mr-3 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none">
-                          <path d="M4 13H10C10.55 13 11 12.55 11 12V4C11 3.45 10.55 3 10 3H4C3.45 3 3 3.45 3 4V12C3 12.55 3.45 13 4 13ZM4 21H10C10.55 21 11 20.55 11 20V16C11 15.45 10.55 15 10 15H4C3.45 15 3 15.45 3 16V20C3 20.55 3.45 21 4 21ZM14 21H20C20.55 21 21 20.55 21 20V12C21 11.45 20.55 11 20 11H14C13.45 11 13 11.45 13 12V20C13 20.55 13.45 21 14 21ZM13 4V8C13 8.55 13.45 9 14 9H20C20.55 9 21 8.55 21 8V4C21 3.45 20.55 3 20 3H14C13.45 3 13 3.45 13 4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        Mis Propiedades
-                      </Link>
-                      <Link
-                        href="/perfil-asesor"
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                        onClick={() => setIsDropdownOpen(false)}
-                      >
-                        <svg className="mr-3 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none">
-                          <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          <path d="M6 21V19C6 17.9391 6.42143 16.9217 7.17157 16.1716C7.92172 15.4214 8.93913 15 10 15H14C15.0609 15 16.0783 15.4214 16.8284 16.1716C17.5786 16.9217 18 17.9391 18 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        Mi Perfil
-                      </Link>
-                      <button
-                        onClick={handleSignOut}
-                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                      >
-                        <svg className="mr-3 h-5 w-5 text-red-400" viewBox="0 0 24 24" fill="none">
-                          <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          <path d="M16 17L21 12L16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          <path d="M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        Cerrar Sesión
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="sm:hidden p-2 rounded-md text-gray-500 hover:text-gray-700 focus:outline-none"
-            >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {isMobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile menu */}
-        <div className={`sm:hidden ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
-          <div className="pt-2 pb-4 space-y-1">
+          <div><span className='font-semibold text-lg mr-12'>Rentas Qro</span></div>
+          <nav className="-mb-px flex space-x-8">
             <Link
               href="/?type=renta"
-              className={`block px-3 py-2 rounded-md text-base font-medium ${
-                pathname?.includes('type=renta') 
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-              onClick={() => setIsMobileMenuOpen(false)}
+              className={`${
+                pathname?.includes('type=renta')
+                  ? 'border-indigo-800 text-indigo-800'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              } whitespace-nowrap py-3 px-1 border-b-3 font-medium text-sm cursor-pointer`}
             >
               Rentar
             </Link>
             <Link
               href="/?type=venta"
-              className={`block px-3 py-2 rounded-md text-base font-medium ${
-                pathname?.includes('type=venta') 
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-              onClick={() => setIsMobileMenuOpen(false)}
+              className={`${
+                pathname?.includes('type=venta')
+                  ? 'border-indigo-800 text-indigo-800'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              } whitespace-nowrap py-3 px-1 border-b-3 font-medium text-sm cursor-pointer`}
             >
               Comprar
             </Link>
-          </div>
+            <Link
+              href="/zonas"
+              className={`${
+                pathname?.startsWith('/zonas')
+                  ? 'border-indigo-800 text-indigo-800'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              } whitespace-nowrap py-3 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+            >
+              Zonas
+            </Link>
+            <Link
+              href="/condos"
+              className={`${
+                pathname?.startsWith('/condos')
+                  ? 'border-indigo-800 text-indigo-800'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              } whitespace-nowrap py-3 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+            >
+              Condominios
+            </Link>
+          </nav>
+        </div>
+
+        {/* Right side */}
+        <div className="flex items-center space-x-6">
+          {user ? (
+            // Usuario autenticado - Mostrar perfil y dropdown
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center focus:outline-none"
+              >
+                <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-400 flex items-center justify-center text-white font-medium shadow-sm transition-transform hover:scale-105">
+                  {user.email?.charAt(0).toUpperCase()}
+                </div>
+              </button>
+
+              {isDropdownOpen && (
+                <div className="origin-top-right absolute right-0 mt-3 w-64 rounded-xl shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    <p className="text-sm font-medium text-gray-900">
+                      {user.email?.split('@')[0]}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1 truncate">
+                      {user.email}
+                    </p>
+                    {/* Add role indicator */}
+                    {userRole && (
+                      <p className="mt-1">
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full 
+                          ${userRole === 'admin' ? 'bg-purple-100 text-purple-800' : 
+                            userRole === 'advisor' ? 'bg-blue-100 text-blue-800' : 
+                            'bg-green-100 text-green-800'}`}>
+                          {userRole === 'admin' ? 'Admin' : 
+                           userRole === 'advisor' ? 'Asesor' : 'Usuario'}
+                        </span>
+                      </p>
+                    )}
+                  </div>
+                  <div className="py-1">
+                    <Link
+                      href="/asesor"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      onClick={() => setIsDropdownOpen(false)}
+                    >
+                      <svg className="mr-3 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M6 21V19C6 17.9391 6.42143 16.9217 7.17157 16.1716C7.92172 15.4214 8.93913 15 10 15H14C15.0609 15 16.0783 15.4214 16.8284 16.1716C17.5786 16.9217 18 17.9391 18 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      Panel de asesor
+                    </Link>
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                    >
+                      <svg className="mr-3 h-5 w-5 text-red-400" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M16 17L21 12L16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      Cerrar Sesión
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            // Usuario no autenticado - Mostrar enlaces de acción
+            <div className="flex items-center space-x-4">
+              <Link
+                href="/necesitas-asesor"
+                className="text-sm font-medium text-gray-700 hover:text-indigo-800"
+              >
+                ¿Necesitas un asesor?
+              </Link>
+              <Link
+                href="/login"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-800 to-indigo-700 rounded-lg hover:from-indigo-900 hover:to-indigo-800 transition-all duration-200 shadow-sm hover:shadow"
+              >
+                <svg 
+                  className="w-4 h-4 mr-2" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Publica tu propiedad
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile menu */}
+      <div className={`sm:hidden ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
+        <div className="pt-2 pb-4 space-y-1">
+          <Link
+            href="/?type=renta"
+            className={`block px-3 py-2 rounded-md text-base font-medium ${
+              pathname?.includes('type=renta') 
+                ? 'bg-blue-50 text-blue-700'
+                : 'text-gray-700 hover:bg-gray-50'
+            }`}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Rentar
+          </Link>
+          <Link
+            href="/?type=venta"
+            className={`block px-3 py-2 rounded-md text-base font-medium ${
+              pathname?.includes('type=venta') 
+                ? 'bg-blue-50 text-blue-700'
+                : 'text-gray-700 hover:bg-gray-50'
+            }`}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Comprar
+          </Link>
+          <Link
+            href="/zonas"
+            className={`block px-3 py-2 rounded-md text-base font-medium ${
+              pathname?.startsWith('/zonas') 
+                ? 'bg-blue-50 text-blue-700'
+                : 'text-gray-700 hover:bg-gray-50'
+            }`}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Zonas
+          </Link>
+          <Link
+            href="/condos"
+            className={`block px-3 py-2 rounded-md text-base font-medium ${
+              pathname?.startsWith('/condos') 
+                ? 'bg-blue-50 text-blue-700'
+                : 'text-gray-700 hover:bg-gray-50'
+            }`}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Condominios
+          </Link>
         </div>
       </div>
     </nav>

@@ -42,11 +42,11 @@ export default function Zones() {
   };
 
   const handleAddCondo = (zoneId: string) => {
-    router.push(`/editCondo/new?zoneId=${zoneId}`);
+    router.push(`/admin/editCondo/new?zoneId=${zoneId}`);
   };
 
   const handleEditCondo = (condo: CondoData) => {
-    router.push(`/editCondo/${condo.id}`);
+    router.push(`/admin/editCondo/${condo.id}`);
   };
 
   const handleEditZone = (zone: ZoneData) => {
@@ -105,7 +105,6 @@ export default function Zones() {
                     className="p-2 hover:bg-gray-100 rounded-full"
                   >
                     <Edit2 size={18} className="text-gray-500" />
-                    
                   </button>
                 </div>
 
@@ -131,10 +130,11 @@ export default function Zones() {
                         onClick={() => handleEditCondo(condo)}
                         >
                         <span>{condo.name}</span>
-                        <Edit2 size={16} className="text-gray-500" />
-
+                        <div className='flex flex-row gap-2'>
+                        <Edit2 size={16} className="text-gray-500 hover:text-blue-500 " />
+                        <Eye size={16} className="text-gray-500 hover:text-blue-500 " />
                         </div>
-                        
+                        </div>
                       ))
                       ) : (
                       <p className="text-sm text-gray-500 italic">No hay condominios en esta zona</p>
