@@ -31,6 +31,9 @@ export interface CondoData {
     photos?: any[];
   };
   imageAmenityTags?: {[key: string]: string[]};
+  streetViewImage?: string;
+  streetViewLink?: string;
+  manualReviews?: Review[];
 }
 
 export interface CondoFormData {

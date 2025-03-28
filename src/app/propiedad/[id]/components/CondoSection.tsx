@@ -103,7 +103,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
               Incluye
             </h4>
             <div className="space-y-2">
-              {condoData.amenities.map((amenityId) => {
+              {(condoData.amenities || []).map((amenityId) => {
                 const amenityDetails = condoAmenities.find(a => a.id === amenityId);
                 if (!amenityDetails) return null;
 
@@ -129,7 +129,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
                 );
               })}
 
-              {condoData.amenities.length === 0 && (
+              {(!condoData.amenities || condoData.amenities.length === 0) && (
                 <p className="text-xs text-gray-500 italic">No hay amenidades registradas</p>
               )}
             </div>
@@ -144,7 +144,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
 
             <div className="space-y-2">
               {condoAmenities
-                .filter(amenity => !condoData.amenities.includes(amenity.id))
+                .filter(amenity => !condoData.amenities?.includes(amenity.id))
                 .map((amenityDetails) => (
                   <div key={amenityDetails.id} className="flex items-center gap-2">
                     <div className="">
@@ -166,7 +166,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
                   </div>
                 ))}
 
-              {condoAmenities.length === condoData.amenities.length && (
+              {condoAmenities.length === (condoData.amenities || []).length && (
                 <p className="text-xs text-gray-500 italic">Todas las amenidades están incluidas</p>
               )}
             </div>
@@ -179,7 +179,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
 
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Galería de {condoData.name}</h3>
-          {condoData.imageUrls.length > 4 && (
+          {condoData.imageUrls && condoData.imageUrls.length > 4 && (
             <button className="text-sm text-gray-400 hover:text-gray-800 cursor-pointer transition-colors flex items-center gap-1">
               {condoData.imageUrls.length} fotos
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -191,8 +191,8 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
 
         <div className="grid grid-cols-2 gap-3 rounded-lg overflow-hidden">
           {/* First 4 images in 2x2 grid */}
-          {condoData.imageUrls.slice(0, 4).map((img, index) => {
-            const amenityId = condoData.amenities[index];
+          {(condoData.imageUrls || []).slice(0, 4).map((img, index) => {
+            const amenityId = condoData.amenities?.[index];
             const amenity = amenityId ? condoAmenities.find(a => a.id === amenityId) : null;
 
             return (

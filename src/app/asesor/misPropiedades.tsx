@@ -24,7 +24,7 @@ export default function MisPropiedades() {
   }, [properties]);
 
   const complexes = useMemo(() => {
-    const uniqueComplexes = new Set(properties.map(p => p.privateComplex).filter(Boolean));
+    const uniqueComplexes = new Set(properties.map(p => p.condo).filter(Boolean));
     return Array.from(uniqueComplexes as Set<string>);
   }, [properties]);
 
@@ -53,7 +53,7 @@ export default function MisPropiedades() {
   const filteredProperties = useMemo(() => {
     return properties.filter(p => {
       if (zoneFilter && p.zone !== zoneFilter) return false;
-      if (complexFilter && p.privateComplex !== complexFilter) return false;
+      if (complexFilter && p.condo !== complexFilter) return false;
       return true;
     });
   }, [properties, zoneFilter, complexFilter]);
