@@ -91,7 +91,7 @@ export default function Contacto({
               <p className="text-xs text-gray-400 line-through">
               ${legalPolicyPrice.toLocaleString()}
               </p>
-              <span className="text-xs font-medium text-blue-800 bg-blue-50 px-1 py-0.5 rounded">
+              <span className="text-xs font-medium text-violet-800 bg-violet-50 px-1 py-0.5 rounded">
               -35%
               </span>
             </div>
@@ -100,7 +100,7 @@ export default function Contacto({
       </div>
 
       {/* Advisor Info */}
-      <div className="bg-gradient-to-l from-blue-50 to-blue-100 p-2 flex items-start gap-3 mb-6 rounded-xl">
+      <div className="bg-gradient-to-l from-violet-50 to-violet-100 p-2 flex items-start gap-3 mb-6 rounded-xl">
         {/* Avatar */}
         <div className="relative">
           <div className="w-14 h-14 rounded-full bg-gray-100 overflow-hidden relative flex-shrink-0">
@@ -120,11 +120,11 @@ export default function Contacto({
         </div>
         <div>
           <div className="flex flex-col">
-            <span className='text-blue-800 text-[10px]'>Asesor inmobiliario</span>
+            <span className='text-violet-800 text-[10px]'>Asesor inmobiliario</span>
             <span className='text-black text-sm'>{advisor.name} </span>
             <div className='mt-0.5 flex flex-row gap-3 items-center'>
-              <span className="bg-blue-100 rounded-full border border-blue-500 flex flex-row items-center gap-1 text-[9px] px-2 text-blue-700 w-fit pl-1.5">
-                <CheckCircle size={9} className="text-blue-700" />
+              <span className="bg-violet-100 rounded-full border border-violet-500 flex flex-row items-center gap-1 text-[9px] px-2 text-violet-700 w-fit pl-1.5">
+                <CheckCircle size={9} className="text-violet-700" />
                 Verificado
               </span>
               <div className="flex items-center gap-1.5 text-[10px] text-black">

@@ -21,7 +21,7 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
   const isRental = ['renta', 'ventaRenta'].includes(property.transactionType);
   const propertyTypeFormatted = 
     property.propertyType === 'casa' ? 'Casa' : 
-    property.propertyType === 'depa' ? 'Departamento' : 
+    property.propertyType === 'depa' ? 'Depa' : 
     property.propertyType;
     
   // Format price as currency but more minimal
@@ -36,7 +36,7 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
   const PropertyTypeIcon = property.propertyType === 'casa' ? BiHome : BiBuildings;
 
   // Create a more descriptive title
-  const fullTitle = `${propertyTypeFormatted} en ${isRental ? 'renta' : 'venta'}${
+  const fullTitle = `${propertyTypeFormatted} en ${(isRental ? 'Renta' : 'Venta')}${
     condoData?.name ? ` en ${condoData.name}` : ''
   }${zoneData?.name ? `, ${zoneData.name}` : ''}`;
 
@@ -59,7 +59,7 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
           </>
         )}
         <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-            isRental ? 'ml-4 bg-blue-50 border border-blue-500 text-blue-600' : 'border border-green-600 bg-green-50 text-green-600'
+            isRental ? 'ml-4 bg-violet-50 border border-violet-500 text-violet-600' : 'border border-green-600 bg-green-50 text-green-600'
           }`}>
             {isRental ? 'En renta' : 'En venta'}
           </span>
@@ -70,7 +70,7 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
         {/* Title and transaction type */}
         <div>
           <h1 className="text-3xl font-semibold text-gray-900 mt-2">
-            {fullTitle}
+            {fullTitle.charAt(0).toUpperCase() + fullTitle.slice(1)}
           </h1>
         </div>
 

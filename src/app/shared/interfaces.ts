@@ -82,7 +82,8 @@ export interface PropertyData {
   createdAt?: Timestamp;
   publicationDate: Timestamp;
   zone: string;
-  condo: string;
+  condo: string;  // ID del condominio
+  condoName: string;  // Nombre del condominio
   imageUrls: string[];
   propertyType: string; // 'casa', 'departamento', etc.
   price: number;

@@ -34,7 +34,7 @@ const FilterExplorador = () => {
           </div>
 
           {/* Filtros a la derecha */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-12">
             {/* Toggle Renta/Compra */}
             <div className="flex bg-gray-50/80 rounded-xl p-1 shadow-inner">
               {['renta', 'compra'].map((type) => (
@@ -42,9 +42,9 @@ const FilterExplorador = () => {
                   key={type}
                   onClick={() => setTransactionType(type as 'renta' | 'compra')}
                   className={`
-                    px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                    px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer
                     ${transactionType === type 
-                      ? 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-900/5' 
+                      ? 'bg-violet-600 text-white shadow-sm ring-1 ring-violet-500/30' 
                       : 'text-gray-500 hover:text-gray-800'}
                   `}
                 >
@@ -60,12 +60,18 @@ const FilterExplorador = () => {
                 onChange={(e) => setSelectedZone(e.target.value)}
                 className="w-full appearance-none bg-gray-50/50 border border-gray-200/75 rounded-xl 
                            px-4 py-2.5 text-sm text-gray-600 font-medium
-                           focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-300
+                           focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-300
                            transition-all cursor-pointer hover:bg-gray-50"
               >
                 <option value="">Todas las zonas</option>
                 {zones.map((zone) => (
-                  <option key={zone.id} value={zone.id}>{zone.name}</option>
+                  <option 
+                  key={zone.id} 
+                  value={zone.id}
+                  className={selectedZone === zone.id ? '!text-violet-600' : ''}
+                  >
+                  {zone.name}
+                  </option>
                 ))}
               </select>
               <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -105,9 +111,9 @@ const FilterExplorador = () => {
                       onClick={() => setBedrooms(num === '3+' ? 3 : Number(num))}
                       className={`
                         w-9 h-9 rounded-lg flex items-center justify-center text-sm font-medium
-                        transition-all duration-200 
+                        transition-all duration-200 cursor-pointer
                         ${bedrooms === (num === '3+' ? 3 : Number(num))
-                          ? 'bg-gray-900 text-white shadow-lg ring-1 ring-gray-900/5 scale-105'
+                          ? 'bg-violet-600 text-white shadow-lg ring-1 ring-violet-500/30 scale-105'
                           : 'bg-gray-50/50 text-gray-600 hover:bg-gray-100 border border-gray-200/75'}
                       `}
                     >
@@ -116,7 +122,8 @@ const FilterExplorador = () => {
                   ))}
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className='ml-4'></div>
+              <div className="flex items-center gap-3 ">
                 <FaBath className="text-gray-400" />
                 <div className="flex gap-1.5">
                   {[1, '2+'].map((num) => (
@@ -125,9 +132,9 @@ const FilterExplorador = () => {
                       onClick={() => setBathrooms(num === '2+' ? 2 : Number(num))}
                       className={`
                         w-9 h-9 rounded-lg flex items-center justify-center text-sm font-medium
-                        transition-all duration-200
+                        transition-all duration-200 cursor-pointer
                         ${bathrooms === (num === '2+' ? 2 : Number(num))
-                          ? 'bg-gray-900 text-white shadow-lg ring-1 ring-gray-900/5 scale-105'
+                          ? 'bg-violet-600 text-white shadow-lg ring-1 ring-violet-500/30 scale-105'
                           : 'bg-gray-50/50 text-gray-600 hover:bg-gray-100 border border-gray-200/75'}
                       `}
                     >
@@ -138,20 +145,20 @@ const FilterExplorador = () => {
               </div>
             </div>
 
-            {/* Amueblado */}
+            {/* Amueblado
             {transactionType === 'renta' && (
               <button
                 onClick={() => setIsFurnished(!isFurnished)}
                 className={`
                   px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
                   ${isFurnished
-                    ? 'bg-gray-900 text-white shadow-lg ring-1 ring-gray-900/5'
+                    ? 'bg-violet-600 text-white shadow-lg ring-1 ring-violet-500/30'
                     : 'bg-gray-50/50 text-gray-600 hover:bg-gray-100 border border-gray-200/75'}
                 `}
               >
                 Amueblado
               </button>
-            )}
+            )} */}
           </div>
         </div>
       </div>

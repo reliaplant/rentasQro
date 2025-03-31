@@ -5,12 +5,18 @@ import { condoAmenities } from '@/app/constants/amenities';
 // import Reviews from './reviews';
 import { CheckmarkFilled, CloseFilled, Misuse, WordCloud, Education, Building, Sprout, Tree, Box, Temperature, Fire, Restaurant } from '@carbon/icons-react';
 import { PiXFill } from 'react-icons/pi';
+import ZibataMap from '@/app/components/ZibataMap';
+import GaleriaPropiedad from './galeriaPropiedad';
+import { useState } from 'react';
 
 interface CondoSectionProps {
   condoData: CondoData | null;
 }
 
 export default function CondoSection({ condoData }: CondoSectionProps) {
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [initialIndex, setInitialIndex] = useState(0);
+
   if (!condoData) return null;
 
   return (
@@ -20,7 +26,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
         {/* Hero Banner */}
 
         {/* Content Area */}
-        <div className="flex gap-6 border rounded-2xl border-gray-200 flex flex-row items-center p-0 md:p-4 bg-gradient-to-r from-blue-50 to-gray-50 p-4 shadow-[0_8px_20px_rgb(0,0,0,0.05)]">
+        <div className="flex gap-6 border rounded-2xl border-gray-200 flex flex-row items-center p-0 md:p-4 bg-gradient-to-r from-violet-50 to-gray-50 p-4 shadow-[0_8px_20px_rgb(0,0,0,0.05)]">
 
           <div className=''>
             {condoData.logoUrl ? (
@@ -90,6 +96,16 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
         <br />
         <p className="text-gray-700 whitespace-pre-line text-base md:text-base text-sm">{condoData.description}</p>
       </div>
+
+      {/* Zibata Map Section */}
+      {condoData.polygonId && (
+        <div className="mt-12 mb-12">
+          <h3 className="text-lg font-semibold mb-4">Mapa interactivo del condominio</h3>
+          <div className="bg-white rounded-lg shadow-md overflow-hidden h-[80vh]">
+            <ZibataMap highlightedPolygonId={condoData.polygonId} />
+          </div>
+        </div>
+      )}
 
       {/* Amenities Section */}
       <div>
@@ -176,11 +192,16 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
 
       {/* Modern Photo Grid */}
       <div className="mt-12 mb-12 px-6 md:px-0">
-
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Galería de {condoData.name}</h3>
           {condoData.imageUrls && condoData.imageUrls.length > 4 && (
-            <button className="text-sm text-gray-400 hover:text-gray-800 cursor-pointer transition-colors flex items-center gap-1">
+            <button 
+              onClick={() => {
+                setInitialIndex(0);
+                setIsGalleryOpen(true);
+              }}
+              className="text-sm text-gray-400 hover:text-gray-800 cursor-pointer transition-colors flex items-center gap-1"
+            >
               {condoData.imageUrls.length} fotos
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="m9 18 6-6-6-6" />
@@ -190,13 +211,19 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
         </div>
 
         <div className="grid grid-cols-2 gap-3 rounded-lg overflow-hidden">
-          {/* First 4 images in 2x2 grid */}
           {(condoData.imageUrls || []).slice(0, 4).map((img, index) => {
             const amenityId = condoData.amenities?.[index];
             const amenity = amenityId ? condoAmenities.find(a => a.id === amenityId) : null;
 
             return (
-              <div key={index} className="relative">
+              <div 
+                key={index} 
+                className="relative cursor-pointer"
+                onClick={() => {
+                  setInitialIndex(index);
+                  setIsGalleryOpen(true);
+                }}
+              >
                 <div className="aspect-[16/10.5]"> {/* Changed to 16:9 aspect ratio */}
                   <Image
                     src={img || '/placeholder-image.png'}
@@ -217,6 +244,14 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
           })}
         </div>
       </div>
+
+      {/* Gallery Modal */}
+      <GaleriaPropiedad
+        isOpen={isGalleryOpen}
+        onClose={() => setIsGalleryOpen(false)}
+        images={condoData.imageUrls || []}
+        initialIndex={initialIndex}
+      />
 
       {/* Map */}
       <div className="space-y-4 px-6 md:px-0">
@@ -240,10 +275,15 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
           )}
         </div>
         {condoData.placeDetails?.formatted_address && (
-          <p className="text-xs md:text-sm text-gray-600">
+            <a 
+            href={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY}&q=place_id:${condoData.googlePlaceId}&zoom=15`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs md:text-sm text-gray-600 hover:text-violet-600"
+            >
             <MapPin size={14} className="inline mr-1" />
             {condoData.placeDetails.formatted_address}
-          </p>
+            </a>
         )}
       </div>
 
@@ -253,7 +293,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
         <div className="space-y-4 flex flex-col h-full">
           <h3 className="text-lg font-semibold">Vista de calle</h3>
 
-          <div className="aspect-video relative rounded-xl overflow-hidden flex-grow">
+          <div className="aspect-video relative rounded-xl overflow-hidden flex-grow cursor-pointer">
             {condoData.streetViewImage ? (
               <>
                 <Image
@@ -261,9 +301,10 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
                   alt={`Vista de calle de ${condoData.name}`}
                   fill
                   className="object-cover"
+                  onClick={() => window.open(condoData.streetViewLink, '_blank')}
                 />
                 <button
-                  className="absolute top-2 right-2 p-1.5 rounded-full border border-gray-300 bg-white shadow-[0_2px_4px_rgba(0,0,0,0.3)] hover:bg-gray-50"
+                  className="absolute top-2 right-2 p-1.5 rounded-full border border-gray-300 bg-white shadow-[0_2px_4px_rgba(0,0,0,0.3)] hover:bg-gray-50 hover:scale-125 hover:cursor-pointer transition-transform"
                   onClick={() => window.open(condoData.streetViewLink, '_blank')}
                 >
                   <ArrowUpRight size={16} className="" />
@@ -277,15 +318,15 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
           </div>
           <div className="mt-auto ">
             {condoData.streetViewLink && (
-              <a
+                <a
                 href={condoData.streetViewLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center text-xs md:text-sm text-gray-600 hover:text-gray-700"
-              >
+                className="inline-flex items-center text-xs md:text-sm text-gray-600 hover:text-violet-600"
+                >
                 <MapPin size={14} className="mr-1" />
                 Ver en Google Street View
-              </a>
+                </a>
             )}
           </div>
         </div>
@@ -363,7 +404,8 @@ interface Review {
 }
 
 const ReviewCard = ({ review, className = '' }: { review: Review; className?: string }) => (
-  <div className={`bg-white rounded-xl p-6 shadow-lg ${className}`}>
+  <div className={`bg-white rounded-xl p-6 ${className} md:shadow-[0_2px_6px_rgb(0,0,0,0.05)] shadow-lg border border-gray-200`}>
+
     <div className="flex items-center gap-3 mb-2">
       {review.profile_photo_url ? (
         <Image
@@ -374,8 +416,8 @@ const ReviewCard = ({ review, className = '' }: { review: Review; className?: st
           className="rounded-full"
         />
       ) : (
-        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
-          <span className="text-blue-600 font-medium">
+        <div className="w-10 h-10 rounded-full bg-violet-50 flex items-center justify-center">
+          <span className="text-violet-600 font-medium">
             {review.author_name.charAt(0).toUpperCase()}
           </span>
         </div>

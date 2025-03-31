@@ -10,14 +10,14 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'properties' | 'zones' | 'admins' | 'advisors'>('properties');
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className='flex flex-row gap-5 items-center border-b border-gray-200'>
-        <div className='cursor-pointer'>
+    <div className="min-h-screen bg-gray-50 ">
+      <div className='flex flex-row gap-5 items-center border-b border-gray-200 h-16'>
+        <div className='ml-[4vw] cursor-pointer'>
           <a href="/">
             <img
-              src="/assets/logos/logoRQ.svg"
+              src="/assets/logos/logoPizo.svg"
               alt="Rentas Queretaro Logo"
-              className="h-12 w-auto hover:opacity-80"
+              className="h-16 w-auto hover:opacity-80 p-4 bg-indigo-50"
             />
           </a>
         </div>
@@ -26,13 +26,13 @@ export default function AdminDashboard() {
         </div>
          {/* Tabs */}
          <div className="ml-4">
-          <nav className="-mb-px flex space-x-8">
+          <nav className="-mb-px flex space-x-8 h-16">
             <button
               onClick={() => setActiveTab('properties')}
               className={`${activeTab === 'properties'
                 ? 'border-[#6981d3] text-[#6981d3]'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-3 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+                } whitespace-nowrap py-3 px-1 pt-4 border-b-3 font-medium text-sm cursor-pointer`}
             >
               Propiedades
             </button>
@@ -41,7 +41,7 @@ export default function AdminDashboard() {
               className={`${activeTab === 'zones'
                 ? 'border-[#6981d3] text-[#6981d3]'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-3 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+                } whitespace-nowrap py-3 px-1 pt-4 border-b-3 font-medium text-sm cursor-pointer`}
             >
               Zonas y Condominios
             </button>
@@ -50,7 +50,7 @@ export default function AdminDashboard() {
               className={`${activeTab === 'admins'
                 ? 'border-[#6981d3] text-[#6981d3]'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-3 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+                } whitespace-nowrap py-3 px-1 pt-4 border-b-3 font-medium text-sm cursor-pointer`}
             >
               Administradores
             </button>
@@ -59,7 +59,7 @@ export default function AdminDashboard() {
               className={`${activeTab === 'advisors'
                 ? 'border-[#6981d3] text-[#6981d3]'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-3 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+                } whitespace-nowrap py-3 px-1 pt-4 border-b-3 font-medium text-sm cursor-pointer`}
             >
               Asesores
             </button>

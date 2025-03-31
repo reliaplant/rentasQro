@@ -127,58 +127,10 @@ export default function CondoBasicInfo({
           </div>
 
           {/* Campos de Precios */}
-          <div className="col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Precio mínimo
-              </label>
-              <input
-                type="number"
-                value={formData.priceMin || ''}
-                onChange={(e) => onFormDataChange({ 
-                  ...formData, 
-                  priceMin: parseInt(e.target.value) || 0 
-                })}
-                className="input1"
-                placeholder="Precio mínimo"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Precio promedio
-              </label>
-              <input
-                type="number"
-                value={formData.priceAvg || ''}
-                onChange={(e) => onFormDataChange({ 
-                  ...formData, 
-                  priceAvg: parseInt(e.target.value) || 0 
-                })}
-                className="input1"
-                placeholder="Precio promedio"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Precio máximo
-              </label>
-              <input
-                type="number"
-                value={formData.priceMax || ''}
-                onChange={(e) => onFormDataChange({ 
-                  ...formData, 
-                  priceMax: parseInt(e.target.value) || 0 
-                })}
-                className="input1"
-                placeholder="Precio máximo"
-              />
-            </div>
-          </div>
+    
 
           {/* Campos de Precios de Renta */}
-          <div className="col-span-2">
+          <div className="col-span-2 pt-6 border-t border-gray-200">
             <h4 className="text-sm font-medium text-gray-900 mb-4">Precios de Renta</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
@@ -388,7 +340,9 @@ export default function CondoBasicInfo({
               const file = e.target.files?.[0];
               if (file) {
                 try {
+                  console.log('Processing portada image:', file.name);
                   const compressedDataUrl = await compressImageToDataURL(file);
+                  console.log('Compressed portada image, updating formData');
                   onFormDataChange({
                     ...formData,
                     portada: compressedDataUrl

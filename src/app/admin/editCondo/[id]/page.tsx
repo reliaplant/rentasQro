@@ -120,14 +120,26 @@ export default function EditCondoPage() {
       
       console.log('Datos a guardar:', formData);
       console.log('Archivos de imágenes:', imageFiles.length, 'imágenes');
+      console.log('Portada:', formData.portada ? 'Presente' : 'No presente');
+      console.log('PolygonId:', formData.polygonId || 'No presente');
       
       if (id !== 'new') {
         // Actualizar condominio existente
         await updateCondo(id as string, formData, imageFiles.length > 0 ? imageFiles : undefined, logoFile);
         console.log('Condominio actualizado con éxito');
       } else {
-        // Crear nuevo condominio
-        const newId = await addCondo(formData as CondoData, imageFiles, logoFile);
+        // Crear nuevo condominio - ensure all data is passed correctly
+        const condoData: CondoData = {
+          ...formData,
+          name: formData.name || '',
+          zoneId: formData.zoneId || '',
+          status: 'active',
+          polygonId: formData.polygonId || '',
+          polygonPath: formData.polygonPath || '',
+          portada: formData.portada || '',
+        } as CondoData;
+        
+        const newId = await addCondo(condoData, imageFiles, logoFile);
         console.log('Nuevo condominio creado con ID:', newId);
       }
       
@@ -238,7 +250,7 @@ export default function EditCondoPage() {
               >
                 {step.label}
                 {index === currentStep && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 " />
                 )}
               </div>
             ))}
@@ -289,7 +301,7 @@ export default function EditCondoPage() {
       </header>
 
       <main className="flex-1 overflow-auto">
-        <div className="max-w-3xl mx-auto px-4 py-8">
+        <div className="max-w-3xl mx-auto px-4 py-16">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}

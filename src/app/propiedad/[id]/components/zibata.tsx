@@ -81,32 +81,32 @@ export default function ZibataInfo() {
           <h3 className="text-xl font-semibold mb-3 text-gray-800">Amenidades</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="flex flex-col items-center text-center p-3 bg-gray-50 rounded-lg">
-              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mb-2">
-                <Trees className="w-5 h-5 text-green-600" />
+              <div className="w-10 h-10 bg-violet-100 rounded-full flex items-center justify-center mb-2">
+                <Trees className="w-5 h-5 text-violet-600" />
               </div>
               <h4 className="font-medium text-sm mb-1">Áreas verdes</h4>
               <p className="text-xs text-gray-500">40+ hectáreas de parques</p>
             </div>
 
             <div className="flex flex-col items-center text-center p-3 bg-gray-50 rounded-lg">
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-2">
-                <IoGolf className="w-5 h-5 text-blue-600" />
+              <div className="w-10 h-10 bg-violet-100 rounded-full flex items-center justify-center mb-2">
+                <IoGolf className="w-5 h-5 text-violet-600" />
               </div>
               <h4 className="font-medium text-sm mb-1">Campo de golf</h4>
               <p className="text-xs text-gray-500">18 hoyos profesionales</p>
             </div>
             
             <div className="flex flex-col items-center text-center p-3 bg-gray-50 rounded-lg">
-              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mb-2">
-                <Dog className="w-5 h-5 text-amber-600" />
+              <div className="w-10 h-10 bg-violet-100 rounded-full flex items-center justify-center mb-2">
+                <Dog className="w-5 h-5 text-violet-600" />
               </div>
               <h4 className="font-medium text-sm mb-1">Pet-friendly</h4>
               <p className="text-xs text-gray-500">Espacios para mascotas</p>
             </div>
             
             <div className="flex flex-col items-center text-center p-3 bg-gray-50 rounded-lg">
-              <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mb-2">
-                <Globe className="w-5 h-5 text-indigo-600" />
+              <div className="w-10 h-10 bg-violet-100 rounded-full flex items-center justify-center mb-2">
+                <Globe className="w-5 h-5 text-violet-600" />
               </div>
               <h4 className="font-medium text-sm mb-1">Sustentable</h4>
               <p className="text-xs text-gray-500">Planta de tratamiento</p>
@@ -138,8 +138,8 @@ export default function ZibataInfo() {
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="p-3 border border-gray-100 rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-emerald-50 rounded-full flex items-center justify-center flex-shrink-0">
-                  <ShoppingBag className="w-4 h-4 text-emerald-600" />
+                <div className="w-9 h-9 bg-violet-50 rounded-full flex items-center justify-center flex-shrink-0">
+                  <ShoppingBag className="w-4 h-4 text-violet-600" />
                 </div>
                 <div>
                   <h4 className="text-sm font-medium">Supermercados</h4>
@@ -150,8 +150,8 @@ export default function ZibataInfo() {
             
             <div className="p-3 border border-gray-100 rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-red-50 rounded-full flex items-center justify-center flex-shrink-0">
-                  <HeartPulse className="w-4 h-4 text-red-600" />
+                <div className="w-9 h-9 bg-violet-50 rounded-full flex items-center justify-center flex-shrink-0">
+                  <HeartPulse className="w-4 h-4 text-violet-600" />
                 </div>
                 <div>
                   <h4 className="text-sm font-medium">Servicios médicos</h4>
@@ -162,8 +162,8 @@ export default function ZibataInfo() {
             
             <div className="p-3 border border-gray-100 rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-cyan-50 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Store className="w-4 h-4 text-cyan-600" />
+                <div className="w-9 h-9 bg-violet-50 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Store className="w-4 h-4 text-violet-600" />
                 </div>
                 <div>
                   <h4 className="text-sm font-medium">Plazas comerciales</h4>
@@ -236,8 +236,8 @@ export default function ZibataInfo() {
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="p-3 border border-gray-100 rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-yellow-50 rounded-full flex items-center justify-center flex-shrink-0">
-                  <School className="w-4 h-4 text-yellow-600" />
+                <div className="w-9 h-9 bg-violet-50 rounded-full flex items-center justify-center flex-shrink-0">
+                  <School className="w-4 h-4 text-violet-600" />
                 </div>
                 <div>
                   <h4 className="text-sm font-medium">Colegios</h4>
@@ -248,8 +248,8 @@ export default function ZibataInfo() {
             
             <div className="p-3 border border-gray-100 rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-yellow-50 rounded-full flex items-center justify-center flex-shrink-0">
-                  <GraduationCap className="w-4 h-4 text-yellow-600" />
+                <div className="w-9 h-9 bg-violet-50 rounded-full flex items-center justify-center flex-shrink-0">
+                  <GraduationCap className="w-4 h-4 text-violet-600" />
                 </div>
                 <div>
                   <h4 className="text-sm font-medium">Universidad</h4>
@@ -297,8 +297,8 @@ export default function ZibataInfo() {
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="p-3 border border-gray-100 rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-indigo-50 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Car className="w-4 h-4 text-indigo-600" />
+                <div className="w-9 h-9 bg-violet-50 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Car className="w-4 h-4 text-violet-600" />
                 </div>
                 <div>
                   <h4 className="text-sm font-medium">Centro histórico</h4>
@@ -309,8 +309,8 @@ export default function ZibataInfo() {
 
             <div className="p-3 border border-gray-100 rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-indigo-50 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Plane className="w-4 h-4 text-indigo-600" />
+                <div className="w-9 h-9 bg-violet-50 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Plane className="w-4 h-4 text-violet-600" />
                 </div>
                 <div>
                   <h4 className="text-sm font-medium">Aeropuerto</h4>
@@ -348,10 +348,10 @@ export default function ZibataInfo() {
         </div>
 
         {/* Contact CTA */}
-        <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-center">
-          <h3 className="text-lg font-medium mb-2 text-blue-800">¿Te gustaría vivir aquí?</h3>
-          <p className="text-sm text-blue-600 mb-4">Contacta a nuestros agentes para conocer las propiedades disponibles</p>
-          <button className="bg-blue-600 text-white font-medium py-2 px-6 rounded-md hover:bg-blue-700 transition-colors duration-300 text-sm">
+        <div className="bg-violet-50 border border-violet-100 rounded-lg p-4 text-center">
+          <h3 className="text-lg font-medium mb-2 text-violet-800">¿Te gustaría vivir aquí?</h3>
+          <p className="text-sm text-violet-600 mb-4">Contacta a nuestros agentes para conocer las propiedades disponibles</p>
+          <button className="bg-violet-600 text-white font-medium py-2 px-6 rounded-md hover:bg-violet-700 transition-colors duration-300 text-sm">
             Contactar ahora
           </button>
         </div>

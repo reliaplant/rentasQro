@@ -349,6 +349,15 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
     }
   };
 
+  const handleCondoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedCondo = condos.find(condo => condo.id === e.target.value);
+    onChange({ 
+      condo: e.target.value,
+      condoName: selectedCondo?.name || ''
+    });
+    setValidationErrors({ ...validationErrors, condo: undefined });
+  };
+
   // Improve validation on mount and data changes
   useEffect(() => {
     // Add a small delay to avoid premature validation when component first mounts
@@ -534,10 +543,7 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
             <div className="relative">
               <select
                 value={data.condo || ''}
-                onChange={(e) => {
-                  onChange({ condo: e.target.value });
-                  setValidationErrors({ ...validationErrors, condo: undefined });
-                }}
+                onChange={handleCondoChange}
                 className={`py-3 px-4 block w-full rounded-lg border ${
                   validationErrors.condo ? 'border-red-500' : 'border-gray-300'
                 } focus:ring-blue-500 focus:border-blue-500 pr-10`}

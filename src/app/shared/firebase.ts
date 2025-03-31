@@ -404,17 +404,40 @@ export const addCondo = async (
       console.log('URL de logo:', logoUrl);
     }
 
-    // Preparar datos a guardar
+    // Extract portada from condoData explicitly if it's a data URL
+    let portadaUrl = condoData.portada;
+    if (portadaUrl && portadaUrl.startsWith('data:image')) {
+      console.log('Portada is a data URL, uploading to storage...');
+      // Convert data URL to Blob and upload
+      const response = await fetch(portadaUrl);
+      const blob = await response.blob();
+      const portadaFile = new File([blob], 'portada.jpg', { type: 'image/jpeg' });
+      const storageRef = ref(storage, `condominiums/portadas/${Date.now()}-portada.jpg`);
+      await uploadBytes(storageRef, portadaFile);
+      portadaUrl = await getDownloadURL(storageRef);
+      console.log('Portada uploaded, URL:', portadaUrl);
+    }
+
+    // Preparar datos a guardar - ensure all fields are included
     const dataToSave = {
       name: condoData.name,
       description: condoData.description || '',
       shortDescription: condoData.shortDescription || '',
       zoneId: condoData.zoneId,
+      polygonId: condoData.polygonId || '', // Ensure polygonId is included
+      polygonPath: condoData.polygonPath || '', // Ensure polygonPath is included
       status: condoData.status || 'active',
       amenities: condoData.amenities || [],
       imageUrls: imageUrls,
       logoUrl: logoUrl || null,
+      portada: portadaUrl || '', // Ensure portada is included
       googlePlaceId: condoData.googlePlaceId || null,
+      rentPriceMin: condoData.rentPriceMin || 0,
+      rentPriceAvg: condoData.rentPriceAvg || 0,
+      rentPriceMax: condoData.rentPriceMax || 0,
+      salePriceMin: condoData.salePriceMin || 0,
+      salePriceAvg: condoData.salePriceAvg || 0,
+      salePriceMax: condoData.salePriceMax || 0,
       cachedReviews: [],
       reviewsLastUpdated: null,
       createdAt: Timestamp.now()

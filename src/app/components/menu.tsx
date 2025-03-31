@@ -11,6 +11,7 @@ import {
   checkIfUserIsAdvisor 
 } from '@/app/shared/firebase';
 import type { User } from 'firebase/auth';
+import { FaHeart } from 'react-icons/fa';
 
 export default function Menu() {
   const [user, setUser] = useState<User | null>(null);
@@ -97,8 +98,8 @@ export default function Menu() {
   }
 
   return (
-    <nav className="bg-white z-[9999] shadow-sm">
-      <div className="px-16 flex flex-row items-center justify-between">
+    <nav className="bg-white z-[9999] shadow-sm ">
+      <div className="px-[5vw] flex flex-row items-center justify-between h-16">
         {/* Left side with logo and navigation */}
         <div className="flex flex-row gap-5 items-center">
           <div className="cursor-pointer">
@@ -111,14 +112,14 @@ export default function Menu() {
             </Link>
           </div>
           <div><span className='font-semibold text-2xl mr-12'>pizo</span></div>
-          <nav className="-mb-px flex space-x-8">
+          <nav className="-mb-px flex space-x-8 ">
             <Link
               href="/?type=renta"
               className={`${
                 pathname?.includes('type=renta')
-                  ? 'border-indigo-800 text-indigo-800'
+                  ? 'border-violet-800 text-violet-800'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-3 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+              } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
             >
               Rentar
             </Link>
@@ -126,9 +127,9 @@ export default function Menu() {
               href="/?type=venta"
               className={`${
                 pathname?.includes('type=venta')
-                  ? 'border-indigo-800 text-indigo-800'
+                  ? 'border-violet-800 text-violet-800'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-3 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+              } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
             >
               Comprar
             </Link>
@@ -136,9 +137,9 @@ export default function Menu() {
               href="/zonas"
               className={`${
                 pathname?.startsWith('/zonas')
-                  ? 'border-indigo-800 text-indigo-800'
+                  ? 'border-violet-800 text-violet-800'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-3 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+              } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
             >
               Zonas
             </Link>
@@ -146,11 +147,37 @@ export default function Menu() {
               href="/condos"
               className={`${
                 pathname?.startsWith('/condos')
-                  ? 'border-indigo-800 text-indigo-800'
+                  ? 'border-violet-800 text-violet-800'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-3 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+              } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
             >
               Condominios
+            </Link>
+            <Link
+              href="/favoritos"
+              className={`
+                whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer
+                flex items-center gap-2
+                ${pathname?.startsWith('/favoritos')
+                  ? 'border-violet-800 text-violet-800'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-5 h-5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                />
+              </svg>
+              Ver favoritos
             </Link>
           </nav>
         </div>
@@ -222,25 +249,36 @@ export default function Menu() {
             // Usuario no autenticado - Mostrar enlaces de acción
             <div className="flex items-center space-x-4">
               <Link
-                href="/necesitas-asesor"
-                className="text-sm font-medium text-gray-700 hover:text-indigo-800"
+                href="/favoritos"
+                className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-violet-800 bg-violet-50 rounded-full hover:bg-violet-100 transition-colors relative group"
               >
-                ¿Necesitas un asesor?
+                <FaHeart className="w-3.5 h-3.5 mr-2" />
+                Favoritos
+                <span className="ml-1 bg-violet-200 text-violet-900 px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">
+                  3
+                </span>
               </Link>
               <Link
-                href="/login"
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-800 to-indigo-700 rounded-lg hover:from-indigo-900 hover:to-indigo-800 transition-all duration-200 shadow-sm hover:shadow"
+                href="/necesitas-asesor"
+                className="text-sm font-medium text-gray-700 hover:text-violet-800"
               >
+                Publica tu propiedad
+              </Link>
+                <Link
+                href="/login"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-violet-800 to-violet-700 rounded-lg hover:from-violet-900 hover:to-violet-800 transition-all duration-200 shadow-sm hover:shadow"
+                >
                 <svg 
                   className="w-4 h-4 mr-2" 
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z"/>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 21V19C6 17.9391 6.42143 16.9217 7.17157 16.1716C7.92172 15.4214 8.93913 15 10 15H14C15.0609 15 16.0783 15.4214 16.8284 16.1716C17.5786 16.9217 18 17.9391 18 19V21"/>
                 </svg>
-                Publica tu propiedad
-              </Link>
+¿Necesitas un asesor?
+                </Link>
             </div>
           )}
         </div>
@@ -292,6 +330,17 @@ export default function Menu() {
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Condominios
+          </Link>
+          <Link
+            href="/favoritos"
+            className={`block px-3 py-2 rounded-md text-base font-medium ${
+              pathname?.startsWith('/favoritos') 
+                ? 'bg-blue-50 text-blue-700'
+                : 'text-gray-700 hover:bg-gray-50'
+            }`}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Favoritos
           </Link>
         </div>
       </div>
