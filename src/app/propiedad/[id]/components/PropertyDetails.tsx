@@ -16,7 +16,7 @@ export default function PropertyDetails({ property, zoneData, condoData }: Prope
       {/* Header */}
       <section>
         <h1 className="text-2xl text-black font-bold mb-4">
-          {property.propertyType} {property.transactionTypes.includes('renta') ? 'en renta' : 'en venta'} en {zoneData?.name || property.zone} {condoData?.name ? `- ${condoData.name}` : ''}
+          {property.propertyType} {property.transactionType === 'renta' ? 'en renta' : property.transactionType === 'venta' ? 'en venta' : 'en renta o venta'} en {zoneData?.name || property.zone} {condoData?.name ? `- ${condoData.name}` : ''}
         </h1>
         <div className="flex items-baseline space-x-6">
           <div className="flex items-center space-x-4 text-lg">

@@ -12,6 +12,16 @@ export interface CondoData {
   shortDescription?: string;
   zoneId: string;
   polygonId?: string; // Nuevo campo para identificar el polígono en el mapa
+  polygonPath?: string;
+  rentPriceMin?: number;
+  rentPriceAvg?: number;
+  rentPriceMax?: number;
+  salePriceMin?: number;
+  salePriceAvg?: number;
+  salePriceMax?: number;
+  priceMin?: number;
+  priceAvg?: number;
+  priceMax?: number;
   status?: 'active' | 'inactive';
   amenities?: string[];
   imageUrls?: string[];

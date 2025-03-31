@@ -6,6 +6,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getProperties } from '@/app/shared/firebase';
 import type { PropertyData } from '@/app/shared/interfaces';
+import HomeBanner from './components/HomeBanner';
+import FilterExplorador from './components/filterExplorador';
+import Explorador from './components/explorador';
 
 // Define Nubank-inspired color palette
 const colors = {
@@ -58,10 +61,13 @@ export default function Home() {
   });
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: colors.background, fontFamily: 'Montserrat, sans-serif' }}>
-      {/* Hero Section with Search */}
+    <main className="min-h-screen bg-gray-50">
+      {/* <HomeBanner /> */}
+      <FilterExplorador />
+      <Explorador />
       
-        
+     
+      {/* ...rest of the content */}
     </main>
   );
 }

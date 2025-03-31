@@ -4,7 +4,7 @@ import { MessageCircle, Info } from 'lucide-react';
 
 interface WhatsAppButtonProps {
   propertyType: string;
-  transactionTypes: string[];
+  transactionType: string; // Changed from transactionTypes to transactionType
   condoName?: string;
   zoneName?: string;
   advisorPhone: string;
@@ -15,7 +15,7 @@ interface WhatsAppButtonProps {
 
 export default function WhatsAppButton({
   propertyType,
-  transactionTypes,
+  transactionType, // Changed from transactionTypes
   condoName,
   zoneName,
   advisorPhone,
@@ -50,7 +50,7 @@ export default function WhatsAppButton({
   }, [contactRef, hasPassed]);
 
   const handleWhatsAppClick = () => {
-    const message = `Hola, me interesa ${propertyType === 'casa' ? 'la casa' : 'el departamento'} ${transactionTypes.includes('renta') ? 'en renta' : 'en venta'} ${condoName ? `en ${condoName}` : ''} ${zoneName ? `en ${zoneName}` : ''}`;
+    const message = `Hola, me interesa ${propertyType === 'casa' ? 'la casa' : 'el departamento'} ${transactionType === 'renta' ? 'en renta' : 'en venta'} ${condoName ? `en ${condoName}` : ''} ${zoneName ? `en ${zoneName}` : ''}`;
     const url = `https://wa.me/${advisorPhone}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
@@ -72,11 +72,11 @@ export default function WhatsAppButton({
           <div className="flex items-center justify-between max-w-6xl mx-auto">
             <div>
               {/* <p className="text-gray-500 text-sm">
-                {transactionTypes.includes('renta') ? 'Renta' : 'Venta'}
+                {transactionType === 'renta' ? 'Renta' : 'Venta'}
               </p> */}
               <p className="text-xl font-semibold">
                 {/* ${price.toLocaleString('es-MX')}
-                {transactionTypes.includes('renta') ? '/mes' : ''} */}
+                {transactionType === 'renta' ? '/mes' : ''} */}
               </p>
             </div>
             

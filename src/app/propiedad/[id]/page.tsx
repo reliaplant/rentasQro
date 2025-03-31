@@ -229,7 +229,7 @@ export default function PropertyPage() {
 
         <WhatsAppButton
           propertyType={property.propertyType}
-          transactionTypes={property.transactionTypes}
+          transactionType={property.transactionType}  // Changed from transactionTypes
           condoName={condoData?.name}
           zoneName={zoneData?.name}
           advisorPhone={advisor?.phone || ''}

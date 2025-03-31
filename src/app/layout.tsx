@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Jost, Kumbh_Sans, Montserrat } from "next/font/google";
 import "./globals.css";
+import 'mapbox-gl/dist/mapbox-gl.css';
 import Menu from '@/app/components/menu';
 
 import { Inter, Source_Serif_4, Literata, Big_Shoulders_Display, Sofia_Sans_Extra_Condensed, Sofia_Sans, Sofia_Sans_Condensed, Sunflower, Zen_Dots, IBM_Plex_Sans, Poppins, Gabarito, Instrument_Sans, Quicksand, Outfit } from "next/font/google";

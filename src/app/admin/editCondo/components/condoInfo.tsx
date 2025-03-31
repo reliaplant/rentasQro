@@ -5,6 +5,7 @@ import { Plus, Upload } from 'lucide-react';
 import { CondoData, ZoneData } from '@/app/shared/interfaces';
 import { getZones } from '@/app/shared/firebase';
 import { condoAmenities } from '@/app/constants/amenities';
+import { compressImageToDataURL } from '@/app/utils/imageCompression';
 
 interface CondoBasicInfoProps {
   formData: Partial<CondoData>;
@@ -107,6 +108,215 @@ export default function CondoBasicInfo({
               Identificador único del polígono en el mapa interactivo
             </p>
           </div>
+
+          {/* Nuevo campo: Polygon Path */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Path del polígono
+            </label>
+            <input
+              type="text"
+              value={formData.polygonPath || ''}
+              onChange={(e) => onFormDataChange({ ...formData, polygonPath: e.target.value })}
+              className="input1"
+              placeholder="Path del polígono SVG (ej: M 100,100 L 200,200...)"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Path SVG para dibujar el polígono en el mapa
+            </p>
+          </div>
+
+          {/* Campos de Precios */}
+          <div className="col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Precio mínimo
+              </label>
+              <input
+                type="number"
+                value={formData.priceMin || ''}
+                onChange={(e) => onFormDataChange({ 
+                  ...formData, 
+                  priceMin: parseInt(e.target.value) || 0 
+                })}
+                className="input1"
+                placeholder="Precio mínimo"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Precio promedio
+              </label>
+              <input
+                type="number"
+                value={formData.priceAvg || ''}
+                onChange={(e) => onFormDataChange({ 
+                  ...formData, 
+                  priceAvg: parseInt(e.target.value) || 0 
+                })}
+                className="input1"
+                placeholder="Precio promedio"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Precio máximo
+              </label>
+              <input
+                type="number"
+                value={formData.priceMax || ''}
+                onChange={(e) => onFormDataChange({ 
+                  ...formData, 
+                  priceMax: parseInt(e.target.value) || 0 
+                })}
+                className="input1"
+                placeholder="Precio máximo"
+              />
+            </div>
+          </div>
+
+          {/* Campos de Precios de Renta */}
+          <div className="col-span-2">
+            <h4 className="text-sm font-medium text-gray-900 mb-4">Precios de Renta</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Renta mínima
+                </label>
+                <input
+                  type="number"
+                  value={formData.rentPriceMin || ''}
+                  onChange={(e) => onFormDataChange({ 
+                    ...formData, 
+                    rentPriceMin: parseInt(e.target.value) || 0 
+                  })}
+                  className="input1"
+                  placeholder="Renta mínima"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Renta promedio
+                </label>
+                <input
+                  type="number"
+                  value={formData.rentPriceAvg || ''}
+                  onChange={(e) => onFormDataChange({ 
+                    ...formData, 
+                    rentPriceAvg: parseInt(e.target.value) || 0 
+                  })}
+                  className="input1"
+                  placeholder="Renta promedio"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Renta máxima
+                </label>
+                <input
+                  type="number"
+                  value={formData.rentPriceMax || ''}
+                  onChange={(e) => onFormDataChange({ 
+                    ...formData, 
+                    rentPriceMax: parseInt(e.target.value) || 0 
+                  })}
+                  className="input1"
+                  placeholder="Renta máxima"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Campos de Precios de Venta */}
+          <div className="col-span-2">
+            <h4 className="text-sm font-medium text-gray-900 mb-4">Precios de Venta</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Venta mínima
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={formData.salePriceMin ? formData.salePriceMin / 1000000 : ''}
+                    onChange={(e) => onFormDataChange({ 
+                      ...formData, 
+                      salePriceMin: parseFloat(e.target.value) * 1000000 
+                    })}
+                    className="input1 pr-8"
+                    placeholder="Ej: 3.2"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                    M
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  {formData.salePriceMin ? 
+                    `$${formData.salePriceMin.toLocaleString('es-MX')}` : 
+                    'Ingresa el valor en millones'}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Venta promedio
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={formData.salePriceAvg ? formData.salePriceAvg / 1000000 : ''}
+                    onChange={(e) => onFormDataChange({ 
+                      ...formData, 
+                      salePriceAvg: parseFloat(e.target.value) * 1000000 
+                    })}
+                    className="input1 pr-8"
+                    placeholder="Ej: 3.5"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                    M
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  {formData.salePriceAvg ? 
+                    `$${formData.salePriceAvg.toLocaleString('es-MX')}` : 
+                    'Ingresa el valor en millones'}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Venta máxima
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={formData.salePriceMax ? formData.salePriceMax / 1000000 : ''}
+                    onChange={(e) => onFormDataChange({ 
+                      ...formData, 
+                      salePriceMax: parseFloat(e.target.value) * 1000000 
+                    })}
+                    className="input1 pr-8"
+                    placeholder="Ej: 4.2"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                    M
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  {formData.salePriceMax ? 
+                    `$${formData.salePriceMax.toLocaleString('es-MX')}` : 
+                    'Ingresa el valor en millones'}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -174,17 +384,19 @@ export default function CondoBasicInfo({
             type="file"
             accept="image/*"
             className="hidden"
-            onChange={(e) => {
+            onChange={async (e) => {
               const file = e.target.files?.[0];
               if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
+                try {
+                  const compressedDataUrl = await compressImageToDataURL(file);
                   onFormDataChange({
                     ...formData,
-                    portada: e.target?.result as string
+                    portada: compressedDataUrl
                   });
-                };
-                reader.readAsDataURL(file);
+                } catch (error) {
+                  console.error('Error handling portada upload:', error);
+                  // You might want to show an error message to the user here
+                }
               }
             }}
           />

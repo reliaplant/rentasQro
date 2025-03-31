@@ -104,13 +104,13 @@ export default function Menu() {
           <div className="cursor-pointer">
             <Link href="/" className="flex items-center">
               <img
-                src="/assets/logos/logoRQ.svg"
+                src="/assets/logos/logoPizo.svg"
                 alt="Rentas Queretaro Logo"
-                className="h-12 w-auto hover:opacity-80"
+                className="h-8 w-auto hover:opacity-80"
               />
             </Link>
           </div>
-          <div><span className='font-semibold text-lg mr-12'>Rentas Qro</span></div>
+          <div><span className='font-semibold text-2xl mr-12'>pizo</span></div>
           <nav className="-mb-px flex space-x-8">
             <Link
               href="/?type=renta"
