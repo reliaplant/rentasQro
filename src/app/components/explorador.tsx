@@ -6,6 +6,7 @@ import type { PropertyData } from '../shared/interfaces';
 import Link from 'next/link';
 import Image from 'next/image';
 import { FaHeart, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { useFavorites } from '../shared/hooks/useFavorites';
 
 const Explorador = () => {
   const [properties, setProperties] = useState<PropertyData[]>([]);
@@ -69,6 +70,28 @@ const Explorador = () => {
 
   // Componente PropertyCard
   const PropertyCard = ({ property }: { property: PropertyData }) => {
+    // Add favorites functionality
+    const { isFavorite, toggleFavorite } = useFavorites();
+    const [isFav, setIsFav] = useState(false);
+    
+    // Initialize favorite state when component mounts
+    useEffect(() => {
+      if (property.id) {
+        setIsFav(isFavorite(property.id));
+      }
+    }, [property.id, isFavorite]);
+    
+    // Handle favorite button click
+    const handleFavoriteClick = (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      if (property.id) {
+        toggleFavorite(property.id);
+        setIsFav(!isFav);
+      }
+    };
+
     const currentIndex = property.id ? currentImageIndices[property.id] || 0 : 0;
     const maxImages = property.imageUrls?.length || 1;
 
@@ -87,30 +110,38 @@ const Explorador = () => {
             </span>
           </div>
 
-          {/* Botón Favorito con hover effect */}
+          {/* Botón Favorito con hover effect - updated with favorite functionality */}
           <button 
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
+            onClick={handleFavoriteClick}
             className="absolute top-3 right-3 z-10 p-2 rounded-full bg-white/90 backdrop-blur-sm hover:scale-110 transition-all duration-200 cursor-pointer group/btn"
-            aria-label="Añadir a favoritos"
+            aria-label={isFav ? "Eliminar de favoritos" : "Añadir a favoritos"}
           >
-            <FaHeart className="w-4 h-4 text-gray-400 group-hover/btn:text-pink-500 transition-colors duration-200" />
+            <FaHeart className={`w-4 h-4 ${isFav ? "text-pink-500" : "text-gray-400"} group-hover/btn:text-pink-500 transition-colors duration-200`} />
           </button>
 
           {/* Contenedor de imagen */}
-          <div className="aspect-[16/12] relative bg-gray-100">
-            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+          <div className="aspect-[16/12] relative bg-gray-100 overflow-hidden">
+            <div 
+              className="flex transition-transform duration-300 ease-in-out w-full h-full"
+              style={{ 
+              transform: `translateX(-${currentIndex * 100}%)`,
+              }}
+            >
+              {property.imageUrls?.map((url, index) => (
+              <div key={index} className="flex-shrink-0 w-full h-full relative">
               <Image 
-                src={property.imageUrls?.[currentIndex] || '/placeholder.jpg'} 
-                alt={property.descripcion || 'Imagen de propiedad'}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                priority={currentIndex === 0}
-                className="object-cover"
+              src={url || '/placeholder.jpg'} 
+              alt={`${property.descripcion || 'Imagen de propiedad'} ${index + 1}`}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              priority={index === 0}
+              className="object-cover"
               />
+              </div>
+              ))}
             </div>
+            {/* Gradient overlay for dots visibility */}
+            <div className="absolute -bottom-3 left-0 right-0 h-16 bg-gradient-to-t from-black/30 to-transparent"></div>
             
             {/* Botones de navegación - siempre visibles si hay más de una imagen */}
             {maxImages > 1 && (

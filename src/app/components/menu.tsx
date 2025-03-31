@@ -12,6 +12,7 @@ import {
 } from '@/app/shared/firebase';
 import type { User } from 'firebase/auth';
 import { FaHeart } from 'react-icons/fa';
+import { useFavorites } from '@/app/shared/hooks/useFavorites';
 
 export default function Menu() {
   const [user, setUser] = useState<User | null>(null);
@@ -20,6 +21,7 @@ export default function Menu() {
   const [loading, setLoading] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { favorites } = useFavorites();
   
   const router = useRouter();
   const pathname = usePathname();
@@ -228,16 +230,24 @@ export default function Menu() {
           ) : (
             // Usuario no autenticado - Mostrar enlaces de acción
             <div className="flex items-center space-x-4">
-              <Link
+                <Link
                 href="/favoritos"
-                className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-violet-800 bg-violet-50 rounded-full hover:bg-violet-100 transition-colors relative group"
-              >
-                <FaHeart className="w-3.5 h-3.5 mr-2" />
+                className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-full transition-colors relative group ${
+                  favorites.length > 0 
+                  ? 'text-violet-800 bg-violet-50 hover:bg-violet-100'
+                  : 'text-gray-500 bg-gray-50 hover:bg-gray-100'
+                }`}
+                >
+                <FaHeart className={`w-3.5 h-3.5 mr-2 ${
+                  favorites.length > 0 ? 'text-red-500' : 'text-gray-400'
+                }`} />
                 Favoritos
-                <span className="ml-1 bg-violet-200 text-violet-900 px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">
-                  3
-                </span>
-              </Link>
+                {favorites.length > 0 && (
+                  <span className="ml-1 bg-violet-200 text-violet-900 px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">
+                  {favorites.length}
+                  </span>
+                )}
+                </Link>
               <Link
                 href="/necesitas-asesor"
                 className="text-sm font-medium text-gray-700 hover:text-violet-800"
