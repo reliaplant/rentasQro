@@ -22,6 +22,7 @@ import MenuPropiedad from './components/menuPropiedad';
 import PropertyInfo from './components/PropertyInfo';
 import WhatsAppButton from './components/WhatsAppButton';
 import PropertyHeader from './components/PropertyHeader';
+import SimilarProperties from './components/SimilarProperties';
 
 const amenityIcons = {
   'pool': { icon: Swim, label: 'Alberca' },
@@ -46,6 +47,7 @@ export default function PropertyPage() {
   const [activeSection, setActiveSection] = useState('info');
   const [zoneData, setZoneData] = useState<ZoneData | null>(null);
   const [condoData, setCondoData] = useState<CondoData | null>(null);
+  const [showSimilar, setShowSimilar] = useState(true);
 
   const infoRef = useRef<HTMLDivElement>(null);
   const characteristicsRef = useRef<HTMLDivElement>(null);
@@ -152,7 +154,7 @@ export default function PropertyPage() {
   }
 
   return (
-    <div className="bg-white min-h-screen md:px-0">
+    <div className="bg-white min-h-screen md:px-0 pb-36">
 
       {/* Menu after photos */}
       <MenuPropiedad
@@ -163,26 +165,23 @@ export default function PropertyPage() {
 
       {/* Rest of property detail content */}
       <div className="max-w-7xl mx-auto px-0 md:px-4 mt-24">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-16">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-12">
             {/* Property Header */}
-
-
-<div className=''>
-            <PropertyHeader
-              property={property}
-              zoneData={zoneData}
-              condoData={condoData}
-            />
-
-
-            <div >
-              <FotosPropiedad
-                images={property.imageUrls}
-                propertyType={property.propertyType}
+            <div className=''>
+              <PropertyHeader
+                property={property}
+                zoneData={zoneData}
+                condoData={condoData}
               />
-            </div>
+
+              <div>
+                <FotosPropiedad
+                  images={property.imageUrls}
+                  propertyType={property.propertyType}
+                />
+              </div>
             </div>
 
             {/* Property Info */}
@@ -207,8 +206,12 @@ export default function PropertyPage() {
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-1 " ref={contactRef}>
-            <div className="sticky top-66">
+          <div className="lg:col-span-1" ref={contactRef}>
+            {/* 
+              Adding margin-top to position it lower initially,
+              but top-1 will make it stick near the top when scrolling
+            */}
+            <div className="sticky top-12 mt-25 space-y-6">
               <Contacto
                 price={property.price}
                 advisor={{
@@ -223,13 +226,27 @@ export default function PropertyPage() {
                 views={property.views}
                 whatsappClicks={property.whatsappClicks}
               />
+
+              {/* Simple implementation of similar properties that won't error */}
+              {property.id && (
+                <div className="mt-6 w-full">
+                  <SimilarProperties
+                    currentPropertyId={property.id}
+                    propertyType={property.propertyType || "casa"}
+                    transactionType={property.transactionType || "venta"} 
+                    zone={property.zone}
+                    condo={property.condo}
+                    price={property.price}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         <WhatsAppButton
           propertyType={property.propertyType}
-          transactionType={property.transactionType}  // Changed from transactionTypes
+          transactionType={property.transactionType}
           condoName={condoData?.name}
           zoneName={zoneData?.name}
           advisorPhone={advisor?.phone || ''}
@@ -239,6 +256,6 @@ export default function PropertyPage() {
         />
       </div>
     </div>
-  )
+  );
 }
 

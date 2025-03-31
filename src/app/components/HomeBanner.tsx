@@ -110,8 +110,7 @@ export default function HomeBanner() {
         attributionControl: false, // Deshabilitar atribuciones
         renderWorldCopies: false,
         bearing: 0,
-        pitch: 0,
-        padding: { top: 50, bottom: 50 } // Añadido padding
+        pitch: 0
       });
 
       // Inyectar estilos CSS
@@ -334,7 +333,7 @@ export default function HomeBanner() {
     
     return () => {
       // Limpiar estilos y popups al desmontar
-      styleElement?.remove();
+      // styleElement?.remove();
       popupRefs.current.forEach(popup => popup?.remove());
       map.current?.remove();
       map.current = null;
@@ -366,7 +365,7 @@ export default function HomeBanner() {
 
   return (
     <div className="relative w-full h-[70vh] overflow-hidden bg-gradient-to-r from-gray-900 to-gray-800">
-      {/* Añadir los estilos de popups */}
+      Añadir los estilos de popups
       <style>{popupStyles}</style>
       
       {/* Contenedor del mapa absolute que cubre toda la pantalla */}

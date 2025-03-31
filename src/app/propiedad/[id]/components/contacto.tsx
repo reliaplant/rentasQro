@@ -63,12 +63,12 @@ export default function Contacto({
       <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
         <span>{getPublicationTime(publicationDate)}</span>
         <div className="flex items-center justify-between text-gray-500 gap-2">
-          <button className="flex items-center gap-2 text-sm hover:text-gray-900 transition-colors">
-            <Heart size={18} />
-          </button>
-          <button className="flex items-center gap-2 text-sm hover:text-gray-900 transition-colors">
-            <Share2 size={18} />
-          </button>
+            <button className="flex items-center gap-2 text-sm hover:text-pink-500 transition-colors group">
+              <Heart size={20} className="hover:fill-pink-500 hover:text-pink-500 hover:scale-125 transition-transform cursor-pointer" />
+            </button>
+            <button className="flex items-center gap-2 text-sm hover:text-violet-500 transition-colors group">
+            <Share2 size={20} className="hover:text-violet-500 hover:scale-125 transition-transform cursor-pointer" />
+            </button>
         </div>
       </div>
 

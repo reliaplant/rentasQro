@@ -151,12 +151,16 @@ export default function FotosPropiedad({ images, propertyType }: FotosPropiedadP
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               
               {/* Overlay with view all photos on hover */}
-                <div className="absolute inset-0 bg-black/0 hover:bg-black/30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                <div className="bg-white/80 border-2 border-white backdrop-blur-sm px-5 py-3 rounded-lg flex items-center gap-3 shadow-lg transform transition-all scale-90 group-hover:scale-100">
-                  <Images className="h-5 w-5" />
-                  <span className="font-medium  rounded-md px-2">Ver todas las fotos ({images.length})</span>
-                </div>
-                </div>
+                  <div className="absolute inset-0 bg-black/0 hover:bg-black/30 transition-all" />
+                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all transform translate-y-1 group-hover:translate-y-0">
+                  <div className="bg-white rounded-full p-1.5 shadow-lg">
+                    <ArrowUpRight className="h-4 w-4 text-gray-700" />
+                  </div>
+                  </div>
+            <div className="absolute bottom-4 right-4 flex gap-2 items-center bg-white/90 hover:bg-white backdrop-blur-sm px-4 py-2 rounded-lg text-sm font-medium shadow-md opacity-0 group-hover:opacity-100 transition-all transform translate-y-1 group-hover:translate-y-0">
+              <Images className="h-4 w-4" />
+              <span>Ver todas las fotos</span>
+            </div>
             </div>
             
             {/* First row of 2 photos */}

@@ -4,7 +4,7 @@
  * Do not create duplicate Firebase service files.
  */
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, Timestamp, getDocs, doc, getDoc, updateDoc, deleteDoc, query, where, increment, setDoc, limit } from "firebase/firestore";
+import { getFirestore, collection, addDoc, Timestamp, getDocs, doc, getDoc, updateDoc, deleteDoc, query, where, increment, setDoc, limit, Query, DocumentData } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import { getAuth, signInWithEmailAndPassword, signOut as firebaseSignOut, onAuthStateChanged, User, fetchSignInMethodsForEmail } from "firebase/auth";
 import { ZoneData, CondoData } from '@/app/shared/interfaces';
@@ -886,6 +886,203 @@ export async function getAdvisorData(userId: string) {
   } catch (error) {
     console.error("[ADVISOR DATA] Error fetching advisor data:", error);
     return null;
+  }
+}
+
+// Add new function to fetch similar properties
+interface SimilarPropertiesParams {
+  currentPropertyId: string;
+  propertyType: string;
+  transactionType: string;
+  zone?: string;
+  condo?: string;
+  price?: number;
+  maxResults?: number; // Renamed to avoid conflict with Firestore's limit()
+}
+
+export async function getSimilarProperties({
+  currentPropertyId,
+  propertyType,
+  transactionType,
+  zone,
+  condo,
+  price,
+  maxResults = 4  // Renamed parameter
+}: SimilarPropertiesParams): Promise<PropertyData[]> {
+  try {
+    console.log(`SIMILAR QUERY: Starting search for properties similar to ${currentPropertyId}`);
+    console.log(`SIMILAR QUERY: Filters - type: ${propertyType}, transaction: ${transactionType}, zone: ${zone}`);
+    
+    let finalProperties: PropertyData[] = [];
+    
+    // STEP 1: Try to find properties with same condo (most similar)
+    if (condo) {
+      try {
+        console.log(`SIMILAR QUERY: Trying to find properties in same condo: ${condo}`);
+        const condoQuery = query(
+          collection(db, 'properties'),
+          where('condo', '==', condo),
+          limit(maxResults * 2)  // Using Firebase's limit() function
+        );
+        
+        const condoSnapshot = await getDocs(condoQuery);
+        console.log(`SIMILAR QUERY: Found ${condoSnapshot.size} properties in same condo`);
+        
+        const condoProperties = condoSnapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() } as PropertyData))
+          .filter(prop => prop.id !== currentPropertyId);
+          
+        finalProperties.push(...condoProperties);
+      } catch (err) {
+        console.error("SIMILAR QUERY: Error in condo query:", err);
+      }
+    }
+    
+    // STEP 2: Try to find properties with same zone
+    if (finalProperties.length < maxResults && zone) {  // Fixed reference
+      try {
+        console.log(`SIMILAR QUERY: Trying to find properties in same zone: ${zone}`);
+        const zoneQuery = query(
+          collection(db, 'properties'),
+          where('zone', '==', zone),
+          limit(maxResults * 2)  // Using Firebase's limit() function
+        );
+        
+        const zoneSnapshot = await getDocs(zoneQuery);
+        console.log(`SIMILAR QUERY: Found ${zoneSnapshot.size} properties in same zone`);
+        
+        const zoneProperties = zoneSnapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() } as PropertyData))
+          .filter(prop => 
+            prop.id !== currentPropertyId && 
+            !finalProperties.some(p => p.id === prop.id)
+          );
+          
+        finalProperties.push(...zoneProperties);
+      } catch (err) {
+        console.error("SIMILAR QUERY: Error in zone query:", err);
+      }
+    }
+    
+    // STEP 3: Try to find properties with same property type and transaction type
+    if (finalProperties.length < maxResults) {  // Fixed reference
+      try {
+        console.log(`SIMILAR QUERY: Trying to find properties with type: ${propertyType}, transaction: ${transactionType}`);
+        const typeQuery = query(
+          collection(db, 'properties'),
+          where('propertyType', '==', propertyType),
+          limit(maxResults * 2)  // Using Firebase's limit() function
+        );
+        
+        const typeSnapshot = await getDocs(typeQuery);
+        console.log(`SIMILAR QUERY: Found ${typeSnapshot.size} properties with same type`);
+        
+        const typeProperties = typeSnapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() } as PropertyData))
+          .filter(prop => 
+            prop.id !== currentPropertyId &&
+            prop.transactionType === transactionType &&
+            !finalProperties.some(p => p.id === prop.id)
+          );
+          
+        finalProperties.push(...typeProperties);
+      } catch (err) {
+        console.error("SIMILAR QUERY: Error in type query:", err);
+      }
+    }
+    
+    // STEP 4: Last resort - get any properties
+    if (finalProperties.length < maxResults) {  // Fixed reference
+      try {
+        console.log('SIMILAR QUERY: Getting any properties as fallback');
+        const anyQuery = query(
+          collection(db, 'properties'),
+          limit(maxResults * 3)  // Using Firebase's limit() function
+        );
+        
+        const anySnapshot = await getDocs(anyQuery);
+        console.log(`SIMILAR QUERY: Found ${anySnapshot.size} total properties`);
+        
+        const anyProperties = anySnapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() } as PropertyData))
+          .filter(prop => 
+            prop.id !== currentPropertyId && 
+            !finalProperties.some(p => p.id === prop.id)
+          );
+          
+        finalProperties.push(...anyProperties);
+      } catch (err) {
+        console.error("SIMILAR QUERY: Error in fallback query:", err);
+      }
+    }
+    
+    // STEP 5: Take only the properties we need for our grid
+    finalProperties = finalProperties.slice(0, maxResults);  // Fixed reference
+    
+    console.log(`SIMILAR QUERY: Final count: ${finalProperties.length} properties`);
+    console.log('SIMILAR QUERY: Property IDs:', finalProperties.map(p => p.id).join(', '));
+    
+    // STEP 6: Add dummy properties if we don't have enough
+    if (finalProperties.length < maxResults) {  // Fixed reference
+      const dummiesNeeded = maxResults - finalProperties.length;  // Fixed reference
+      console.log(`SIMILAR QUERY: Adding ${dummiesNeeded} dummy properties`);
+      
+      for (let i = 0; i < dummiesNeeded; i++) {
+        finalProperties.push({
+          id: `dummy-${i}`,
+          propertyType: propertyType || 'casa',
+          transactionType: transactionType || 'venta',
+          condoName: 'Otras propiedades',
+          zone: zone || '',
+          price: 0,
+          imageUrls: [],
+          advisor: '',
+          status: 'publicada',
+          isDummy: true,
+          views: 0,
+          whatsappClicks: 0,
+          furnished: false,
+          servicesIncluded: false,
+          bedrooms: 0,
+          bathrooms: 0,
+          parkingSpots: 0,
+          publicationDate: Timestamp.now(),
+          descripcion: '',
+          constructionYear: null,
+          condo: ''
+        } as PropertyData);
+      }
+    }
+    
+    return finalProperties;
+    
+  } catch (error) {
+    console.error("SIMILAR QUERY: Critical error:", error);
+    
+    // Always return exactly 'maxResults' properties even on error by creating dummies
+    return Array(4).fill(null).map((_, i) => ({
+      id: `dummy-error-${i}`,
+      propertyType: propertyType || 'casa',
+      transactionType: transactionType || 'venta',
+      condoName: 'Otras propiedades',
+      zone: zone || '',
+      price: 0,
+      imageUrls: [],
+      advisor: '',
+      status: 'publicada',
+      isDummy: true,
+      views: 0,
+      whatsappClicks: 0,
+      furnished: false,
+      servicesIncluded: false,
+      bedrooms: 0,
+      bathrooms: 0,
+      parkingSpots: 0,
+      publicationDate: Timestamp.now(),
+      descripcion: '',
+      constructionYear: null,
+      condo: ''
+    } as PropertyData));
   }
 }
 

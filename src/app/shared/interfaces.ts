@@ -120,4 +120,5 @@ export interface PropertyData {
   depositoRenta?: number;
   views: number;
   whatsappClicks: number;
+  isDummy?: boolean; // Added for dummy properties
 }

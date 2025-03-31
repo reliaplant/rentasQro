@@ -100,7 +100,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
       {/* Zibata Map Section */}
       {condoData.polygonId && (
         <div className="mt-12 mb-12">
-          <h3 className="text-lg font-semibold mb-4">Mapa interactivo del condominio</h3>
+          <h3 className="text-lg font-semibold mb-4">Mapa interactivo de Zibata</h3>
           <div className="bg-white rounded-lg shadow-md overflow-hidden h-[80vh]">
             <ZibataMap highlightedPolygonId={condoData.polygonId} />
           </div>
@@ -224,20 +224,27 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
                   setIsGalleryOpen(true);
                 }}
               >
-                <div className="aspect-[16/10.5]"> {/* Changed to 16:9 aspect ratio */}
+                <div className="aspect-[16/10.5] relative group"> {/* Added relative and group */}
                   <Image
-                    src={img || '/placeholder-image.png'}
-                    alt={`${condoData.name} vista ${index + 1}`}
-                    fill
-                    className="object-cover rounded-xl"
+                  src={img || '/placeholder-image.png'}
+                  alt={`${condoData.name} vista ${index + 1}`}
+                  fill
+                  className="object-cover rounded-xl transition-all duration-200 group-hover:brightness-75" /* Added transition and hover effect */
                   />
                   {amenity && (
-                    <div className="absolute bottom-1 left-1 md:bottom-4 md:left-4">
-                      <span className="bg-black/90 text-white px-2 py-0.5 md:px-3 md:py-1 rounded-full text-[10px] md:text-xs font-medium border border-gray-700 shadow-[0_2px_3px_rgba(0,0,0,0.2)]">
-                        {amenity.label}
-                      </span>
-                    </div>
+                  <div className="absolute bottom-1 left-1 md:bottom-4 md:left-4">
+                  <span className="bg-black/90 text-white px-2 py-0.5 md:px-3 md:py-1 rounded-full text-[10px] md:text-xs font-medium border border-gray-700 shadow-[0_2px_3px_rgba(0,0,0,0.2)]">
+                  {amenity.label}
+                  </span>
+                  </div>
                   )}
+                  {/* Added arrow icon on hover */}
+                  <div className="absolute inset-0 bg-black/0 hover:bg-black/30 transition-all" />
+                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all transform translate-y-1 group-hover:translate-y-0">
+                  <div className="bg-white rounded-full p-1.5 shadow-lg">
+                    <ArrowUpRight className="h-4 w-4 text-gray-700" />
+                  </div>
+                  </div>
                 </div>
               </div>
             );
@@ -256,7 +263,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
       {/* Map */}
       <div className="space-y-4 px-6 md:px-0">
 
-        <h3 className="text-lg font-semibold">Ubicación</h3>
+        <h3 className="text-lg font-semibold">Ubicación en Google Maps</h3>
         <div className="aspect-video relative rounded-xl overflow-hidden">
           {condoData.googlePlaceId ? (
             <iframe
@@ -293,29 +300,35 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
         <div className="space-y-4 flex flex-col h-full">
           <h3 className="text-lg font-semibold">Vista de calle</h3>
 
-          <div className="aspect-video relative rounded-xl overflow-hidden flex-grow cursor-pointer">
+            <div className="aspect-video relative rounded-xl overflow-hidden flex-grow cursor-pointer group">
             {condoData.streetViewImage ? (
               <>
-                <Image
-                  src={condoData.streetViewImage}
-                  alt={`Vista de calle de ${condoData.name}`}
-                  fill
-                  className="object-cover"
-                  onClick={() => window.open(condoData.streetViewLink, '_blank')}
-                />
-                <button
-                  className="absolute top-2 right-2 p-1.5 rounded-full border border-gray-300 bg-white shadow-[0_2px_4px_rgba(0,0,0,0.3)] hover:bg-gray-50 hover:scale-125 hover:cursor-pointer transition-transform"
-                  onClick={() => window.open(condoData.streetViewLink, '_blank')}
-                >
-                  <ArrowUpRight size={16} className="" />
-                </button>
+              <Image
+                src={condoData.streetViewImage}
+                alt={`Vista de calle de ${condoData.name}`}
+                fill
+                className="object-cover transition-all group-hover:brightness-75"
+                onClick={() => window.open(condoData.streetViewLink, '_blank')}
+              />
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="text-white flex items-center gap-2 bg-black/50 px-4 py-2 rounded-full">
+                Ver en Google Street View
+                <ArrowUpRight size={16} />
+                </span>
+              </div>
+              <button
+                className="absolute top-2 right-2 p-1.5 rounded-full border border-gray-300 bg-white shadow-[0_2px_4px_rgba(0,0,0,0.3)] hover:bg-gray-50 hover:scale-125 hover:cursor-pointer transition-transform"
+                onClick={() => window.open(condoData.streetViewLink, '_blank')}
+              >
+                <ArrowUpRight size={16} className="" />
+              </button>
               </>
             ) : (
               <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                <span className="text-gray-400">No hay vista de calle disponible</span>
+              <span className="text-gray-400">No hay vista de calle disponible</span>
               </div>
             )}
-          </div>
+            </div>
           <div className="mt-auto ">
             {condoData.streetViewLink && (
                 <a

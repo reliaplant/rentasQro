@@ -49,6 +49,7 @@ const initialFormData: PropertyData = {
   furnished: false,
   zone: '',
   condo: '',
+  condoName: '',
   publicationDate: Timestamp.fromDate(new Date()),
   imageUrls: [],
   constructionYear: null, // Initialize as null instead of current year

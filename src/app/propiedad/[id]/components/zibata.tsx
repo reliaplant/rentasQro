@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Map, Building, Trees, School, LandPlot, Globe, Car, ShoppingBag, GraduationCap, Dog, Clock, Store, HeartPulse, ShoppingCart, Plane } from 'lucide-react';
+import { Map, Building, Trees, School, LandPlot, Globe, Car, ShoppingBag, GraduationCap, Dog, Clock, Store, HeartPulse, ShoppingCart, Plane, MapPin, ArrowUpRight } from 'lucide-react';
 import { BiBall } from 'react-icons/bi';
 import { IoGolf } from 'react-icons/io5';
 
@@ -281,14 +281,23 @@ export default function ZibataInfo() {
         {/* Map Section */}
         <div className="mb-8">
           <h3 className="text-xl font-semibold mb-3 text-gray-800">Mapa del desarrollo</h3>
-          <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden border border-gray-200">
+            <a href="https://www.google.com/maps/place/76269+Zibat%C3%A1,+Qro./data=!4m2!3m1!1s0x85d35c1cebe1b891:0x93c0abf54cd38ef2?sa=X&ved=1t:242&ictx=111" 
+             target="_blank" 
+             rel="noopener noreferrer"
+             className="relative w-full aspect-[16/9] rounded-lg overflow-hidden border border-gray-200 block cursor-pointer group">
             <Image
               src="/assets/condos/ZibataMapa.png"
               alt="Mapa de Zibatá"
               fill
-              className="object-contain"
+              className="object-cover transition-all duration-100 group-hover:brightness-75"
             />
-          </div>
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <span className="text-white flex items-center gap-2 bg-black/50 px-4 py-2 rounded-full">
+                Ver en Google Maps
+                <ArrowUpRight size={16} />
+              </span>
+            </div>
+            </a>
         </div>
 
         {/* Location Information */}

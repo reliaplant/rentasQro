@@ -102,7 +102,7 @@ export default function Menu() {
       <div className="px-[5vw] flex flex-row items-center justify-between h-16">
         {/* Left side with logo and navigation */}
         <div className="flex flex-row gap-5 items-center">
-          <div className="cursor-pointer">
+          <div className="cursor-pointer cursor-pointer">
             <Link href="/" className="flex items-center">
               <img
                 src="/assets/logos/logoPizo.svg"
@@ -111,7 +111,12 @@ export default function Menu() {
               />
             </Link>
           </div>
-          <div><span className='font-semibold text-2xl mr-12'>pizo</span></div>
+            <div>
+            <Link href="/">
+              <span className='font-semibold text-2xl mr-12 cursor-pointer'>pizo</span>
+            </Link>
+            </div>
+
           <nav className="-mb-px flex space-x-8 ">
             <Link
               href="/?type=renta"
@@ -153,32 +158,7 @@ export default function Menu() {
             >
               Condominios
             </Link>
-            <Link
-              href="/favoritos"
-              className={`
-                whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer
-                flex items-center gap-2
-                ${pathname?.startsWith('/favoritos')
-                  ? 'border-violet-800 text-violet-800'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-5 h-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                />
-              </svg>
-              Ver favoritos
-            </Link>
+  
           </nav>
         </div>
 
