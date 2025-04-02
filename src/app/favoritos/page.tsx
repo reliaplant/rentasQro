@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getProperty } from '@/app/shared/firebase';
 import { PropertyData } from '@/app/shared/interfaces';
-import { useFavorites } from '@/app/shared/hooks/useFavorites';
+import { useFavorites } from '@/app/hooks/useFavorites';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Bed, Bath, MapPin, X } from 'lucide-react';

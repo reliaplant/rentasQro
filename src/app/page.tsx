@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { getProperties } from '@/app/shared/firebase';
 import type { PropertyData } from '@/app/shared/interfaces';
 import HomeBanner from './components/HomeBanner';
-import FilterExplorador from './components/filterExplorador';
+import FilterExplorador from '@/app/components/filterExplorador';
 import Explorador from './components/explorador';
 
 // Define Nubank-inspired color palette
@@ -62,7 +62,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      {/* <HomeBanner /> */}
+      <HomeBanner />
       <FilterExplorador />
       <Explorador />
       

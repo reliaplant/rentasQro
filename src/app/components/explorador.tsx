@@ -6,12 +6,17 @@ import type { PropertyData } from '../shared/interfaces';
 import Link from 'next/link';
 import Image from 'next/image';
 import { FaHeart, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import { useFavorites } from '../shared/hooks/useFavorites';
+import { useFavorites } from '../hooks/useFavorites';
+import { useFilters } from '../context/FilterContext';
 
 const Explorador = () => {
   const [properties, setProperties] = useState<PropertyData[]>([]);
+  const [filteredProperties, setFilteredProperties] = useState<PropertyData[]>([]);
   const [currentImageIndices, setCurrentImageIndices] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Get filters from context
+  const { filters } = useFilters();
 
   // Cargar propiedades
   useEffect(() => {
@@ -29,6 +34,82 @@ const Explorador = () => {
     };
     loadProperties();
   }, []);
+
+  // Efecto para filtrar propiedades basado en los filtros del contexto
+  useEffect(() => {
+    const filterProperties = () => {
+      let filtered = [...properties];
+
+      // Filtrar por tipo de transacción
+      if (filters.transactionType) {
+        filtered = filtered.filter(property => {
+          if (filters.transactionType === 'renta') {
+            return ['renta', 'ventaRenta'].includes(property.transactionType);
+          } else if (filters.transactionType === 'compra') {
+            return ['venta', 'ventaRenta'].includes(property.transactionType);
+          }
+          return true;
+        });
+      }
+
+      // Filtrar por zona
+      if (filters.selectedZone) {
+        filtered = filtered.filter(property => property.zone === filters.selectedZone);
+      }
+
+      // Filtrar por recámaras
+      if (filters.bedrooms !== null) {
+        filtered = filtered.filter(property => {
+          if (filters.bedrooms === 3) {
+            return property.bedrooms >= 3;
+          }
+          return property.bedrooms === filters.bedrooms;
+        });
+      }
+
+      // Filtrar por baños
+      if (filters.bathrooms !== null) {
+        filtered = filtered.filter(property => {
+          if (filters.bathrooms === 2) {
+            return property.bathrooms >= 2;
+          }
+          return property.bathrooms === filters.bathrooms;
+        });
+      }
+
+      // Filtrar por precio
+      if (filters.priceRange[0] > 0) {
+        filtered = filtered.filter(property => property.price >= filters.priceRange[0]);
+      }
+      if (filters.priceRange[1] < 50000) {
+        filtered = filtered.filter(property => property.price <= filters.priceRange[1]);
+      }
+
+      // Filtrar por amueblado
+      if (filters.isFurnished) {
+        filtered = filtered.filter(property => property.furnished);
+      }
+
+      // Filtrar por mascotas
+      if (filters.petsAllowed) {
+        filtered = filtered.filter(property => property.petsAllowed);
+      }
+
+      // Filtrar por estacionamientos
+      if (filters.parkingSpots !== null) {
+        filtered = filtered.filter(property => {
+          if (filters.parkingSpots === 3) {
+            return property.parkingSpots >= 3;
+          }
+          return property.parkingSpots === filters.parkingSpots;
+        });
+      }
+
+      setFilteredProperties(filtered);
+    };
+
+    filterProperties();
+  }, [filters, properties]);
 
   // Manejar navegación de imágenes con loop
   const navigateImage = (e: React.MouseEvent, propertyId: string, direction: 'prev' | 'next', maxImages: number) => {
@@ -214,9 +295,9 @@ const Explorador = () => {
           [...Array(10)].map((_, index) => (
             <PropertySkeleton key={index} />
           ))
-        ) : properties.length > 0 ? (
-          // Mostrar propiedades cuando están cargadas
-          properties.map((property) => (
+        ) : filteredProperties.length > 0 ? (
+          // Mostrar propiedades filtradas cuando están cargadas
+          filteredProperties.map((property) => (
             <Link 
               href={`/propiedad/${property.id}`} 
               key={property.id}
@@ -228,8 +309,12 @@ const Explorador = () => {
         ) : (
           // Mensaje cuando no hay propiedades disponibles
           <div className="col-span-full py-20 text-center">
-            <h3 className="text-lg font-medium text-gray-700">No hay propiedades disponibles</h3>
-            <p className="text-gray-500 mt-1">Intenta cambiar tus filtros de búsqueda</p>
+            <h3 className="text-lg font-medium text-gray-700">
+              No hay propiedades disponibles
+            </h3>
+            <p className="text-gray-500 mt-1">
+              Intenta cambiar tus filtros de búsqueda
+            </p>
           </div>
         )}
       </div>

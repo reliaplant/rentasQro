@@ -514,6 +514,20 @@ export const getCondosByZone = async (zoneId: string): Promise<CondoData[]> => {
   }
 };
 
+// Add new function to get all condominiums
+export const getCondominiums = async (): Promise<CondoData[]> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "condominiums"));
+    return querySnapshot.docs.map(doc => ({ 
+      id: doc.id, 
+      ...doc.data() 
+    })) as CondoData[];
+  } catch (error) {
+    console.error("Error fetching condominiums:", error);
+    throw error;
+  }
+};
+
 // Update updateCondo function to handle selected reviews
 export const updateCondo = async (
   id: string,
@@ -1084,6 +1098,37 @@ export async function getSimilarProperties({
       condo: ''
     } as PropertyData));
   }
+}
+
+export async function getZoneByName(zoneName: string): Promise<ZoneData | null> {
+  const zonesRef = collection(db, 'zones');
+  const normalizedZoneName = zoneName.toLowerCase().trim();
+  
+  // Buscar zona por coincidencia exacta
+  const exactQuery = query(zonesRef, where('name', '==', normalizedZoneName));
+  const exactSnapshot = await getDocs(exactQuery);
+  
+  if (!exactSnapshot.empty) {
+    return { 
+      id: exactSnapshot.docs[0].id,
+      ...exactSnapshot.docs[0].data()
+    } as ZoneData;
+  }
+  
+  // Buscar zona por nombre similar
+  const allZonesSnapshot = await getDocs(zonesRef);
+  const matchingZone = allZonesSnapshot.docs.find(doc => 
+    doc.data().name.toLowerCase() === normalizedZoneName
+  );
+  
+  if (matchingZone) {
+    return { 
+      id: matchingZone.id,
+      ...matchingZone.data()
+    } as ZoneData;
+  }
+  
+  return null;
 }
 
 export { db, auth };

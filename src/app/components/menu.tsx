@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { 
@@ -12,24 +12,68 @@ import {
 } from '@/app/shared/firebase';
 import type { User } from 'firebase/auth';
 import { FaHeart } from 'react-icons/fa';
-import { useFavorites } from '@/app/shared/hooks/useFavorites';
+import { useFavorites } from '@/app/hooks/useFavorites';
+import { useFilters } from '../context/FilterContext';
+import AdvisorModal from './AdvisorModal';
+import PropertyListingModal from './PropertyListingModal';
+
+// Create a separate component for modals to avoid rendering issues
+function MenuModals({
+  isAdvisorModalOpen,
+  closeAdvisorModal,
+  isPropertyListingModalOpen,
+  closePropertyListingModal
+}: {
+  isAdvisorModalOpen: boolean;
+  closeAdvisorModal: () => void;
+  isPropertyListingModalOpen: boolean;
+  closePropertyListingModal: () => void;
+}) {
+  return (
+    <>
+      {isAdvisorModalOpen && (
+        <AdvisorModal 
+          isOpen={isAdvisorModalOpen}
+          onClose={closeAdvisorModal}
+        />
+      )}
+      {isPropertyListingModalOpen && (
+        <PropertyListingModal
+          isOpen={isPropertyListingModalOpen}
+          onClose={closePropertyListingModal}
+        />
+      )}
+    </>
+  );
+}
 
 export default function Menu() {
+  const pathname = usePathname();
+
+  // Stop rendering early if on admin or advisor pages
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/asesor')) {
+    return null;
+  }
+
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<string>('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAdvisorModalOpen, setIsAdvisorModalOpen] = useState(false);
+  const [isPropertyListingModalOpen, setIsPropertyListingModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { favorites } = useFavorites();
+  const { filters, updateFilter } = useFilters();
   
   const router = useRouter();
-  const pathname = usePathname();
-  
-  // Skip rendering menu on admin pages
-  if (pathname?.startsWith('/admin') || pathname?.startsWith('/asesor')) {
-    return null;
-  }
+  const currentTransactionType = filters.transactionType;
+
+  // Create memoized callbacks for modal handlers
+  const openAdvisorModal = useCallback(() => setIsAdvisorModalOpen(true), []);
+  const closeAdvisorModal = useCallback(() => setIsAdvisorModalOpen(false), []);
+  const openPropertyListingModal = useCallback(() => setIsPropertyListingModalOpen(true), []);
+  const closePropertyListingModal = useCallback(() => setIsPropertyListingModalOpen(false), []);
 
   useEffect(() => {
     const checkUserRole = async (user: User | null) => {
@@ -91,8 +135,22 @@ export default function Menu() {
 
   const isActive = (path: string) => {
     if (path === '/' && pathname === '/') return true;
+    
+    // Special handling for rentar/comprar links using filter context
+    if (path === '/rentar') return pathname === '/explorar' && currentTransactionType === 'renta';
+    if (path === '/comprar') return pathname === '/explorar' && currentTransactionType === 'compra';
+    
+    // Normal path checking for other links
     if (path !== '/' && pathname?.startsWith(path)) return true;
     return false;
+  };
+
+  const handleRentClick = () => {
+    updateFilter('transactionType', 'renta');
+  };
+
+  const handleBuyClick = () => {
+    updateFilter('transactionType', 'compra');
   };
 
   if (loading) {
@@ -121,9 +179,10 @@ export default function Menu() {
 
           <nav className="-mb-px flex space-x-8 ">
             <Link
-              href="/?type=renta"
+              href="/explorar"
+              onClick={handleRentClick}
               className={`${
-                pathname?.includes('type=renta')
+                isActive('/rentar')
                   ? 'border-violet-800 text-violet-800'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
@@ -131,9 +190,10 @@ export default function Menu() {
               Rentar
             </Link>
             <Link
-              href="/?type=venta"
+              href="/explorar"
+              onClick={handleBuyClick}
               className={`${
-                pathname?.includes('type=venta')
+                isActive('/comprar')
                   ? 'border-violet-800 text-violet-800'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
@@ -141,24 +201,14 @@ export default function Menu() {
               Comprar
             </Link>
             <Link
-              href="/zonas"
+              href="/qro/zibata"
               className={`${
-                pathname?.startsWith('/zonas')
-                  ? 'border-violet-800 text-violet-800'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              pathname?.startsWith('/qro/zibata')
+                ? 'border-violet-800 text-violet-800'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
             >
-              Zonas
-            </Link>
-            <Link
-              href="/condos"
-              className={`${
-                pathname?.startsWith('/condos')
-                  ? 'border-violet-800 text-violet-800'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
-            >
-              Condominios
+              Zibata
             </Link>
   
           </nav>
@@ -248,16 +298,16 @@ export default function Menu() {
                   </span>
                 )}
                 </Link>
-              <Link
-                href="/necesitas-asesor"
-                className="text-sm font-medium text-gray-700 hover:text-violet-800"
+              <button
+                onClick={openPropertyListingModal}
+                className="text-sm font-medium text-gray-700 hover:text-violet-800 cursor-pointer"
               >
                 Publica tu propiedad
-              </Link>
-                <Link
-                href="/login"
+              </button>
+              <button
+                onClick={openAdvisorModal}
                 className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-violet-800 to-violet-700 rounded-lg hover:from-violet-900 hover:to-violet-800 transition-all duration-200 shadow-sm hover:shadow"
-                >
+              >
                 <svg 
                   className="w-4 h-4 mr-2" 
                   fill="none" 
@@ -267,8 +317,8 @@ export default function Menu() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z"/>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 21V19C6 17.9391 6.42143 16.9217 7.17157 16.1716C7.92172 15.4214 8.93913 15 10 15H14C15.0609 15 16.0783 15.4214 16.8284 16.1716C17.5786 16.9217 18 17.9391 18 19V21"/>
                 </svg>
-¿Necesitas un asesor?
-                </Link>
+                ¿Necesitas un asesor?
+              </button>
             </div>
           )}
         </div>
@@ -278,24 +328,30 @@ export default function Menu() {
       <div className={`sm:hidden ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
         <div className="pt-2 pb-4 space-y-1">
           <Link
-            href="/?type=renta"
+            href="/explorar"
+            onClick={(e) => {
+              handleRentClick();
+              setIsMobileMenuOpen(false);
+            }}
             className={`block px-3 py-2 rounded-md text-base font-medium ${
-              pathname?.includes('type=renta') 
-                ? 'bg-blue-50 text-blue-700'
+              currentTransactionType === 'renta' 
+                ? 'bg-violet-50 text-violet-700'
                 : 'text-gray-700 hover:bg-gray-50'
             }`}
-            onClick={() => setIsMobileMenuOpen(false)}
           >
             Rentar
           </Link>
           <Link
-            href="/?type=venta"
+            href="/explorar"
+            onClick={(e) => {
+              handleBuyClick();
+              setIsMobileMenuOpen(false);
+            }}
             className={`block px-3 py-2 rounded-md text-base font-medium ${
-              pathname?.includes('type=venta') 
-                ? 'bg-blue-50 text-blue-700'
+              currentTransactionType === 'compra'
+                ? 'bg-violet-50 text-violet-700'
                 : 'text-gray-700 hover:bg-gray-50'
             }`}
-            onClick={() => setIsMobileMenuOpen(false)}
           >
             Comprar
           </Link>
@@ -334,6 +390,14 @@ export default function Menu() {
           </Link>
         </div>
       </div>
+
+      {/* Use the extracted modal component */}
+      <MenuModals 
+        isAdvisorModalOpen={isAdvisorModalOpen}
+        closeAdvisorModal={closeAdvisorModal}
+        isPropertyListingModalOpen={isPropertyListingModalOpen}
+        closePropertyListingModal={closePropertyListingModal}
+      />
     </nav>
   );
 }

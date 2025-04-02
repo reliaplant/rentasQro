@@ -3,62 +3,65 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { getCondoById, getZoneById } from '@/app/shared/firebase';
-import { CondoData, ZoneData } from '@/app/shared/interfaces';
+import { getZoneByName, getCondosByZone } from '@/app/shared/firebase';
+import { ZoneData, CondoData } from '@/app/shared/interfaces';
 import CondoSection from '@/app/propiedad/[id]/components/CondoSection';
 import ZibataMap from '@/app/components/ZibataMap';
 
 export default function CondoDetailPage() {
-  const params = useParams();
-  const condoId = params.id as string;
+  const params = useParams<{ zoneid: string; condoid: string }>();
+  const zoneName = params?.zoneid || '';
+  const condoName = params?.condoid || '';
   
   const [condo, setCondo] = useState<CondoData | null>(null);
   const [zone, setZone] = useState<ZoneData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Zibata-related zones (add any specific IDs that should show the Zibata map)
-  const ZIBATA_ZONE_IDS = ["zibata", "zivata"]; // Add actual zone IDs from your DB
-  
-  const isZibataZone = zone ? 
-    ZIBATA_ZONE_IDS.includes(zone.id || '') || 
-    zone.name.toLowerCase().includes("zibata") : 
-    false;
+  const ZIBATA_ZONE_NAMES = ["zibata", "zivata"];
+  const isZibataZone = zoneName ? ZIBATA_ZONE_NAMES.includes(zoneName.toLowerCase()) : false;
 
   useEffect(() => {
-    async function fetchCondoData() {
+    async function fetchData() {
+      if (!zoneName || !condoName) {
+        setError("URL inválida");
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        // Fetch the condominium data
-        const condoData = await getCondoById(condoId);
-        
-        if (!condoData) {
-          setError("El condominio solicitado no existe.");
-          setLoading(false);
+        // First get the zone
+        const zoneData = await getZoneByName(zoneName);
+        if (!zoneData) {
+          setError(`No se encontró la zona "${zoneName}"`);
           return;
         }
-        
-        setCondo(condoData);
-        
-        // If we have a zoneId, fetch the zone data as well
-        if (condoData.zoneId) {
-          const zoneData = await getZoneById(condoData.zoneId);
-          setZone(zoneData);
+        setZone(zoneData);
+
+        // Then get all condos for this zone and find the matching one by name
+        const condosData = await getCondosByZone(zoneData.id || '');
+        const matchingCondo = condosData.find(c => 
+          c.name.toLowerCase().replace(/\s+/g, '-') === condoName.toLowerCase()
+        );
+
+        if (!matchingCondo) {
+          setError(`No se encontró el condominio "${condoName}" en ${zoneName}`);
+          return;
         }
-        
+
+        setCondo(matchingCondo);
         setError(null);
       } catch (err) {
-        console.error("Error fetching condominium:", err);
-        setError("Ocurrió un error al cargar la información del condominio.");
+        console.error("Error fetching data:", err);
+        setError("Ocurrió un error al cargar los datos.");
       } finally {
         setLoading(false);
       }
     }
 
-    if (condoId) {
-      fetchCondoData();
-    }
-  }, [condoId]);
+    fetchData();
+  }, [zoneName, condoName]);
 
   if (loading) {
     return (

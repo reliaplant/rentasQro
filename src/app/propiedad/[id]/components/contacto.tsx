@@ -3,7 +3,7 @@ import { Heart, Share2, CheckCircle, Eye, MessageSquare, Home, Star, Clock } fro
 import { Timestamp } from 'firebase/firestore';
 import { incrementWhatsappClicks } from '@/app/shared/firebase';
 import { useEffect, useState } from 'react';
-import { useFavorites } from '@/app/shared/hooks/useFavorites';
+import { useFavorites } from '@/app/hooks/useFavorites';
 
 interface ContactoProps {
   price: number;

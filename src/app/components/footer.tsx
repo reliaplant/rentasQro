@@ -30,9 +30,9 @@ const Footer = () => {
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-violet-600">
                 <FaFacebook size={20} />
               </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-violet-600">
+                <a href="https://www.instagram.com/pizomx/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-violet-600">
                 <FaInstagram size={20} />
-              </a>
+                </a>
               <a href="https://wa.me/1234567890" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-violet-600">
                 <FaWhatsapp size={20} />
               </a>
@@ -43,13 +43,31 @@ const Footer = () => {
           <div>
             <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Enlaces rápidos</h3>
             <ul className="space-y-2">
-              {['Explorar', 'Propiedades en Renta', 'Propiedades en Venta', 'Novedades', 'Contacto'].map((item) => (
-                <li key={item}>
-                  <Link href={`/${item.toLowerCase().replace(/ /g, '-')}`} className="text-gray-500 hover:text-violet-600">
-                    {item}
-                  </Link>
-                </li>
-              ))}
+              <li>
+                <Link href="/explorador" className="text-gray-500 hover:text-violet-600">
+                  Explorar
+                </Link>
+              </li>
+              <li>
+                <Link href="/explorador?tipo=renta" className="text-gray-500 hover:text-violet-600">
+                  Propiedades en Renta
+                </Link>
+              </li>
+              <li>
+                <Link href="/explorador?tipo=venta" className="text-gray-500 hover:text-violet-600">
+                  Propiedades en Venta
+                </Link>
+              </li>
+              <li>
+                <Link href="/novedades" className="text-gray-500 hover:text-violet-600">
+                  Novedades
+                </Link>
+              </li>
+              <li>
+                <Link href="/contacto" className="text-gray-500 hover:text-violet-600">
+                  Contacto
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -57,14 +75,18 @@ const Footer = () => {
           <div>
             <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Contacto</h3>
             <ul className="space-y-3">
-              <li className="flex items-start">
+                <li className="flex items-start">
                 <FaPhone className="mt-1 mr-3 text-gray-400"/>
-                <span className="text-gray-500">(442) 123-4567</span>
-              </li>
-              <li className="flex items-start">
+                <a href="tel:4421234567" className="text-gray-500 hover:text-violet-600">
+                  (442) 123-4567
+                </a>
+                </li>
+                <li className="flex items-start">
                 <FaEnvelope className="mt-1 mr-3 text-gray-400"/>
-                <span className="text-gray-500">info@rentasqro.com</span>
-              </li>
+                <a href="mailto:info@pizo.mx" className="text-gray-500 hover:text-violet-600">
+                  info@pizo.mx
+                </a>
+                </li>
               <li className="flex items-start">
                 <FaMapMarkerAlt className="mt-1 mr-3 text-gray-400"/>
                 <span className="text-gray-500">Blvd. Bernardo Quintana 555, Querétaro, Qro.</span>
@@ -90,10 +112,10 @@ const Footer = () => {
               &copy; {currentYear} Pio. Todos los derechos reservados.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link href="/aviso-privacidad" className="text-sm text-gray-400 hover:text-violet-600">
+              <Link href="/legal/privacidad" className="text-sm text-gray-400 hover:text-violet-600">
                 Aviso de Privacidad
               </Link>
-              <Link href="/terminos" className="text-sm text-gray-400 hover:text-violet-600">
+              <Link href="/legal/tyc" className="text-sm text-gray-400 hover:text-violet-600">
                 Términos y Condiciones
               </Link>
             </div>

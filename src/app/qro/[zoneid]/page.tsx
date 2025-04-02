@@ -3,41 +3,44 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { getZoneById, getCondosByZone } from '@/app/shared/firebase';
+import { getZoneByName, getCondosByZone } from '@/app/shared/firebase';  // Update import
 import { ZoneData, CondoData } from '@/app/shared/interfaces';
 import ZibataMap from '@/app/components/ZibataMap';
 
 export default function ZoneDetailPage() {
-  const params = useParams();
-  const zoneId = params.id as string;
-  
+  // Fix the type for params and zoneName
+  const params = useParams<{ zoneid: string }>();
+  const zoneName = params?.zoneid || '';
+
   const [zone, setZone] = useState<ZoneData | null>(null);
   const [condos, setCondos] = useState<CondoData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Zibata-related zones (add any specific IDs that should show the Zibata map)
-  const ZIBATA_ZONE_IDS = ["zibata", "zivata"]; // Add actual zone IDs from your DB
-  
-  const isZibataZone = zone ? ZIBATA_ZONE_IDS.includes(zoneId) || zone.name.toLowerCase().includes("zibata") : false;
+  const ZIBATA_ZONE_NAMES = ["zibata", "zivata"];
+  const isZibataZone = zoneName ? ZIBATA_ZONE_NAMES.includes(zoneName.toLowerCase()) : false;
 
   useEffect(() => {
     async function fetchZoneData() {
+      if (!zoneName) {
+        setError("No se proporcionó una zona válida");
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        const zoneData = await getZoneById(zoneId);
+        const zoneData = await getZoneByName(zoneName);
         
         if (!zoneData) {
-          setError("La zona solicitada no existe.");
+          setError(`No se encontró la zona "${zoneName}"`);
           return;
         }
         
         setZone(zoneData);
-        
-        // Fetch condos in this zone
-        const condosData = await getCondosByZone(zoneId);
+        // Use the found zone's ID to get condos
+        const condosData = await getCondosByZone(zoneData.id || '');
         setCondos(condosData);
-        
         setError(null);
       } catch (err) {
         console.error("Error fetching zone:", err);
@@ -47,10 +50,8 @@ export default function ZoneDetailPage() {
       }
     }
 
-    if (zoneId) {
-      fetchZoneData();
-    }
-  }, [zoneId]);
+    fetchZoneData();
+  }, [zoneName]);
 
   if (loading) {
     return (
@@ -114,8 +115,11 @@ export default function ZoneDetailPage() {
                                (condo.imageUrls && condo.imageUrls.length > 0 ? condo.imageUrls[0] : null) || 
                                condo.logoUrl;
               
+              // Convertir el nombre del condo a formato URL (slug)
+              const condoSlug = condo.name.toLowerCase().replace(/\s+/g, '-');
+              
               return (
-                <Link href={`/condos/${condo.id}`} key={condo.id}>
+                <Link href={`/qro/${zoneName}/${condoSlug}`} key={condo.id}>
                   <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 h-full cursor-pointer">
                     {coverImage && (
                       <div className="relative h-40 bg-gray-100 rounded-t-lg overflow-hidden">

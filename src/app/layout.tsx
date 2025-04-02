@@ -1,71 +1,91 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono, Jost, Kumbh_Sans, Montserrat, Questrial } from "next/font/google";
+import { Metadata } from 'next';
+import { Viewport } from 'next';
+import { Poppins } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
+import Menu from "@/app/components/menu";
+import Footer from "@/app/components/footer";
 import "./globals.css";
-import 'mapbox-gl/dist/mapbox-gl.css';
-import Menu from '@/app/components/menu';
-import Footer from './components/footer';
+import { FilterProvider } from './context/FilterContext';
 
-import { Inter, Source_Serif_4, Literata, Big_Shoulders_Display, Sofia_Sans_Extra_Condensed, Sofia_Sans, Sofia_Sans_Condensed, Sunflower, Zen_Dots, IBM_Plex_Sans, Poppins, Gabarito, Instrument_Sans, Quicksand, Outfit } from "next/font/google";
-// import "@carbon/styles/css/styles.css";
-
-
-const sourceSerif4 = Source_Serif_4({ subsets: ["latin"] });
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"]
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
-const literata = Literata({ subsets: ["latin"] });
-const bigShouldersDisplay = Big_Shoulders_Display({ subsets: ["latin"] }); // Nombre corregido
-const SofiaSansExtraCondensed = Sofia_Sans_Extra_Condensed({ subsets: ["latin"] }); // Nombre corregido
-const SofiaSans = Sofia_Sans({ subsets: ["latin"] }); // Nombre corregido
-const SofiaSansCondensed = Sofia_Sans_Condensed({ subsets: ["latin"] }); // Nombre corregido
-const instrumentSans = Instrument_Sans({ subsets: ["latin"] });
-const quicksand = Quicksand({ subsets: ["latin"] });
-const montserrat = Montserrat({ 
-  subsets: ["latin"],
-  weight: ["400", "500", "700"] // Common weights, adjust as needed
-});
-const jost = Jost({
-  
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"] // Adjust weights as needed
-});
-
-const questrial = Questrial({
-  subsets: ["latin"],
-  weight: ["400"] // Questrial font only has 400 weight
-});
-
-const outfit = Outfit({ 
-  subsets: ["latin"],
-  weight: ["400", "700"] // You can adjust weights as needed
-});
-const gabarito = Gabarito({ subsets: ["latin"] });
-
-const IbmPlexSans = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: "400"
-}); // Nombre corregido
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const kumbhSans = Kumbh_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "700"]
-});
-
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  // Añade aquí otras configuraciones de viewport necesarias
+};
+
 export const metadata: Metadata = {
-  title: 'RentasQro',
-  description: 'Encuentra la propiedad perfecta en Querétaro',
+  metadataBase: new URL('https://rentasqro.com'),
+  title: {
+    default: "RentasQro - Propiedades en Querétaro",
+    template: "%s | RentasQro"
+  },
+  description: "Encuentra casas y departamentos en renta y venta en los mejores condominios de Querétaro como Zibatá, Juriquilla y más",
+  keywords: [
+    "rentas querétaro",
+    "departamentos querétaro",
+    "casas querétaro",
+    "zibatá",
+    "juriquilla",
+    "el refugio",
+    "condominios querétaro"
+  ],
+  authors: [{ name: 'RentasQro' }],
+  creator: 'RentasQro',
+  publisher: 'RentasQro',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    title: "RentasQro - Propiedades en Querétaro",
+    description: "Encuentra casas y departamentos en renta y venta en los mejores condominios de Querétaro",
+    url: 'https://rentasqro.com',
+    siteName: 'RentasQro',
+    locale: 'es_MX',
+    type: 'website',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'RentasQro - Propiedades en Querétaro'
+      }
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'RentasQro - Propiedades en Querétaro',
+    description: 'Encuentra casas y departamentos en renta y venta en los mejores condominios de Querétaro',
+    images: ['/twitter-image.jpg'],
+    creator: '@rentasqro'
+  },
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/icon.png', type: 'image/png' }
+    ],
+    apple: [
+      { url: '/apple-icon.png', type: 'image/png' }
+    ],
+  },
+  manifest: '/site.webmanifest',
+  alternates: {
+    canonical: '/',
+    languages: {
+      'es-MX': '/',
+    },
+  },
 };
 
 export default function RootLayout({
@@ -76,11 +96,13 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${poppins.className} ${geistMono.variable} min-h-screen flex flex-col antialiased`}>
-        <Menu />
-        <main className="flex-grow">
-          {children}
-        </main>
-        <Footer />
+        <FilterProvider>
+          <Menu />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer />
+        </FilterProvider>
       </body>
     </html>
   );

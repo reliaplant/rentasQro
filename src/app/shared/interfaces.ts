@@ -3,6 +3,12 @@ import { Timestamp } from 'firebase/firestore';
 export interface ZoneData {
   id?: string;
   name: string;
+  shortDescription?: string;
+  longDescription?: string;
+  description?: string; // Añadimos este campo
+  imageUrl?: string;
+  createdAt?: any; // Puedes usar Timestamp de Firebase si lo prefieres
+  condominiums?: any[]; // Puedes especificar CondoData[] si lo necesitas
 }
 
 export interface CondoData {
@@ -11,6 +17,7 @@ export interface CondoData {
   description?: string;
   shortDescription?: string;
   zoneId: string;
+  zoneName: string;
   polygonId?: string; // Nuevo campo para identificar el polígono en el mapa
   polygonPath?: string;
   rentPriceMin?: number;

@@ -78,7 +78,14 @@ export default function CondoBasicInfo({
             </label>
             <select
               value={formData.zoneId || ''}
-              onChange={(e) => onFormDataChange({ ...formData, zoneId: e.target.value })}
+              onChange={(e) => {
+                const selectedZone = zones.find(zone => zone.id === e.target.value);
+                onFormDataChange({ 
+                  ...formData, 
+                  zoneId: e.target.value,
+                  zoneName: selectedZone?.name || ''
+                });
+              }}
               className="select1"
               disabled={loadingZones}
               required
