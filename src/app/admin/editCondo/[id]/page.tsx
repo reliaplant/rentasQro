@@ -18,7 +18,8 @@ const steps = [
 
 export default function EditCondoPage() {
   const router = useRouter();
-  const { id } = useParams();
+  const params = useParams();
+  const id = params?.id ? (Array.isArray(params.id) ? params.id[0] : params.id) : 'new';
   
   // State
   const [currentStep, setCurrentStep] = useState(0);
@@ -200,7 +201,7 @@ export default function EditCondoPage() {
       case 2:
         return (
           <CondoGoogleData
-            id={id as string}
+            id={id}
             formData={formData}
             onFormDataChange={handleFormChange}
           />

@@ -3,26 +3,18 @@ import { notFound } from 'next/navigation';
 import { getZoneByName, getCondosByZone } from '@/app/shared/firebase';
 import { Metadata } from 'next';
 
-// Import the client wrapper component instead
+// Import the client wrapper component
 import ZibataMapWrapper from '@/app/components/ZibataMapWrapper';
 
-// Use strongly typed params
-type PageProps = {
-  params: {
-    condoid: string;
-  }
-}
-
-// Fix generateMetadata to properly handle params
-export async function generateMetadata({ 
-  params 
-}: { 
-  params: { condoid: string } 
-}): Promise<Metadata> {
+// Generate metadata with proper params handling
+export async function generateMetadata(props: any): Promise<Metadata> {
   try {
-    // For Zibata, we use a fixed zoneid since we know it's always Zibata
+    // Properly await params before accessing
+    const params = await props.params;
+    const condoid = params.condoid;
+    
+    // For Zibata, we use a fixed zoneid
     const zoneid = 'zibata';
-    const { condoid } = params;
     
     const zone = await getZoneByName(zoneid);
     if (!zone) return defaultMetadata();
@@ -51,16 +43,19 @@ function defaultMetadata(): Metadata {
   };
 }
 
-// Fix the component to properly handle params
-export default async function CondoDetailPage({ params }: PageProps) {
+// Main page component with proper params handling
+export default async function CondoDetailPage(props: any) {
   try {
-    // For Zibata, we use a fixed zoneid since we know it's always Zibata
-    const zoneid = 'zibata';
-    const { condoid } = params;
+    // Properly await params before accessing
+    const params = await props.params;
+    const condoid = params.condoid;
     
     if (!condoid) {
       notFound();
     }
+    
+    // For Zibata, we use a fixed zoneid
+    const zoneid = 'zibata';
     
     // Cargar datos de zona
     const zone = await getZoneByName(zoneid);
@@ -84,8 +79,6 @@ export default async function CondoDetailPage({ params }: PageProps) {
                      condo.logoUrl || '/assets/placeholders/property-placeholder.jpg';
 
     // Get polygon ID that matches the condo
-    // In a real scenario, you would have a mapping between condo slugs and polygon IDs
-    // This is just a placeholder
     const polygonId = condo.polygonId || undefined;
     
     return (
@@ -168,7 +161,7 @@ export default async function CondoDetailPage({ params }: PageProps) {
               </div>
             </div>
 
-            {/* Map showing the condo location - only pass static props */}
+            {/* Map showing the condo location */}
             <div className="bg-white p-6 rounded-lg shadow-md mb-8">
               <h3 className="text-lg font-semibold mb-3">Ubicación en Zibatá</h3>
               <div className="h-80 rounded-lg overflow-hidden">
