@@ -1,0 +1,8 @@
+{
+  "name": "Rentas Querétaro",
+  "short_name": "RentasQro",
+  "icons": [],
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "display": "standalone"
+}

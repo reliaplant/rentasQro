@@ -95,6 +95,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
+      <head>
+        {/* ...existing meta tags... */}
+        <link rel="manifest" href="/site.webmanifest" />
+      </head>
       <body className={`${poppins.className} ${geistMono.variable} min-h-screen flex flex-col antialiased`}>
         <FilterProvider>
           <Menu />

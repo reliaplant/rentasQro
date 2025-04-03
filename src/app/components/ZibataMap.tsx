@@ -1,33 +1,44 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface ZibataMapProps {
   highlightedPolygonId?: string;
+  onPolygonClick?: (polygonId: string) => void;
+  className?: string;
+  height?: string;
 }
 
-export default function ZibataMap({ highlightedPolygonId }: ZibataMapProps) {
+export default function ZibataMap({ 
+  highlightedPolygonId,
+  onPolygonClick,
+  className = "w-full h-full", 
+  height = "100%"
+}: ZibataMapProps) {
   const [hoveredPolygonId, setHoveredPolygonId] = useState<string | null>(null);
+  const router = useRouter();
 
   // Use passed highlightedPolygonId instead of hardcoded value
   const DESTACADO = highlightedPolygonId || null;
 
   // Datos de los polígonos con sus propiedades
-const polygons = [
+  const polygons = [
     {
         id: "poly11234",
         path: "M1740.5 1265.5L1688 1272L1644.5 1289L1641.5 1295.5L1650.5 1304L1732 1344.5L1799.5 1368L1902.5 1388.5L1910 1373L1902.5 1341.5L1884.5 1307L1815.5 1283L1779 1274.5L1740.5 1265.5Z",
         fill: "#62BD4F",
         name: "Zona 1123",
-        photo: "/assets/condos/Sabino.png"
+        photo: "/assets/condos/Sabino.png",
+        slug: "sabino"
     },
     {
         id: "poly21111111",
         path: "M2500 1282.5L2504 1319.5L2520 1331.5L2547.5 1319.5L2600.5 1290L2656 1282.5L2670.5 1276.5L2704.5 1265L2685.5 1246L2670.5 1241.5L2645.5 1246L2606.5 1255.5H2578.5L2541.5 1246L2509.5 1260.5L2500 1282.5Z",
         fill: "#E7E7E7",
         name: "Zona 21111111",
-        photo: "/assets/condos/Sabino.png"
+        photo: "/assets/condos/Sabino.png",
+        slug: "zona-21111111"
     },
     {
         id: "poly3",
@@ -71,10 +82,23 @@ const polygons = [
         name: "AZHALA2",
         photo: "/assets/condos/Sabino.png"
     }
-];
+  ];
+
+  const handlePolygonClick = (polygonId: string) => {
+    // Call the callback if provided (for any custom handling)
+    if (onPolygonClick) {
+      onPolygonClick(polygonId);
+    } else {
+      // Default behavior - navigate to the condo page
+      const polygon = polygons.find(p => p.id === polygonId);
+      if (polygon && polygon.slug) {
+        router.push(`/qro/zibata/${polygon.slug}`);
+      }
+    }
+  };
 
   return (
-    <div className="w-full h-full bg-gray-200 relative">
+    <div className={`${className} bg-gray-200 relative`} style={{ height }}>
       <img 
         src="/assets/zibata/mapaZibataFondo.svg"
         alt="Mapa base de Zibata"
@@ -120,6 +144,7 @@ const polygons = [
                 opacity: polygon.id === DESTACADO ? 1 : 0.85
               }}
               onMouseEnter={() => setHoveredPolygonId(polygon.id)}
+              onClick={() => handlePolygonClick(polygon.id)}
             />
           ))
         }
@@ -144,6 +169,7 @@ const polygons = [
                 : "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))"
             }}
             onMouseLeave={() => setHoveredPolygonId(null)}
+            onClick={() => handlePolygonClick(hoveredPolygonId)}
           />
         )}
       </svg>
@@ -155,12 +181,12 @@ const polygons = [
         }`}>
           <h2 className={`text-xl font-bold ${hoveredPolygonId === DESTACADO ? 'text-pink-600' : ''}`}>
             {polygons.find(p => p.id === hoveredPolygonId)?.name}
-            <img
-                src={polygons.find(p => p.id === hoveredPolygonId)?.photo}
-                alt={`Foto de ${polygons.find(p => p.id === hoveredPolygonId)?.name}`}
-                className="mt-2 w-48 h-32 object-cover rounded-md"
-            />
           </h2>
+          <img
+            src={polygons.find(p => p.id === hoveredPolygonId)?.photo}
+            alt={`Foto de ${polygons.find(p => p.id === hoveredPolygonId)?.name}`}
+            className="mt-2 w-48 h-32 object-cover rounded-md"
+          />
           {hoveredPolygonId === DESTACADO && (
             <div className="mt-2 text-sm text-pink-700">
               ¡Polígono destacado!
