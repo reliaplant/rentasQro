@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { getCurrentUser, getAdvisorProfile, signOut } from "@/app/shared/firebase";
 import MisPropiedades from "./misPropiedades";
@@ -102,85 +103,86 @@ export default function Asesor() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b border-gray-200">
-        <div className="px-6 flex flex-row items-center justify-between">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="pl-6 pr-8 h-16 flex items-center justify-between">
           {/* Left side with logo and navigation */}
-          <div className="flex flex-row gap-5 items-center">
-            <div className="cursor-pointer">
-              <a href="/">
-                <img
-                  src="/assets/logos/logoRQ.svg"
-                  alt="Rentas Queretaro Logo"
-                  className="h-12 w-auto hover:opacity-80"
-                />
-              </a>
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold text-gray-900">Panel de Asesor</h1>
-            </div>
-            <nav className="-mb-px flex space-x-8">
+          <div className="flex items-center gap-8">
+            <Link href="/" className="flex items-center gap-4">
+              <Image
+                src="/assets/logos/logoPizo.svg"
+                alt="Pizo Logo"
+                width={32}
+                height={32}
+                className="hover:opacity-80"
+              />
+              <span className="font-semibold text-2xl">pizo</span>
+            </Link>
+
+            <nav className="flex items-center gap-8 h-16">
               <button
                 onClick={() => setActiveTab('properties')}
-                className={`${
-                  activeTab === 'properties'
-                    ? 'border-[#6981d3] text-[#6981d3]'
+                className={`h-full flex items-center border-b-3 font-medium text-sm transition-colors cursor-pointer
+                  ${activeTab === 'properties'
+                    ? 'border-violet-800 text-violet-800'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-3 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+                  }`}
               >
                 Mis Propiedades
               </button>
               <button
                 onClick={() => setActiveTab('create')}
-                className={`${
-                  activeTab === 'create'
-                    ? 'border-[#6981d3] text-[#6981d3]'
+                className={`h-full flex items-center border-b-3 font-medium text-sm transition-colors cursor-pointer
+                  ${activeTab === 'create'
+                    ? 'border-violet-800 text-violet-800'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-3 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+                  }`}
               >
                 Crear Propiedad
               </button>
               <button
                 onClick={() => setActiveTab('profile')}
-                className={`${
-                  activeTab === 'profile'
-                    ? 'border-[#6981d3] text-[#6981d3]'
+                className={`h-full flex items-center border-b-3 font-medium text-sm transition-colors cursor-pointer
+                  ${activeTab === 'profile'
+                    ? 'border-violet-800 text-violet-800'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-3 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+                  }`}
               >
                 Mi Perfil
               </button>
             </nav>
           </div>
 
-          {/* User profile section with actual advisor data */}
+          {/* User profile section */}
           <div className="relative">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center focus:outline-none"
+              className="flex items-center gap-3 group"
             >
-              <div className="flex items-center gap-3">
-                <div className="text-sm">
-                  <p className="font-medium text-gray-900">{userData?.name}</p>
-                  <p className="text-xs text-gray-500">
-                    {userData?.verified ? "Asesor verificado" : "Asesor"}
-                  </p>
-                </div>
-                <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-white shadow-sm">
-                  <img
-                    src={userData?.photo || "/assets/default-avatar.png"}
-                    alt="Profile"
-                    className="h-full w-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "/assets/default-avatar.png";
-                    }}
-                  />
-                </div>
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-900 group-hover:text-violet-800">
+                  {userData?.name}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {userData?.verified ? "Asesor verificado" : "Asesor"}
+                </p>
+              </div>
+              <div className="relative h-10 w-10 rounded-full overflow-hidden ring-2 ring-white shadow-sm transition-transform group-hover:scale-105">
+                <Image
+                  src={userData?.photo || "/assets/default-avatar.png"}
+                  alt="Profile"
+                  fill
+                  sizes="40px"
+                  className="object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = "/assets/default-avatar.png";
+                  }}
+                />
               </div>
             </button>
 
             {isDropdownOpen && (
-              <div className="border border-gray-200 origin-top-right absolute right-0 mt-3 w-64 rounded-xl shadow-lg py-1 bg-white ">
+              <div className="absolute right-0 mt-3 w-64 rounded-xl shadow-lg py-1 bg-white border-gray-200 border ring-opacity-5">
                 <div className="px-4 py-3 border-b border-gray-100">
                   <p className="text-sm font-medium text-gray-900">
                     {userData?.name}
@@ -188,6 +190,9 @@ export default function Asesor() {
                   <p className="text-xs text-gray-500 mt-1 truncate">
                     {userData?.email}
                   </p>
+                  <span className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-800">
+                    {userData?.verified ? "Verificado" : "Asesor"}
+                  </span>
                 </div>
                 <div className="py-1">
                   <button
@@ -195,7 +200,7 @@ export default function Asesor() {
                       setActiveTab('profile');
                       setIsDropdownOpen(false);
                     }}
-                    className="cursor-pointer flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-violet-50"
                   >
                     <svg className="mr-3 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none">
                       <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -205,7 +210,7 @@ export default function Asesor() {
                   </button>
                   <button
                     onClick={handleSignOut}
-                    className="cursro-pointer flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                    className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                   >
                     <svg className="mr-3 h-5 w-5 text-red-400" viewBox="0 0 24 24" fill="none">
                       <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -222,7 +227,7 @@ export default function Asesor() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow">
+      <main className="flex-grow bg-gray-50/50">
         {activeTab === 'properties' && <MisPropiedades />}
         {activeTab === 'create' && <div className="h-full"><CrearPropiedad /></div>}
         {activeTab === 'profile' && <div className="h-full"><PerfilAsesor /></div>}

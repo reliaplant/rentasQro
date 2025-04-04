@@ -1,27 +1,40 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
   images: {
-    domains: [
-      'firebasestorage.googleapis.com',
-      'storage.googleapis.com',
-      // Add Google's image domains
-      'lh3.googleusercontent.com',
-      'ui-avatars.com',
-      'places.googleapis.com',
-      'maps.googleapis.com',
-    ],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'firebasestorage.googleapis.com',
         pathname: '/**',
       },
-      // Añade aquí otros patrones si son necesarios
+      {
+        protocol: 'https',
+        hostname: 'storage.googleapis.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ui-avatars.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'places.googleapis.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'maps.googleapis.com',
+        pathname: '/**',
+      },
     ],
-  },
-  experimental: {
-    appDir: true,
+    unoptimized: true, // Add this if using static exports
+    domains: ['via.placeholder.com'], // Add this for temporary placeholder images
   },
   webpack(config) {
     config.module.rules.push({

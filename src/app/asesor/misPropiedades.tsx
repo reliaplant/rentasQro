@@ -2,17 +2,17 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { getCurrentUser, getPropertiesByAdvisor, updateProperty } from '@/app/shared/firebase';
-import type { PropertyData } from '@/app/shared/interfaces'; 
+import { getCurrentUser, getPropertiesByAdvisor, getZones } from '@/app/shared/firebase';
+import type { PropertyData, ZoneData } from '@/app/shared/interfaces'; 
+import Image from 'next/image';
 
 export default function MisPropiedades() {
   const router = useRouter();
   const [properties, setProperties] = useState<PropertyData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+  const [zonesData, setZonesData] = useState<Record<string, string>>({});
+
   // Filters state
   const [zoneFilter, setZoneFilter] = useState<string>('');
   const [complexFilter, setComplexFilter] = useState<string>('');
@@ -29,7 +29,7 @@ export default function MisPropiedades() {
   }, [properties]);
 
   useEffect(() => {
-    const loadProperties = async () => {
+    const loadData = async () => {
       try {
         const user = await getCurrentUser();
         if (!user) {
@@ -37,7 +37,21 @@ export default function MisPropiedades() {
           return;
         }
 
-        const userProperties = await getPropertiesByAdvisor(user.uid);
+        // Load properties and zones in parallel
+        const [userProperties, zonesResult] = await Promise.all([
+          getPropertiesByAdvisor(user.uid),
+          getZones()
+        ]);
+
+        // Fix the type issue with the zones map
+        const zonesMap: Record<string, string> = {};
+        zonesResult.forEach(zone => {
+          if (zone.id) {
+            zonesMap[zone.id] = zone.name;
+          }
+        });
+
+        setZonesData(zonesMap);
         setProperties(userProperties);
       } catch (err) {
         setError('Error al cargar las propiedades');
@@ -46,7 +60,7 @@ export default function MisPropiedades() {
       }
     };
 
-    loadProperties();
+    loadData();
   }, [router]);
 
   // Apply filters to properties
@@ -68,11 +82,19 @@ export default function MisPropiedades() {
   };
 
   const statusColors = {
-    borrador: 'bg-gray-400',
-    publicada: 'bg-green-400',
-    en_cierre: 'bg-yellow-400',
-    vendida: 'bg-blue-400',
-    descartada: 'bg-red-400'
+    borrador: 'bg-violet-200',
+    publicada: 'bg-violet-500',
+    en_cierre: 'bg-violet-800',
+    vendida: 'bg-emerald-500',
+    descartada: 'bg-gray-400'
+  };
+
+  const statusBgColors = {
+    borrador: 'bg-violet-50',
+    publicada: 'bg-violet-100',
+    en_cierre: 'bg-violet-200',
+    vendida: 'bg-emerald-50',
+    descartada: 'bg-red-50'
   };
 
   const statusLabels = {
@@ -83,133 +105,90 @@ export default function MisPropiedades() {
     descartada: 'Descartada'
   };
 
-  // Calculate totals for each column
-  const columnTotals = Object.entries(columns).reduce((acc, [status, items]) => ({
-    ...acc,
-    [status]: items.reduce((sum, prop) => sum + (prop.price || 0), 0)
-  }), {} as Record<string, number>);
-
-  const handleDragEnd = async (result: any) => {
-    if (!result.destination) return;
-
-    const { source, destination, draggableId } = result;
-    if (source.droppableId === destination.droppableId) return;
-
-    try {
-      const newStatus = destination.droppableId as PropertyData['status'];
-      await updateProperty(draggableId, { status: newStatus });
-      
-      // Update local state
-      setProperties(properties.map(prop => 
-        prop.id === draggableId ? { ...prop, status: newStatus } : prop
-      ));
-    } catch (error) {
-      setError('Error al actualizar el estado');
-    }
-  };
-
-  const clearFilters = () => {
-    setZoneFilter('');
-    setComplexFilter('');
-  };
-
-  if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-    </div>;
-  }
-
   return (
     <div className="flex flex-col h-screen">
-
-
-      {/* Kanban Board */}
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex flex-1 overflow-hidden">
-          {Object.entries(columns).map(([status, items]) => (
-            <div key={status} className="flex-1 min-w-0 flex flex-col border-r last:border-r-0 border-gray-200 bg-gray-50">
-              {/* Column header */}
-              <div className="px-3 py-2 border-b border-gray-200 bg-white">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-2.5 h-2.5 rounded-full ${statusColors[status as keyof typeof statusColors]}`}></div>
-                    <span className="font-medium text-sm">
-                      {statusLabels[status as keyof typeof statusLabels]}
-                    </span>
-                  </div>
-                  <span className="text-xs text-gray-500 font-medium">{items.length}</span>
+      <div className="flex flex-1 overflow-hidden">
+        {Object.entries(columns).map(([status, items]) => (
+          <div key={status} className="flex-1 min-w-0 flex flex-col border-r last:border-r-0 border-gray-200 bg-gray-50/80">
+            {/* Column header */}
+            <div className="px-3 py-2 border-b border-gray-200 bg-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className={`w-2.5 h-2.5 rounded-full ${statusColors[status as keyof typeof statusColors]}`}></div>
+                  <span className="font-medium text-sm text-gray-900">
+                    {statusLabels[status as keyof typeof statusLabels]}
+                  </span>
                 </div>
-                <div className="mt-1 text-xs text-gray-500">
-                  <span>${columnTotals[status].toLocaleString()}</span>
-                </div>
+                <span className="text-xs text-gray-500 font-medium">{items.length}</span>
               </div>
-              
-              {/* Column content with internal scroll */}
-              <Droppable droppableId={status}>
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={`flex-1 overflow-y-auto p-2 ${
-                      snapshot.isDraggingOver ? 'bg-blue-50' : ''
-                    }`}
-                  >
-                    {items.map((property, index) => (
-                      <Draggable 
-                        key={property.id} 
-                        draggableId={property.id!} 
-                        index={index}
-                      >
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            onClick={() => router.push(`/crearPropiedad?id=${property.id}`)}
-                            className={`bg-white border border-gray-200 mb-2 cursor-pointer hover:shadow-sm transition-all ${
-                              snapshot.isDragging ? 'shadow-md ring-1 ring-blue-400' : ''
-                            }`}
-                          >
-                            <div className="flex flex-col">
-                              <img
-                                src={property.imageUrls[0]}
-                                alt={`${property.propertyType} en ${property.zone}`}
-                                className="w-full h-28 object-cover"
-                              />
-                              
-                              <div className="p-2.5">
-                                <div className="flex justify-between items-start">
-                                  <div>
-                                    <div className="text-sm font-medium">
-                                      {property.propertyType === 'casa' ? 'Casa' : 'Depto'}
-                                    </div>
-                                    <div className="text-xs text-gray-600">
-                                      {property.zone}
-                                      {property.condo && (
-                                        <span className="block text-gray-500 truncate max-w-[130px]">
-                                          {property.condo}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
-                                  <div className="text-sm font-bold text-blue-600">
-                                    ${property.price.toLocaleString()}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
             </div>
-          ))}
-        </div>
-      </DragDropContext>
+            
+            {/* Column content */}
+            <div className="flex-1 overflow-y-auto p-2">
+              {items.map((property) => (
+                <div
+                  key={property.id}
+                  onClick={() => router.push(`/crearPropiedad?id=${property.id}`)}
+                  className="bg-white border border-gray-200 rounded-xl mb-2 cursor-pointer hover:shadow-sm transition-all"
+                >
+                  <div className="flex flex-col">
+                    {/* Image container with status badge */}
+                    <div className="relative aspect-[16/12]">
+                      <Image
+                        src={property.imageUrls[0] || '/placeholder-property.jpg'}
+                        alt={`${property.propertyType} en ${zonesData[property.zone] || 'zona no especificada'}`}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover rounded-t-xl"
+                        priority={false}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/placeholder-property.jpg';
+                        }}
+                      />
+                      <div className="absolute top-2 left-2 z-10">
+                        <span className="bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-medium px-3 py-1 rounded-full shadow-sm">
+                          {property.transactionType === 'renta' ? 'En renta' : 'En venta'}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="p-3 space-y-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium text-gray-900">
+                            {property.propertyType === 'departamento' ? 'Depa' : 'Casa'}{' '}
+                            {property.transactionType === 'renta' ? 'en Renta' : 'en Venta'}
+                          </h3>
+                          <p className="text-sm text-gray-500">
+                            {property.condoName}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            {zonesData[property.zone] || 'Zona no especificada'}
+                          </p>
+                        </div>
+                        <div className="text-sm font-semibold text-violet-800">
+                          ${property.price.toLocaleString()}
+                          {property.transactionType === 'renta' && <span className="text-gray-500 text-xs">/mes</span>}
+                        </div>
+                      </div>
+                      
+                      {/* Property details */}
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <span>{property.bedrooms} rec</span>
+                        <span>•</span>
+                        <span>{property.bathrooms} baños</span>
+                        <span>•</span>
+                        <span>{property.construccionM2}m²</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

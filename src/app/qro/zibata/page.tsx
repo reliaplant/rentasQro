@@ -12,6 +12,7 @@ import {
 // Import the client component wrapper instead
 import ZibataMapWrapper from '@/app/components/ZibataMapWrapper';
 
+
 // Función auxiliar para normalizar los slugs
 const normalizeSlug = (text: string): string => {
   return text
