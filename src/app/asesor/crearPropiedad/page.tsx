@@ -84,7 +84,7 @@ const initialFormData: PropertyData = {
 export default function CreatePropertyPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const propertyId = searchParams.get('id');
+  const propertyId = searchParams?.get('id') || null;
   const services = useFirebaseServices();
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState<PropertyData | null>(null);

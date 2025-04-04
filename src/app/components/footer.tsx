@@ -44,28 +44,20 @@ const Footer = () => {
             <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Enlaces rápidos</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/explorador" className="text-gray-500 hover:text-violet-600">
-                  Explorar
+                <Link href="/explorar" className="text-gray-500 hover:text-violet-600">
+                  Explorar propiedades
                 </Link>
               </li>
-              <li>
-                <Link href="/explorador?tipo=renta" className="text-gray-500 hover:text-violet-600">
-                  Propiedades en Renta
-                </Link>
-              </li>
-              <li>
-                <Link href="/explorador?tipo=venta" className="text-gray-500 hover:text-violet-600">
-                  Propiedades en Venta
-                </Link>
-              </li>
-              <li>
-                <Link href="/novedades" className="text-gray-500 hover:text-violet-600">
-                  Novedades
-                </Link>
-              </li>
+             
+
               <li>
                 <Link href="/contacto" className="text-gray-500 hover:text-violet-600">
                   Contacto
+                </Link>
+              </li>
+              <li>
+                <Link href="/login" className="text-gray-500 hover:text-violet-600">
+                  Asesores
                 </Link>
               </li>
             </ul>
@@ -109,7 +101,7 @@ const Footer = () => {
         <div className="pt-8 mt-8 border-t border-gray-200">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-sm text-gray-400">
-              &copy; {currentYear} Pio. Todos los derechos reservados.
+              &copy; {currentYear} Pizo. Todos los derechos reservados.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <Link href="/legal/privacidad" className="text-sm text-gray-400 hover:text-violet-600">

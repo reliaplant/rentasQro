@@ -3,6 +3,9 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import type { ZoneData } from '../shared/interfaces';
 
+// Add this line somewhere near the top of the file
+export const MAX_PRICE = 50000;
+
 // Define types for filters
 export interface FilterState {
   transactionType: 'renta' | 'compra' | '';
@@ -30,7 +33,7 @@ const FilterContext = createContext<FilterContextType | undefined>(undefined);
 const defaultFilters: FilterState = {
   transactionType: 'renta',
   selectedZone: '',
-  priceRange: [0, 50000],
+  priceRange: [0, MAX_PRICE],
   bedrooms: null,
   bathrooms: null,
   isFurnished: false,

@@ -7,8 +7,14 @@ import { useRouter } from 'next/navigation';
 import { getProperties } from '@/app/shared/firebase';
 import type { PropertyData } from '@/app/shared/interfaces';
 import HomeBanner from './components/HomeBanner';
-import FilterExplorador from '@/app/components/filterExplorador';
 import Explorador from './components/explorador';
+import dynamic from 'next/dynamic';
+
+// Import FilterExplorador with no SSR
+const FilterExplorador = dynamic(
+  () => import('./components/filterExplorador'),
+  { ssr: false }
+);
 
 // Define Nubank-inspired color palette
 const colors = {

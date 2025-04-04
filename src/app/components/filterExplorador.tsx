@@ -5,7 +5,10 @@ import { FaBed, FaBath, FaCheck, FaCar, FaTimes } from 'react-icons/fa';
 import { getZones } from '../shared/firebase';
 import type { ZoneData } from '../shared/interfaces';
 import { usePathname } from 'next/navigation';
-import { useFilters, MAX_PRICE } from '../context/FilterContext';
+import { useFilters } from '../context/FilterContext';
+
+// Define MAX_PRICE constant locally
+const MAX_PRICE = 50000;
 
 const FilterExplorador = () => {
   const pathname = usePathname();
@@ -20,6 +23,7 @@ const FilterExplorador = () => {
   // Add local state for input values
   const [minPriceInput, setMinPriceInput] = useState('');
   const [maxPriceInput, setMaxPriceInput] = useState('');
+  const [isClient, setIsClient] = useState(false);
 
   // Define types for numeric values
   type NumericValue = number | '2+' | '3+';
@@ -28,6 +32,11 @@ const FilterExplorador = () => {
   const bedroomOptions: NumericValue[] = [1, 2, '3+'];
   const bathroomOptions: NumericValue[] = [1, '2+'];
   const parkingOptions: NumericValue[] = [1, 2, '3+'];
+
+  // Add isClient state to prevent hydration mismatch
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     const loadZones = async () => {
@@ -176,113 +185,114 @@ const FilterExplorador = () => {
             </div>
 
             {/* Zona - más compacta */}
-            <div className="relative w-32">
-              <select
-                value={filters.selectedZone}
-                onChange={(e) => updateFilter('selectedZone', e.target.value)}
-                className={`
-                  w-full appearance-none rounded-full
-                  px-2.5 py-1.5 text-xs font-medium
-                  transition-all cursor-pointer
-                  ${filters.selectedZone 
-                  ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200' 
-                  : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
-                `}
-              >
-                <option value="">Zonas</option>
-                {zones.map((zone) => (
-                  <option 
-                    key={zone.id} 
-                    value={zone.id}
-                    className={filters.selectedZone === zone.id ? '!text-violet-600' : ''}
-                  >
-                    {zone.name}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+            {isClient && (
+              <div className="relative w-32">
+                <select
+                  value={filters.selectedZone}
+                  onChange={(e) => updateFilter('selectedZone', e.target.value)}
+                  className={`
+                    w-full appearance-none rounded-full
+                    px-2.5 py-1.5 text-xs font-medium
+                    transition-all cursor-pointer
+                    ${filters.selectedZone 
+                    ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200' 
+                    : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
+                  `}
+                >
+                  <option value="">Zonas</option>
+                  {zones.map((zone) => (
+                    <option 
+                      key={zone.id} 
+                      value={zone.id}
+                      className={filters.selectedZone === zone.id ? '!text-violet-600' : ''}
+                    >
+                      {zone.name}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Precio - ajustes de tamaño */}
-            <div className="flex items-center gap-2">
-              {/* Selector de moneda más pequeño */}
-              <div className="flex bg-gray-50/80 rounded-full p-0.5 shadow-inner">
-                {['MXN', 'USD'].map((curr) => (
-                  <button
-                    key={curr}
-                    onClick={() => setCurrency(curr as 'MXN' | 'USD')}
-                    className={`
-                      px-2 py-1 rounded-full text-xs font-medium transition-all duration-200
-                      ${currency === curr
-                        ? 'bg-violet-100 text-violet-700 shadow-sm ring-1 ring-violet-200'
-                        : 'text-gray-500 hover:text-violet-600 hover:bg-violet-50'}
-                    `}
-                  >
-                    {curr}
-                  </button>
-                ))}
-              </div>
+            {isClient && (
+              <div className="flex items-center gap-2">
+                {/* Selector de moneda más pequeño */}
+                <div className="flex bg-gray-50/80 rounded-full p-0.5 shadow-inner">
+                  {['MXN', 'USD'].map((curr) => (
+                    <button
+                      key={curr}
+                      onClick={() => setCurrency(curr as 'MXN' | 'USD')}
+                      className={`
+                        px-2 py-1 rounded-full text-xs font-medium transition-all duration-200
+                        ${currency === curr
+                          ? 'bg-violet-100 text-violet-700 shadow-sm ring-1 ring-violet-200'
+                          : 'text-gray-500 hover:text-violet-600 hover:bg-violet-50'}
+                      `}
+                      suppressHydrationWarning
+                    >
+                      {curr}
+                    </button>
+                  ))}
+                </div>
 
-              {/* Inputs de precio más pequeños - updated for better editing */}
-              <div className={`
-                flex items-center gap-2 rounded-full px-2.5 py-1.5
-                ${(filters.priceRange[0] > 0 || filters.priceRange[1] < MAX_PRICE)
-                  ? 'bg-violet-50 ring-2 ring-violet-200'
-                  : 'bg-gray-50/80 border border-gray-200/75'}
-              `}>
-                <div className="flex items-center">
-                  <input
-                    type="text"
-                    placeholder="Min"
-                    className="w-16 bg-transparent text-xs text-gray-600 placeholder-gray-400 focus:outline-none"
-                    value={minPriceInput}
-                    onChange={handleMinPriceChange}
-                    onBlur={() => {
-                      // Only format numbers on blur without adding currency
-                      if (filters.priceRange[0] > 0) {
-                        setMinPriceInput(formatPrice(filters.priceRange[0]));
-                      }
-                    }}
-                    onFocus={(e) => {
-                      // Move cursor to end on focus
-                      const val = e.target.value;
-                      e.target.value = '';
-                      e.target.value = val;
-                    }}
-                  />
-                  <span className="text-xs text-gray-500 ml-0.5">{currency}</span>
-                </div>
-                
-                <div className="h-3.5 w-px bg-gray-200"></div>
-                
-                <div className="flex items-center">
-                  <input
-                    type="text"
-                    placeholder="Max"
-                    className="w-16 bg-transparent text-xs text-gray-600 placeholder-gray-400 focus:outline-none"
-                    value={maxPriceInput}
-                    onChange={handleMaxPriceChange}
-                    onBlur={() => {
-                      // Only format if there's a value and it's less than the MAX_PRICE
-                      if (filters.priceRange[1] > 0 && filters.priceRange[1] < MAX_PRICE) {
-                        setMaxPriceInput(formatPrice(filters.priceRange[1]));
-                      }
-                    }}
-                    onFocus={(e) => {
-                      // Move cursor to end on focus
-                      const val = e.target.value;
-                      e.target.value = '';
-                      e.target.value = val;
-                    }}
-                  />
-                  <span className="text-xs text-gray-500 ml-0.5">{currency}</span>
+                {/* Inputs de precio más pequeños */}
+                <div className={`
+                  flex items-center gap-2 rounded-full px-2.5 py-1.5
+                  ${(filters.priceRange[0] > 0 || filters.priceRange[1] < MAX_PRICE)
+                    ? 'bg-violet-50 ring-2 ring-violet-200'
+                    : 'bg-gray-50/80 border border-gray-200/75'}
+                `}>
+                  <div className="flex items-center">
+                    <input
+                      type="text"
+                      placeholder="Min"
+                      className="w-16 bg-transparent text-xs text-gray-600 placeholder-gray-400 focus:outline-none"
+                      value={minPriceInput}
+                      onChange={handleMinPriceChange}
+                      onBlur={() => {
+                        if (filters.priceRange[0] > 0) {
+                          setMinPriceInput(formatPrice(filters.priceRange[0]));
+                        }
+                      }}
+                      onFocus={(e) => {
+                        const val = e.target.value;
+                        e.target.value = '';
+                        e.target.value = val;
+                      }}
+                    />
+                    <span className="text-xs text-gray-500 ml-0.5" suppressHydrationWarning>{currency}</span>
+                  </div>
+                  
+                  <div className="h-3.5 w-px bg-gray-200"></div>
+                  
+                  <div className="flex items-center">
+                    <input
+                      type="text"
+                      placeholder="Max"
+                      className="w-16 bg-transparent text-xs text-gray-600 placeholder-gray-400 focus:outline-none"
+                      value={maxPriceInput}
+                      onChange={handleMaxPriceChange}
+                      onBlur={() => {
+                        if (filters.priceRange[1] > 0 && filters.priceRange[1] < MAX_PRICE) {
+                          setMaxPriceInput(formatPrice(filters.priceRange[1]));
+                        }
+                      }}
+                      onFocus={(e) => {
+                        const val = e.target.value;
+                        e.target.value = '';
+                        e.target.value = val;
+                      }}
+                    />
+                    <span className="text-xs text-gray-500 ml-0.5" suppressHydrationWarning>{currency}</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Recámaras */}
             <div className="flex items-center gap-2">

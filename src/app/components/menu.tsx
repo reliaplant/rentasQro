@@ -14,7 +14,7 @@ import type { User } from 'firebase/auth';
 import { FaHeart } from 'react-icons/fa';
 import { useFavorites } from '@/app/hooks/useFavorites';
 import { useFilters } from '../context/FilterContext';
-import AdvisorModal from './AdvisorModal';
+import AdvisorModal from '../components/AdvisorModal';
 import PropertyListingModal from './PropertyListingModal';
 
 // Create a separate component for modals to avoid rendering issues
@@ -31,12 +31,10 @@ function MenuModals({
 }) {
   return (
     <>
-      {isAdvisorModalOpen && (
-        <AdvisorModal 
-          isOpen={isAdvisorModalOpen}
-          onClose={closeAdvisorModal}
-        />
-      )}
+      <AdvisorModal 
+        isOpen={isAdvisorModalOpen}
+        onClose={closeAdvisorModal}
+      />
       {isPropertyListingModalOpen && (
         <PropertyListingModal
           isOpen={isPropertyListingModalOpen}
