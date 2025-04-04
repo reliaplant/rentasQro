@@ -1,27 +1,25 @@
 'use client';
 
-import { usePathname, useSearchParams } from 'next/navigation';
 import Script from 'next/script';
-import { useEffect, Suspense } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
+import { Suspense } from 'react';
 
 const GA_MEASUREMENT_ID = 'G-8CENRP7LCJ';
 
-function AnalyticsContent() {
+// Componente separado para tracking de páginas vistas
+function PageViewTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   useEffect(() => {
     if (pathname) {
-      pageview(pathname);
+      // Envía el evento de página vista a GA
+      window.gtag('config', GA_MEASUREMENT_ID, {
+        page_path: pathname,
+      });
     }
   }, [pathname, searchParams]);
-
-  const pageview = (url: string) => {
-    // Now TypeScript knows about gtag
-    window.gtag('config', GA_MEASUREMENT_ID, {
-      page_path: url,
-    });
-  };
 
   return null;
 }
@@ -44,7 +42,7 @@ export default function GoogleAnalytics() {
         `}
       </Script>
       <Suspense fallback={null}>
-        <AnalyticsContent />
+        <PageViewTracker />
       </Suspense>
     </>
   );

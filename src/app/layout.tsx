@@ -51,7 +51,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "RentasQro - Propiedades en Querétaro",
     description: "Encuentra casas y departamentos en renta y venta en los mejores condominios de Querétaro",
-    url: 'https://rentasqro.com',
+    url: 'https://pizo.mx', // Actualizar para que coincida con metadataBase
     siteName: 'RentasQro',
     locale: 'es_MX',
     type: 'website',
@@ -97,13 +97,22 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
-        <meta name="google-site-verification" content="CÓDIGO_QUE_PROPORCIONARÁ_GOOGLE" />
+        {/* Google tag (gtag.js) */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-8CENRP7LCJ" />
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-8CENRP7LCJ');
+          `
+        }} />
         <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body className={`${poppins.className} ${geistMono.variable} min-h-screen flex flex-col antialiased`}>
         {/* Google Analytics */}
         <GoogleAnalytics />
-        
+
         <FilterProvider>
           <Menu />
           <main className="flex-grow">
@@ -112,6 +121,5 @@ export default function RootLayout({
           <Footer />
         </FilterProvider>
       </body>
-    </html>
-  );
+    </html>);
 }
