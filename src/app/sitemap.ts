@@ -20,7 +20,7 @@ function sanitizeUrlSegment(segment: string): string {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://pizo.mx';
+  const baseUrl = 'https://pizo.mx'; // Asegúrate de que esta URL sea correcta
 
   try {
     const zones = await getZones();

@@ -4,6 +4,7 @@ import { Poppins } from "next/font/google";
 import { Geist_Mono } from "next/font/google";
 import Menu from "@/app/components/menu";
 import Footer from "@/app/components/footer";
+import GoogleAnalytics from "@/app/components/GoogleAnalytics";
 import "./globals.css";
 import { FilterProvider } from './context/FilterContext';
 
@@ -24,7 +25,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://rentasqro.com'),
+  metadataBase: new URL('https://pizo.mx'),
   title: {
     default: "RentasQro - Propiedades en Querétaro",
     template: "%s | RentasQro"
@@ -96,10 +97,13 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
-        {/* ...existing meta tags... */}
+        <meta name="google-site-verification" content="CÓDIGO_QUE_PROPORCIONARÁ_GOOGLE" />
         <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body className={`${poppins.className} ${geistMono.variable} min-h-screen flex flex-col antialiased`}>
+        {/* Google Analytics */}
+        <GoogleAnalytics />
+        
         <FilterProvider>
           <Menu />
           <main className="flex-grow">

@@ -15,6 +15,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: 'https://rentasqro.com/sitemap.xml',
+    sitemap: 'https://pizo.mx/sitemap.xml',  // Update this to match your domain in sitemap.ts
   };
 }
