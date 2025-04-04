@@ -65,7 +65,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
             value={data.descripcion || ''}
             onChange={(e) => handleChange('descripcion', e.target.value)}
             rows={4}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-violet-500 focus:border-violet-500"
             placeholder="Describe las características principales de la propiedad..."
           />
           <p className="mt-2 text-sm text-gray-500">
@@ -94,7 +94,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
               min="1"
               value={data.bedrooms}
               onChange={(e) => handleChange('bedrooms', parseInt(e.target.value) || 1)}
-              className="border-y border-gray-300 py-2 px-3 text-center w-16"
+              className="border-y border-gray-300 py-2 px-3 text-center w-16 focus:ring-violet-500 focus:border-violet-500"
             />
             <button
               type="button"
@@ -123,7 +123,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
               step="0.5"
               value={data.bathrooms}
               onChange={(e) => handleChange('bathrooms', parseFloat(e.target.value) || 1)}
-              className="border-y border-gray-300 py-2 px-3 text-center w-16"
+              className="border-y border-gray-300 py-2 px-3 text-center w-16 focus:ring-violet-500 focus:border-violet-500"
             />
             <button
               type="button"
@@ -151,7 +151,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
               min="0"
               value={data.parkingSpots}
               onChange={(e) => handleChange('parkingSpots', parseInt(e.target.value) || 0)}
-              className="border-y border-gray-300 py-2 px-3 text-center w-16"
+              className="border-y border-gray-300 py-2 px-3 text-center w-16 focus:ring-violet-500 focus:border-violet-500"
             />
             <button
               type="button"
@@ -173,7 +173,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
                 type="checkbox"
                 checked={!data.constructionYear}
                 onChange={(e) => handleChange('constructionYear', e.target.checked ? null : new Date().getFullYear())}
-                className="h-4 w-4 text-blue-600 rounded"
+                className="h-4 w-4 text-violet-600 rounded"
               />
               <label htmlFor="unknownYear" className="ml-2 text-sm text-gray-700">
                 Año desconocido
@@ -187,7 +187,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
                 max={new Date().getFullYear()}
                 value={data.constructionYear || ''}
                 onChange={(e) => handleChange('constructionYear', parseInt(e.target.value) || null)}
-                className="border border-gray-300 rounded-lg px-3 py-2 w-full"
+                className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:ring-violet-500 focus:border-violet-500"
               />
             )}
           </div>
@@ -199,7 +199,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
           <select
             value={data.estadoConservacion || ''}
             onChange={(e) => handleChange('estadoConservacion', e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 w-full"
+            className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:ring-violet-500 focus:border-violet-500"
           >
             <option value="nuevo">A estrenar</option>
             <option value="como_nuevo">Como nuevo</option>
@@ -220,7 +220,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
                   type="checkbox"
                   checked={data.furnished}
                   onChange={(e) => handleChange('furnished', e.target.checked)}
-                  className="h-4 w-4 text-blue-600 rounded"
+                  className="h-4 w-4 text-violet-600 rounded"
                 />
                 <label htmlFor="furnished" className="ml-2 text-sm text-gray-700">
                   Amueblado
@@ -235,7 +235,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
                 type="checkbox"
                 checked={getBooleanValue(data.petsAllowed)}
                 onChange={(e) => handleChange('petsAllowed', e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded"
+                className="h-4 w-4 text-violet-600 rounded"
               />
               <label htmlFor="petsAllowed" className="ml-2 text-sm text-gray-700">
                 Mascotas permitidas
@@ -258,7 +258,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
               min="1"
               value={data.construccionM2 || ''}
               onChange={(e) => handleChange('construccionM2', parseInt(e.target.value) || 0)}
-              className={`border rounded-lg px-3 py-2 w-full ${
+              className={`border rounded-lg px-3 py-2 w-full focus:ring-violet-500 focus:border-violet-500 ${
                 !data.construccionM2 ? 'border-red-500' : 'border-gray-300'
               }`}
               required
@@ -279,7 +279,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
                 min="1"
                 value={data.nivelesCasa || 1}
                 onChange={(e) => handleChange('nivelesCasa', parseInt(e.target.value) || 1)}
-                className="border border-gray-300 rounded-lg px-3 py-2 w-full"
+                className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:ring-violet-500 focus:border-violet-500"
               />
             </div>
           ) : isApartment && (
@@ -290,7 +290,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
                 min="1"
                 value={data.pisoDepto || 1}
                 onChange={(e) => handleChange('pisoDepto', parseInt(e.target.value) || 1)}
-                className="border border-gray-300 rounded-lg px-3 py-2 w-full"
+                className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:ring-violet-500 focus:border-violet-500"
               />
             </div>
           )}
@@ -306,7 +306,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
                 type="checkbox"
                 checked={getBooleanValue(data.cocinaEquipada)}
                 onChange={(e) => handleChange('cocinaEquipada', e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded"
+                className="h-4 w-4 text-violet-600 rounded"
               />
               <label htmlFor="cocinaEquipada" className="ml-2 text-sm text-gray-700">
                 Cocina equipada
@@ -323,7 +323,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
           <select
             value={data.tipoGas || ''}
             onChange={(e) => handleChange('tipoGas', e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 w-full"
+            className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:ring-violet-500 focus:border-violet-500"
           >
             <option value="">Seleccionar...</option>
             <option value="estacionario">Estacionario</option>
@@ -337,7 +337,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
                 type="checkbox"
                 checked={getBooleanValue(data.calentadorAgua)}
                 onChange={(e) => handleChange('calentadorAgua', e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded"
+                className="h-4 w-4 text-violet-600 rounded"
               />
               <label htmlFor="calentadorAgua" className="ml-2 text-sm text-gray-700">
                 Calentador de agua
@@ -355,7 +355,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
                 type="checkbox"
                 checked={getBooleanValue(data.cuartoEstudio)}
                 onChange={(e) => handleChange('cuartoEstudio', e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded"
+                className="h-4 w-4 text-violet-600 rounded"
               />
               <label htmlFor="cuartoEstudio" className="ml-2 text-sm text-gray-700">
                 Cuarto de estudio/TV
@@ -370,7 +370,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
                 type="checkbox"
                 checked={getBooleanValue(data.cuartoLavado)}
                 onChange={(e) => handleChange('cuartoLavado', e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded"
+                className="h-4 w-4 text-violet-600 rounded"
               />
               <label htmlFor="cuartoLavado" className="ml-2 text-sm text-gray-700">
                 Cuarto de lavado
@@ -385,7 +385,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
                 type="checkbox"
                 checked={getBooleanValue(data.balcon)}
                 onChange={(e) => handleChange('balcon', e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded"
+                className="h-4 w-4 text-violet-600 rounded"
               />
               <label htmlFor="balcon" className="ml-2 text-sm text-gray-700">
                 Balcón/Terraza
@@ -400,7 +400,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
                 type="checkbox"
                 checked={getBooleanValue(data.jardin)}
                 onChange={(e) => handleChange('jardin', e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded"
+                className="h-4 w-4 text-violet-600 rounded"
               />
               <label htmlFor="jardin" className="ml-2 text-sm text-gray-700">
                 Jardín/Patio
@@ -415,7 +415,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
                 type="checkbox"
                 checked={getBooleanValue(data.roofGarden)}
                 onChange={(e) => handleChange('roofGarden', e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded"
+                className="h-4 w-4 text-violet-600 rounded"
               />
               <label htmlFor="roofGarden" className="ml-2 text-sm text-gray-700">
                 Roof garden
@@ -430,7 +430,7 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
                 type="checkbox"
                 checked={getBooleanValue(data.bodega)}
                 onChange={(e) => handleChange('bodega', e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded"
+                className="h-4 w-4 text-violet-600 rounded"
               />
               <label htmlFor="bodega" className="ml-2 text-sm text-gray-700">
                 Bodega/Almacenamiento

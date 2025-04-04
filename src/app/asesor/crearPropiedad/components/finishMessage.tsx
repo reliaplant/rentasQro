@@ -70,7 +70,7 @@ export default function FinishMessage({ propertyId }: FinishMessageProps) {
                   cy="50"
                   r="45"
                   fill="none"
-                  stroke="#3b82f6"
+                  stroke="#8B5CF6" // Violet-500
                   strokeWidth="8"
                   strokeLinecap="round"
                   strokeDasharray={Math.PI * 2 * 45}
@@ -102,8 +102,8 @@ export default function FinishMessage({ propertyId }: FinishMessageProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            onClick={() => router.push('/misObras')}
-            className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            onClick={() => router.push('/asesor')} // Cambiar esta línea
+            className="px-6 py-3 bg-violet-600 text-white font-medium rounded-lg hover:bg-violet-700 transition-colors"
           >
             Regresar a mis propiedades
           </motion.button>

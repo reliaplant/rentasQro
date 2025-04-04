@@ -483,7 +483,7 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
               value={data.price || ''}
               onChange={(e) => handlePriceChange(Number(e.target.value))}
               className={`py-3 pl-8 pr-12 block w-full rounded-lg border ${
-                validationErrors.price ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                validationErrors.price ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-violet-500 focus:border-violet-500'
               }`}
               placeholder="Ingresa el precio"
               min="1000"
@@ -515,7 +515,7 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
                 }}
                 className={`py-3 px-4 block w-full rounded-lg border ${
                   validationErrors.zone ? 'border-red-500' : 'border-gray-300'
-                } focus:ring-blue-500 focus:border-blue-500 pr-10`}
+                } focus:ring-violet-500 focus:border-violet-500 pr-10`}
                 disabled={loading.zones}
               >
                 <option value="">Selecciona una zona</option>
@@ -546,7 +546,7 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
                 onChange={handleCondoChange}
                 className={`py-3 px-4 block w-full rounded-lg border ${
                   validationErrors.condo ? 'border-red-500' : 'border-gray-300'
-                } focus:ring-blue-500 focus:border-blue-500 pr-10`}
+                } focus:ring-violet-500 focus:border-violet-500 pr-10`}
                 disabled={!data.zone || loading.condos}
               >
                 <option value="">Selecciona un fraccionamiento</option>
@@ -585,7 +585,7 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
                   type="checkbox"
                   checked={getBooleanValue(data.maintenanceIncluded)}
                   onChange={(e) => handleMaintenanceChange(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 rounded"
+                  className="h-4 w-4 text-violet-600 rounded"
                 />
                 <label htmlFor="maintenanceIncluded" className="ml-2 text-sm text-gray-700">
                   Mantenimiento incluido
@@ -606,7 +606,7 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
                       min="0"
                       value={data.maintenanceCost || 0}
                       onChange={(e) => handleMaintenanceCostChange(parseInt(e.target.value) || 0)}
-                      className="pl-8 py-3 px-4 block w-full rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                      className="pl-8 py-3 px-4 block w-full rounded-lg border border-gray-300 focus:ring-violet-500 focus:border-violet-500"
                     />
                   </div>
                 </div>
@@ -621,7 +621,7 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
                   type="checkbox"
                   checked={getBooleanValue(data.servicesIncluded)}
                   onChange={(e) => handleServicesChange(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 rounded"
+                  className="h-4 w-4 text-violet-600 rounded"
                 />
                 <label htmlFor="servicesIncluded" className="ml-2 text-sm text-gray-700">
                   Servicios incluidos en el precio
@@ -636,7 +636,7 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
                       type="checkbox"
                       checked={getBooleanValue(data.includesWifi)}
                       onChange={(e) => onChange({ includesWifi: e.target.checked })}
-                      className="h-4 w-4 text-blue-600 rounded"
+                      className="h-4 w-4 text-violet-600 rounded"
                     />
                     <label htmlFor="includesWifi" className="ml-2 text-sm text-gray-700">
                       Internet/WiFi
@@ -649,7 +649,7 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
                       type="checkbox"
                       checked={getBooleanValue(data.includesWater)}
                       onChange={(e) => onChange({ includesWater: e.target.checked })}
-                      className="h-4 w-4 text-blue-600 rounded"
+                      className="h-4 w-4 text-violet-600 rounded"
                     />
                     <label htmlFor="includesWater" className="ml-2 text-sm text-gray-700">
                       Agua
@@ -662,7 +662,7 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
                       type="checkbox"
                       checked={getBooleanValue(data.includesGas)}
                       onChange={(e) => onChange({ includesGas: e.target.checked })}
-                      className="h-4 w-4 text-blue-600 rounded"
+                      className="h-4 w-4 text-violet-600 rounded"
                     />
                     <label htmlFor="includesGas" className="ml-2 text-sm text-gray-700">
                       Gas
@@ -675,7 +675,7 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
                       type="checkbox"
                       checked={getBooleanValue(data.includesElectricity)}
                       onChange={(e) => onChange({ includesElectricity: e.target.checked })}
-                      className="h-4 w-4 text-blue-600 rounded"
+                      className="h-4 w-4 text-violet-600 rounded"
                     />
                     <label htmlFor="includesElectricity" className="ml-2 text-sm text-gray-700">
                       Electricidad
@@ -697,7 +697,7 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
                   step="0.5"
                   value={data.depositoRenta || 1}
                   onChange={(e) => onChange({ depositoRenta: parseFloat(e.target.value) || 1 })}
-                  className="py-3 px-4 block w-full rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  className="py-3 px-4 block w-full rounded-lg border border-gray-300 focus:ring-violet-500 focus:border-violet-500"
                 />
               </div>
 
@@ -710,7 +710,7 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
                   min="1"
                   value={data.contratoMinimo || 12}
                   onChange={(e) => onChange({ contratoMinimo: parseInt(e.target.value) || 12 })}
-                  className="py-3 px-4 block w-full rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  className="py-3 px-4 block w-full rounded-lg border border-gray-300 focus:ring-violet-500 focus:border-violet-500"
                 />
               </div>
             </div>

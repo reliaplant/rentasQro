@@ -151,7 +151,7 @@ export default function CreatePropertyPage() {
   if (loading || !services || !formData) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-violet-500"></div>
         <p className="ml-3">Cargando...</p>
       </div>
     );
@@ -194,7 +194,7 @@ export default function CreatePropertyPage() {
       
       setIsComplete(true);
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push('/asesor'); // Cambiar esta línea
       }, 3000);
       
     } catch (error) {
@@ -217,7 +217,7 @@ export default function CreatePropertyPage() {
       
       {loading ? (
         <div className="flex h-screen items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-violet-500"></div>
           <p className="ml-3">Cargando...</p>
         </div>
       ) : isComplete ? (
@@ -230,9 +230,9 @@ export default function CreatePropertyPage() {
               {steps.map((step, i) => (
                 <div 
                   key={step.id} 
-                  className={`flex flex-col items-center ${i <= currentStep ? 'text-blue-600' : 'text-gray-400'}`}
+                  className={`flex flex-col items-center ${i <= currentStep ? 'text-violet-600' : 'text-gray-400'}`}
                 >
-                  <div className={`h-8 w-8 rounded-full flex items-center justify-center mb-2 ${i <= currentStep ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>
+                  <div className={`h-8 w-8 rounded-full flex items-center justify-center mb-2 ${i <= currentStep ? 'bg-violet-600 text-white' : 'bg-gray-200'}`}>
                     {i + 1}
                   </div>
                   <span className="text-sm">{step.label}</span>
@@ -242,7 +242,7 @@ export default function CreatePropertyPage() {
             <div className="relative mt-1">
               <div className="h-2 bg-gray-200 rounded-full">
                 <div 
-                  className="h-2 bg-blue-600 rounded-full transition-all duration-300" 
+                  className="h-2 bg-violet-600 rounded-full transition-all duration-300" 
                   style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
                 ></div>
               </div>
@@ -300,8 +300,8 @@ export default function CreatePropertyPage() {
               <button 
                 onClick={handleNextStep}
                 disabled={!!validationError}
-                className={`px-6 py-2 bg-blue-600 text-white rounded-md ${
-                  validationError ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
+                className={`px-6 py-2 bg-violet-600 text-white rounded-md ${
+                  validationError ? 'opacity-50 cursor-not-allowed' : 'hover:bg-violet-700'
                 }`}
               >
                 Siguiente

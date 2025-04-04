@@ -227,7 +227,7 @@ export default function Menu() {
               </button>
 
               {isDropdownOpen && (
-                <div className="origin-top-right absolute right-0 mt-3 w-64 rounded-xl shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <div className="origin-top-right absolute right-0 mt-3 w-64 rounded-xl shadow-lg py-1 bg-white  ring-opacity-5 focus:outline-none">
                   <div className="px-4 py-3 border-b border-gray-100">
                     <p className="text-sm font-medium text-gray-900">
                       {user.email?.split('@')[0]}

@@ -128,7 +128,7 @@ export default function MisPropiedades() {
               {items.map((property) => (
                 <div
                   key={property.id}
-                  onClick={() => router.push(`/crearPropiedad?id=${property.id}`)}
+                  onClick={() => router.push(`/asesor/crearPropiedad?id=${property.id}`)}
                   className="bg-white border border-gray-200 rounded-xl mb-2 cursor-pointer hover:shadow-sm transition-all"
                 >
                   <div className="flex flex-col">
