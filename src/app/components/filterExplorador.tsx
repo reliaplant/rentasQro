@@ -154,7 +154,7 @@ const FilterExplorador = () => {
   `;
 
   return (
-    <div className="w-full bg-white border-b border-gray-200 sticky top-0 z-50 transition-all duration-300 shadow-none hover:shadow-md">
+    <div className="w-full bg-white border-b border-gray-200 sticky top-16 z-50 transition-all duration-300 shadow-sm hover:shadow-md">
       <div className="px-[5vw] py-1.5">
         <div className="flex justify-between items-center">
           {/* Texto a la izquierda más pequeño */}

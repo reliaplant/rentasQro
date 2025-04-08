@@ -182,7 +182,7 @@ const Explorador = () => {
     };
 
     return (
-      <div className="group block">
+      <div className="group block ">
         <div className="relative rounded-xl overflow-hidden">
           {/* Badge de transacción */}
           <div className="absolute top-3 left-3 z-10">

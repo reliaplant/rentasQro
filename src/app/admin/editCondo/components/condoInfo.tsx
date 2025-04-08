@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { Plus, Upload } from 'lucide-react';
-import { CondoData, ZoneData } from '@/app/shared/interfaces';
-import { getZones } from '@/app/shared/firebase';
+import { CondoData, ZoneData, Desarrolladora } from '@/app/shared/interfaces';
+import { getZones, getDesarrolladoras } from '@/app/shared/firebase';
 import { condoAmenities } from '@/app/constants/amenities';
 import { compressImageToDataURL } from '@/app/utils/imageCompression';
 
@@ -30,6 +30,10 @@ export default function CondoBasicInfo({
   const [loadingZones, setLoadingZones] = useState(true);
   const [zoneError, setZoneError] = useState<string | null>(null);
 
+  // Nuevo estado para desarrolladoras
+  const [desarrolladoras, setDesarrolladoras] = useState<Desarrolladora[]>([]);
+  const [loadingDesarrolladoras, setLoadingDesarrolladoras] = useState(true);
+
   useEffect(() => {
     const fetchZones = async () => {
       try {
@@ -42,6 +46,19 @@ export default function CondoBasicInfo({
       }
     };
     fetchZones();
+
+    // Cargar desarrolladoras
+    const fetchDesarrolladoras = async () => {
+      try {
+        const data = await getDesarrolladoras();
+        setDesarrolladoras(data);
+      } catch (error) {
+        console.error('Error al cargar desarrolladoras:', error);
+      } finally {
+        setLoadingDesarrolladoras(false);
+      }
+    };
+    fetchDesarrolladoras();
   }, []);
 
   return (
@@ -54,7 +71,7 @@ export default function CondoBasicInfo({
         <p className="text-sm text-gray-500 mb-6">
           Ingresa los detalles principales del condominio
         </p>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Name Field */}
           <div>
@@ -80,8 +97,8 @@ export default function CondoBasicInfo({
               value={formData.zoneId || ''}
               onChange={(e) => {
                 const selectedZone = zones.find(zone => zone.id === e.target.value);
-                onFormDataChange({ 
-                  ...formData, 
+                onFormDataChange({
+                  ...formData,
                   zoneId: e.target.value,
                   zoneName: selectedZone?.name || ''
                 });
@@ -98,7 +115,38 @@ export default function CondoBasicInfo({
               ))}
             </select>
           </div>
-          
+
+          {/* NUEVO: Campo de Desarrolladora */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Desarrolladora
+            </label>
+            <select
+              value={formData.desarrolladoraId || ''}
+              onChange={(e) => {
+                const selectedDesarrolladora = desarrolladoras.find(d => d.id === e.target.value);
+                if (selectedDesarrolladora) {
+                  onFormDataChange({
+                    ...formData,
+                    desarrolladoraId: selectedDesarrolladora.id!,
+                    desarrolladoraName: selectedDesarrolladora.name,
+                    desarrolladoraDescripcion: selectedDesarrolladora.descripcion || '',
+                    desarrolladoraLogoURL: selectedDesarrolladora.logoURL || '',
+                  });
+                }
+              }}
+              className="select1"
+              disabled={loadingDesarrolladoras}
+            >
+              <option value="">Seleccionar desarrolladora</option>
+              {desarrolladoras.map((desarrolladora) => (
+                <option key={desarrolladora.id} value={desarrolladora.id}>
+                  {desarrolladora.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Nuevo campo: Polygon ID */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -134,7 +182,6 @@ export default function CondoBasicInfo({
           </div>
 
           {/* Campos de Precios */}
-    
 
           {/* Campos de Precios de Renta */}
           <div className="col-span-2 pt-6 border-t border-gray-200">
@@ -147,9 +194,9 @@ export default function CondoBasicInfo({
                 <input
                   type="number"
                   value={formData.rentPriceMin || ''}
-                  onChange={(e) => onFormDataChange({ 
-                    ...formData, 
-                    rentPriceMin: parseInt(e.target.value) || 0 
+                  onChange={(e) => onFormDataChange({
+                    ...formData,
+                    rentPriceMin: parseInt(e.target.value) || 0
                   })}
                   className="input1"
                   placeholder="Renta mínima"
@@ -163,9 +210,9 @@ export default function CondoBasicInfo({
                 <input
                   type="number"
                   value={formData.rentPriceAvg || ''}
-                  onChange={(e) => onFormDataChange({ 
-                    ...formData, 
-                    rentPriceAvg: parseInt(e.target.value) || 0 
+                  onChange={(e) => onFormDataChange({
+                    ...formData,
+                    rentPriceAvg: parseInt(e.target.value) || 0
                   })}
                   className="input1"
                   placeholder="Renta promedio"
@@ -179,9 +226,9 @@ export default function CondoBasicInfo({
                 <input
                   type="number"
                   value={formData.rentPriceMax || ''}
-                  onChange={(e) => onFormDataChange({ 
-                    ...formData, 
-                    rentPriceMax: parseInt(e.target.value) || 0 
+                  onChange={(e) => onFormDataChange({
+                    ...formData,
+                    rentPriceMax: parseInt(e.target.value) || 0
                   })}
                   className="input1"
                   placeholder="Renta máxima"
@@ -203,9 +250,9 @@ export default function CondoBasicInfo({
                     type="number"
                     step="0.1"
                     value={formData.salePriceMin ? formData.salePriceMin / 1000000 : ''}
-                    onChange={(e) => onFormDataChange({ 
-                      ...formData, 
-                      salePriceMin: parseFloat(e.target.value) * 1000000 
+                    onChange={(e) => onFormDataChange({
+                      ...formData,
+                      salePriceMin: parseFloat(e.target.value) * 1000000
                     })}
                     className="input1 pr-8"
                     placeholder="Ej: 3.2"
@@ -215,8 +262,8 @@ export default function CondoBasicInfo({
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-gray-500">
-                  {formData.salePriceMin ? 
-                    `$${formData.salePriceMin.toLocaleString('es-MX')}` : 
+                  {formData.salePriceMin ?
+                    `$${formData.salePriceMin.toLocaleString('es-MX')}` :
                     'Ingresa el valor en millones'}
                 </p>
               </div>
@@ -230,9 +277,9 @@ export default function CondoBasicInfo({
                     type="number"
                     step="0.1"
                     value={formData.salePriceAvg ? formData.salePriceAvg / 1000000 : ''}
-                    onChange={(e) => onFormDataChange({ 
-                      ...formData, 
-                      salePriceAvg: parseFloat(e.target.value) * 1000000 
+                    onChange={(e) => onFormDataChange({
+                      ...formData,
+                      salePriceAvg: parseFloat(e.target.value) * 1000000
                     })}
                     className="input1 pr-8"
                     placeholder="Ej: 3.5"
@@ -242,8 +289,8 @@ export default function CondoBasicInfo({
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-gray-500">
-                  {formData.salePriceAvg ? 
-                    `$${formData.salePriceAvg.toLocaleString('es-MX')}` : 
+                  {formData.salePriceAvg ?
+                    `$${formData.salePriceAvg.toLocaleString('es-MX')}` :
                     'Ingresa el valor en millones'}
                 </p>
               </div>
@@ -257,9 +304,9 @@ export default function CondoBasicInfo({
                     type="number"
                     step="0.1"
                     value={formData.salePriceMax ? formData.salePriceMax / 1000000 : ''}
-                    onChange={(e) => onFormDataChange({ 
-                      ...formData, 
-                      salePriceMax: parseFloat(e.target.value) * 1000000 
+                    onChange={(e) => onFormDataChange({
+                      ...formData,
+                      salePriceMax: parseFloat(e.target.value) * 1000000
                     })}
                     className="input1 pr-8"
                     placeholder="Ej: 4.2"
@@ -269,8 +316,8 @@ export default function CondoBasicInfo({
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-gray-500">
-                  {formData.salePriceMax ? 
-                    `$${formData.salePriceMax.toLocaleString('es-MX')}` : 
+                  {formData.salePriceMax ?
+                    `$${formData.salePriceMax.toLocaleString('es-MX')}` :
                     'Ingresa el valor en millones'}
                 </p>
               </div>
@@ -290,7 +337,7 @@ export default function CondoBasicInfo({
 
         <div className="relative">
           {/* Portada Upload */}
-          <motion.div 
+          <motion.div
             onClick={() => portadaInputRef.current?.click()}
             className="h-[300px] w-full rounded border-2 border-gray-200 cursor-pointer relative overflow-hidden"
           >
@@ -312,7 +359,7 @@ export default function CondoBasicInfo({
 
             {/* Logo Overlay */}
             <div className="absolute top-4 left-4">
-              <motion.div 
+              <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={(e) => {

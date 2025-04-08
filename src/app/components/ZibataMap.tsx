@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { polygons } from './polygonsZibata';
 
 interface ZibataMapProps {
   highlightedPolygonId?: string;
@@ -17,72 +18,43 @@ export default function ZibataMap({
   height = "100%"
 }: ZibataMapProps) {
   const [hoveredPolygonId, setHoveredPolygonId] = useState<string | null>(null);
+  const [isInfoPanelHovered, setIsInfoPanelHovered] = useState(false);
   const router = useRouter();
+  const infoRef = useRef<HTMLDivElement>(null);
 
   // Use passed highlightedPolygonId instead of hardcoded value
   const DESTACADO = highlightedPolygonId || null;
 
-  // Datos de los polígonos con sus propiedades
-  const polygons = [
-    {
-        id: "poly11234",
-        path: "M1740.5 1265.5L1688 1272L1644.5 1289L1641.5 1295.5L1650.5 1304L1732 1344.5L1799.5 1368L1902.5 1388.5L1910 1373L1902.5 1341.5L1884.5 1307L1815.5 1283L1779 1274.5L1740.5 1265.5Z",
-        fill: "#62BD4F",
-        name: "Zona 1123",
-        photo: "/assets/condos/Sabino.png",
-        slug: "sabino"
-    },
-    {
-        id: "poly21111111",
-        path: "M2500 1282.5L2504 1319.5L2520 1331.5L2547.5 1319.5L2600.5 1290L2656 1282.5L2670.5 1276.5L2704.5 1265L2685.5 1246L2670.5 1241.5L2645.5 1246L2606.5 1255.5H2578.5L2541.5 1246L2509.5 1260.5L2500 1282.5Z",
-        fill: "#E7E7E7",
-        name: "Zona 21111111",
-        photo: "/assets/condos/Sabino.png",
-        slug: "zona-21111111"
-    },
-    {
-        id: "poly3",
-        path: "M2895.5 1080L2961.5 1127L2979 1096L2966 1082V1061.5L2926.5 1034L2895.5 1080Z",
-        fill: "#E7E7E7",
-        name: "Zona 3",
-        photo: "/assets/condos/Sabino.png"
-    },
-    {
-        id: "Vector_381",
-        path: "M428.5 299L406.5 423.5L586 387.5V375.5L609.5 352L644.5 249.5L609.5 256L548 266L428.5 299Z",
-        fill: "#E7E7E7",
-        name: "Vector 381",
-        photo: "/assets/condos/Sabino.png"
-    },
-    {
-        id: "Vector_125",
-        path: "M1018 607L822 790L854.5 816L900 838L942 849L949 842.5L959.5 840L971.5 842.5L1018 808.5L1035.5 794L1054 787.5L1185 634.5L1146.5 555L1100 585L1054 602L1018 607Z",
-        fill: "#E7E7E7",
-        name: "Vector 125",
-        photo: "/assets/condos/Sabino.png"
-    },
-    {
-        id: "Vector_130",
-        path: "M824 1236L789 1247.5L776.5 1169L753.5 1179L710.5 1169L653 1173.5L641 1164H626.5L561.5 1196.5L475 1104L641 1008.5L667 979.5L704 1005L761.5 1041.5L781 1051L799.5 1054.5L824 1236Z",
-        fill: "#E7E7E7",
-        name: "Vector 130",
-        photo: "/assets/condos/Sabino.png"
-    },
-    {
-        id: "AUREAIOLITA1",
-        path: "M588 1038L474 1103L428.5 1052L418.5 773L445.5 766.5L468 762L512 744.5L588 1038Z",
-        fill: "#E7E7E7",
-        name: "AUREAIOLITA1",
-        photo: "/assets/condos/Sabino.png"
-    },
-    {
-        id: "AZHALA2",
-        path: "M251.5 1025.5L291.5 774L309 777V779.5L328 793.5H341.5L355.5 779.5H386L416.5 774L426 1051L355.5 1047.5L309 1043L251.5 1025.5Z",
-        fill: "#E7E7E7",
-        name: "AZHALA2",
-        photo: "/assets/condos/Sabino.png"
+  // This effect adds a small delay before hiding the info panel
+  // to prevent flickering and improve user experience
+  useEffect(() => {
+    function handleMouseMove(e: MouseEvent) {
+      // If we're hovering over a polygon and the info panel exists
+      if (hoveredPolygonId && infoRef.current) {
+        // Check if the mouse is over the info panel
+        const rect = infoRef.current.getBoundingClientRect();
+        const isOverInfoPanel = 
+          e.clientX >= rect.left && 
+          e.clientX <= rect.right && 
+          e.clientY >= rect.top && 
+          e.clientY <= rect.bottom;
+        
+        setIsInfoPanelHovered(isOverInfoPanel);
+      }
     }
-  ];
+    
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, [hoveredPolygonId]);
+  
+  const handlePolygonHover = (polygonId: string | null) => {
+    // Only update state if we're not hovering the info panel
+    if (!isInfoPanelHovered) {
+      setHoveredPolygonId(polygonId);
+    }
+  };
 
   const handlePolygonClick = (polygonId: string) => {
     // Call the callback if provided (for any custom handling)
@@ -97,8 +69,18 @@ export default function ZibataMap({
     }
   };
 
+  // First, sort polygons so the highlighted one comes last (will be rendered on top)
+  const sortedPolygons = [...polygons].sort((a, b) => {
+    if (a.id === DESTACADO) return 1; // Highlighted polygon goes to end of array
+    if (b.id === DESTACADO) return -1; // Highlighted polygon goes to end of array
+    return 0;
+  });
+
+  // Determine which polygon info to show - either the hovered one or the highlighted one if hovered
+  const displayPolygonId = hoveredPolygonId || null;
+
   return (
-    <div className={`${className} bg-gray-200 relative`} style={{ height }}>
+    <div className={`${className} relative`} style={{ height }}>
       <img 
         src="/assets/zibata/mapaZibataFondo.svg"
         alt="Mapa base de Zibata"
@@ -111,83 +93,131 @@ export default function ZibataMap({
       >
         <defs>
           <style>
-            {`
-              @keyframes highlightPulse {
-                0% { opacity: 0.7; }
-                50% { opacity: 1; }
-                100% { opacity: 0.7; }
-              }
-              .destacado {
-                fill: #FF69B4 !important;
-                stroke: #FF1493;
-                animation: highlightPulse 1.5s infinite ease-in-out;
-                filter: drop-shadow(0 0 10px rgba(255, 105, 180, 0.6));
-              }
-            `}
+        {`
+          @keyframes highlightPulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+          }
+          .destacado {
+            fill: #BD72F0 !important;
+            stroke: #FF1493;
+            animation: highlightPulse 1.5s infinite ease-in-out;
+            filter: drop-shadow(0 0 15px rgba(255, 105, 180, 0.8));
+            z-index: 50 !important;
+            transform: scale(1);
+            transform-origin: center;
+            transform-box: fill-box;
+          }
+        `}
           </style>
         </defs>
         
-        {/* Renderiza los polígonos no seleccionados */}
-        {polygons
-          .filter(poly => poly.id !== hoveredPolygonId)
+        {/* Render regular polygons (not highlighted and not hovered) */}
+        {sortedPolygons
+          .filter(poly => poly.id !== hoveredPolygonId && poly.id !== DESTACADO)
           .map(polygon => (
             <path
               key={polygon.id}
               d={polygon.path}
-              fill={polygon.id === DESTACADO ? "#FF69B4" : polygon.fill}
-              stroke={polygon.id === DESTACADO ? "#FF1493" : "black"}
-              strokeWidth={polygon.id === DESTACADO ? 5 : 4}
-              className={polygon.id === DESTACADO ? "destacado" : ""}
+              fill="#D3D3D3"  // Light gray
+              stroke="#ffffff" // White
+              strokeWidth={4}
               style={{
                 transition: "all 0.3s ease",
                 cursor: "pointer",
-                opacity: polygon.id === DESTACADO ? 1 : 0.85
+                opacity: 0.85,
+                zIndex: 10
               }}
-              onMouseEnter={() => setHoveredPolygonId(polygon.id)}
+              onMouseEnter={() => handlePolygonHover(polygon.id)}
+              onMouseLeave={() => handlePolygonHover(null)}
               onClick={() => handlePolygonClick(polygon.id)}
             />
           ))
         }
-
-        {/* Renderiza el polígono seleccionado */}
-        {hoveredPolygonId && (
+        
+        {/* Render the hovered polygon (if it's not the highlighted one) */}
+        {hoveredPolygonId && hoveredPolygonId !== DESTACADO && (
           <path
             d={polygons.find(p => p.id === hoveredPolygonId)?.path}
-            fill={hoveredPolygonId === DESTACADO ? "#FF69B4" : polygons.find(p => p.id === hoveredPolygonId)?.fill}
-            stroke={hoveredPolygonId === DESTACADO ? "#FF1493" : "black"}
+            fill="#8A2BE2" // Purple when hovered
+            stroke="#4B0082" // Darker purple
             strokeWidth={6}
-            className={hoveredPolygonId === DESTACADO ? "destacado" : ""}
+            style={{
+              cursor: "pointer",
+              opacity: 1,
+              filter: "drop-shadow(0 0 5px rgba(138, 43, 226, 1))",
+              zIndex: 20 // Higher than normal polygons
+            }}
+            onMouseEnter={() => handlePolygonHover(hoveredPolygonId)}
+            onMouseLeave={() => handlePolygonHover(null)}
+            onClick={() => handlePolygonClick(hoveredPolygonId)}
+          />
+        )}
+        
+        {/* Always render the highlighted polygon last (on top) with the highest z-index */}
+        {DESTACADO && (
+          <path
+            d={polygons.find(p => p.id === DESTACADO)?.path}
+            fill="#FF69B4" // Pink for highlighted
+            stroke="#FF1493" // Hot pink
+            strokeWidth={5}
+            className="destacado"
             style={{
               transition: "all 0.3s ease",
               cursor: "pointer",
               opacity: 1,
-              transform: "scale(1.03)",
-              transformOrigin: "center",
-              transformBox: "fill-box",
-              filter: hoveredPolygonId === DESTACADO 
-                ? "drop-shadow(0 0 10px rgba(255, 105, 180, 0.6))" 
-                : "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))"
+              zIndex: 30, // Highest z-index
+              position: "relative" // Needed for z-index to work properly in SVG
             }}
-            onMouseLeave={() => setHoveredPolygonId(null)}
+            onMouseEnter={() => handlePolygonHover(DESTACADO)}
+            onMouseLeave={() => handlePolygonHover(null)}
+            onClick={() => handlePolygonClick(DESTACADO)}
+          />
+        )}
+        
+        {/* If the highlighted polygon is also hovered, show it with enhanced styles */}
+        {hoveredPolygonId && hoveredPolygonId === DESTACADO && (
+          <path
+            d={polygons.find(p => p.id === hoveredPolygonId)?.path}
+            fill="#BD72F0" // Brighter color when highlighted and hovered
+            stroke="#FF1493" // Hot pink
+            strokeWidth={6}
+            className="destacado"
+            style={{
+              cursor: "pointer",
+              opacity: 1,
+              filter: "drop-shadow(0 0 15px rgba(255, 105, 180, 0.8))",
+              zIndex: 40, // Even higher z-index when highlighted and hovered
+              position: "relative"
+            }}
+            onMouseEnter={() => handlePolygonHover(hoveredPolygonId)}
+            onMouseLeave={() => handlePolygonHover(null)}
             onClick={() => handlePolygonClick(hoveredPolygonId)}
           />
         )}
       </svg>
 
       {/* Panel de información */}
-      {hoveredPolygonId && (
-        <div className={`absolute top-4 right-4 p-4 rounded-lg shadow-lg ${
-          hoveredPolygonId === DESTACADO ? 'bg-pink-100 border-2 border-pink-500' : 'bg-white'
-        }`}>
-          <h2 className={`text-xl font-bold ${hoveredPolygonId === DESTACADO ? 'text-pink-600' : ''}`}>
-            {polygons.find(p => p.id === hoveredPolygonId)?.name}
+      {(displayPolygonId || isInfoPanelHovered) && (
+        <div 
+          ref={infoRef}
+          className={`absolute top-4 right-4 p-4 rounded-lg shadow-lg ${
+            displayPolygonId === DESTACADO ? 'bg-pink-100 border-2 border-pink-500' : 'bg-white'
+          }`} 
+          style={{ zIndex: 100 }}
+          onMouseEnter={() => setIsInfoPanelHovered(true)}
+          onMouseLeave={() => setIsInfoPanelHovered(false)}
+        >
+          <h2 className={`text-xl font-bold ${displayPolygonId === DESTACADO ? 'text-pink-600' : ''}`}>
+            {polygons.find(p => p.id === displayPolygonId)?.name || ''}
           </h2>
           <img
-            src={polygons.find(p => p.id === hoveredPolygonId)?.photo}
-            alt={`Foto de ${polygons.find(p => p.id === hoveredPolygonId)?.name}`}
+            src={polygons.find(p => p.id === displayPolygonId)?.photo || ''}
+            alt={`Foto de ${polygons.find(p => p.id === displayPolygonId)?.name || ''}`}
             className="mt-2 w-48 h-32 object-cover rounded-md"
           />
-          {hoveredPolygonId === DESTACADO && (
+          {displayPolygonId === DESTACADO && (
             <div className="mt-2 text-sm text-pink-700">
               ¡Polígono destacado!
             </div>

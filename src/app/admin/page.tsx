@@ -5,6 +5,7 @@ import AllProperties from './components/allProperties';
 import Zones from './zones/zones';
 import ListaAdmins from './admins/listaAdmins';
 import ListaAdvisors from './advisors/listaAdvisors';
+import DesarrolladorasPage from './desarrolladoras/page';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'properties' | 'zones' | 'admins' | 'advisors'>('properties');
@@ -46,6 +47,15 @@ export default function AdminDashboard() {
               Zonas y Condominios
             </button>
             <button
+              onClick={() => setActiveTab('desarrolladoras')}
+              className={`${activeTab === 'desarrolladoras'
+                ? 'border-[#6981d3] text-[#6981d3]'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-3 px-1 pt-4 border-b-3 font-medium text-sm cursor-pointer`}
+            >
+              Desarrolladoras
+            </button>
+            <button
               onClick={() => setActiveTab('admins')}
               className={`${activeTab === 'admins'
                 ? 'border-[#6981d3] text-[#6981d3]'
@@ -73,6 +83,7 @@ export default function AdminDashboard() {
           {activeTab === 'zones' && <Zones />}
           {activeTab === 'admins' && <ListaAdmins />}
           {activeTab === 'advisors' && <ListaAdvisors />}
+          {activeTab === 'desarrolladoras' && <DesarrolladorasPage />}
         </div>
       </div>
     </div>

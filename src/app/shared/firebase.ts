@@ -8,7 +8,7 @@ import { getFirestore, collection, addDoc, Timestamp, getDocs, doc, getDoc, upda
 import { getStorage, ref, uploadBytes, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import { getAuth, signInWithEmailAndPassword, signOut as firebaseSignOut, onAuthStateChanged, User, fetchSignInMethodsForEmail } from "firebase/auth";
 import { ZoneData, CondoData } from '@/app/shared/interfaces';
-import { PropertyData } from '@/app/shared/interfaces';
+import { PropertyData, Desarrolladora } from '@/app/shared/interfaces';
 
 const firebaseConfig = {
   apiKey: "AIzaSyArhNxt2pZdMCGJwmoqV1PNWOIX7jN3oVQ",
@@ -1131,4 +1131,71 @@ export async function getZoneByName(zoneName: string): Promise<ZoneData | null> 
   return null;
 }
 
-export { db, auth };
+// Function to get properties by condo ID
+export const getPropertiesByCondo = async (condoId: string): Promise<PropertyData[]> => {
+  try {
+    console.log(`Fetching properties for condo ID: ${condoId}`);
+    const q = query(
+      collection(db, "properties"),
+      where("condo", "==", condoId),
+      where("status", "==", "publicada")
+    );
+    
+    const querySnapshot = await getDocs(q);
+    console.log(`Found ${querySnapshot.size} properties for condo ${condoId}`);
+    
+    const properties: PropertyData[] = [];
+    querySnapshot.forEach((doc) => {
+      properties.push({ id: doc.id, ...doc.data() } as PropertyData);
+    });
+    
+    return properties;
+  } catch (error) {
+    console.error("Error fetching properties by condo:", error);
+    return [];
+  }
+};
+
+// CRUD functions for Desarrolladoras
+export const getDesarrolladoras = async (): Promise<Desarrolladora[]> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, 'desarrolladoras'));
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Desarrolladora[];
+  } catch (error) {
+    console.error('Error fetching desarrolladoras:', error);
+    throw error;
+  }
+};
+
+export const addDesarrolladora = async (data: Desarrolladora): Promise<string> => {
+  try {
+    const docRef = await addDoc(collection(db, 'desarrolladoras'), data);
+    return docRef.id;
+  } catch (error) {
+    console.error('Error adding desarrolladora:', error);
+    throw error;
+  }
+};
+
+export const updateDesarrolladora = async (id: string, data: Partial<Desarrolladora>): Promise<void> => {
+  try {
+    await updateDoc(doc(db, 'desarrolladoras', id), data);
+  } catch (error) {
+    console.error('Error updating desarrolladora:', error);
+    throw error;
+  }
+};
+
+export const deleteDesarrolladora = async (id: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, 'desarrolladoras', id));
+  } catch (error) {
+    console.error('Error deleting desarrolladora:', error);
+    throw error;
+  }
+};
+
+export { db, auth, storage };

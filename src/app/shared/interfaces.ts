@@ -51,6 +51,17 @@ export interface CondoData {
   streetViewImage?: string;
   streetViewLink?: string;
   manualReviews?: Review[];
+  desarrolladoraLogoURL?: string;
+  desarrolladoraDescripcion?: string;
+  desarrolladoraName?: string;
+  desarrolladoraId: string;
+}
+
+export interface Desarrolladora {
+  id?: string;
+  name: string;
+  logoURL?: string;
+  descripcion?: string;
 }
 
 export interface CondoFormData {

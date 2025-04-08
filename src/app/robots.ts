@@ -6,15 +6,35 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: '/',
+        allow: [
+          '/zona/',
+          '/condominio/',
+          '/blog/',
+          '/guia/',
+        ],
         disallow: [
+          '/api/',
           '/admin/',
           '/asesor/',
-          '/propiedad/',
-          '/busqueda',
+          '/login/',
+          '/perfil/',
+          '/dashboard/',
+          '/favoritos/',
+          '/auth/',
+          '/buscar',          // Block search page
+          '/busqueda',        // Block search results
+          '/*?*',             // Block all URLs with query parameters
+          '/*page=*',         // Block pagination
+          '/*filter=*',       // Block filter parameters
+          '/*sort=*',         // Block sorting parameters
+          '/*q=*',            // Block search queries
+          '/*categoria=*',    // Block category filters
+          '/*precio=*',       // Block price filters
         ],
+        crawlDelay: 10,
       },
     ],
-    sitemap: 'https://pizo.mx/sitemap.xml',  // Update this to match your domain in sitemap.ts
+    host: 'https://pizo.mx',
+    sitemap: 'https://pizo.mx/sitemap.xml',
   };
 }
