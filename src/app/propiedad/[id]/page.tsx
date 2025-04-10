@@ -164,37 +164,46 @@ export default function PropertyPage() {
       />
 
       {/* Rest of property detail content */}
-      <div className="max-w-7xl mx-auto px-0 md:px-4 mt-24">
+      <div className="max-w-7xl mx-auto px-0 md:px-4 mt-0 md:mt-24">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-16">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-12">
-            {/* Property Header */}
-            <div className=''>
-              <PropertyHeader
-                property={property}
-                zoneData={zoneData}
-                condoData={condoData}
-              />
+            <div className="lg:col-span-2 md:space-y-12 space-y-0">
 
-              <div>
-                <FotosPropiedad
-                  images={property.imageUrls}
-                  propertyType={property.propertyType}
-                />
+            <div className="block md:hidden">
+              <FotosPropiedad
+                images={property.imageUrls}
+                propertyType={property.propertyType}
+              />
+            </div>
+
+            {/* Property Header */}
+            <div className='px-4 md:px-0'>
+              <PropertyHeader
+              property={property}
+              zoneData={zoneData}
+              condoData={condoData}
+              />
+              <div className="hidden md:block">
+              <FotosPropiedad
+                images={property.imageUrls}
+                propertyType={property.propertyType}
+              />
               </div>
             </div>
 
             {/* Property Info */}
+            <div className='px-4 md:px-0'>
             <PropertyInfo
               property={property}
               zoneData={zoneData}
               condoData={condoData}
             />
+            </div>
 
             {/* Condo Section */}
             {condoData && (
               <section ref={condoRef}>
-                <div className="space-y-12">
+                <div className="px-4 md:px-0 mt-8 md:mt-0">
                   <CondoSection condoData={condoData} />
                 </div>
               </section>
@@ -211,32 +220,32 @@ export default function PropertyPage() {
               Adding margin-top to position it lower initially,
               but top-1 will make it stick near the top when scrolling
             */}
-            <div className="sticky top-12 mt-25 space-y-6">
+            <div className="hidden md:block sticky top-24 mt-25 space-y-6">
               <Contacto
-                price={property.price}
-                advisor={{
-                  name: advisor?.name || '',
-                  photo: advisor?.photo || '',
-                  phone: advisor?.phone || '',
-                  bio: advisor?.bio || '',
-                  verified: advisor?.verified || false
-                }}
-                propertyId={property.id!}
-                publicationDate={property.publicationDate}
-                views={property.views}
-                whatsappClicks={property.whatsappClicks}
+              price={property.price}
+              advisor={{
+                name: advisor?.name || '',
+                photo: advisor?.photo || '',
+                phone: advisor?.phone || '',
+                bio: advisor?.bio || '',
+                verified: advisor?.verified || false
+              }}
+              propertyId={property.id!}
+              publicationDate={property.publicationDate}
+              views={property.views}
+              whatsappClicks={property.whatsappClicks}
               />
 
               {/* Simple implementation of similar properties that won't error */}
               {property.id && (
-                <div className="mt-6 w-full">
+                <div className="mt-6 w-full px-4 md:px-0">
                   <SimilarProperties
-                    currentPropertyId={property.id}
-                    propertyType={property.propertyType || "casa"}
-                    transactionType={property.transactionType || "venta"} 
-                    zone={property.zone}
-                    condo={property.condo}
-                    price={property.price}
+                  currentPropertyId={property.id}
+                  propertyType={property.propertyType || "casa"}
+                  transactionType={property.transactionType || "venta"} 
+                  zone={property.zone}
+                  condo={property.condo}
+                  price={property.price}
                   />
                 </div>
               )}

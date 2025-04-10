@@ -156,7 +156,8 @@ const FilterExplorador = () => {
   return (
     <div className="w-full bg-white border-b border-gray-200 sticky top-16 z-50 transition-all duration-300 shadow-sm hover:shadow-md">
       <div className="px-[5vw] py-1.5">
-        <div className="flex justify-between items-center">
+        {/* Make layout stack on mobile with space between elements */}
+        <div className="flex flex-col md:flex-row justify-between md:items-center gap-2 md:gap-0">
           {/* Texto a la izquierda más pequeño */}
           <div className="flex items-center gap-1.5 text-gray-400 text-xs">
             <span className="font-medium">Filtros</span>
@@ -164,248 +165,253 @@ const FilterExplorador = () => {
             {!isExplorarPage && <span>Encuentra la propiedad perfecta</span>}
           </div>
 
-          {/* Todos los filtros en línea */}
-          <div className="flex items-center gap-4 flex-wrap">
-            {/* Toggle Renta/Compra */}
-            <div className="flex bg-gray-50/80 rounded-full p-0.5 shadow-inner">
-              {['renta', 'compra'].map((type) => (
+          {/* Scrollable container for filters on mobile */}
+          <div className="overflow-x-auto pb-2 md:pb-0 -mx-[5vw] px-[5vw] md:mx-0 md:px-0">
+            {/* All filters horizontally scrollable on mobile, wrapping on larger screens */}
+            <div className="flex items-center gap-4 flex-nowrap md:flex-wrap min-w-max md:min-w-0">
+              {/* Toggle Renta/Compra */}
+              <div className="flex bg-gray-50/80 rounded-full p-0.5 shadow-inner">
+                {['renta', 'compra'].map((type) => (
                 <button
                   key={type}
                   onClick={() => handleTransactionTypeChange(type as 'renta' | 'compra')}
                   className={`
-                    px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
-                    ${filters.transactionType === type 
-                      ? 'bg-violet-100 text-violet-700 shadow-sm ring-2 ring-violet-200' 
-                      : 'text-gray-500 hover:text-violet-600 hover:bg-violet-50'}
+                  px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
+                  cursor-pointer
+                  ${filters.transactionType === type 
+                    ? 'bg-violet-100 text-violet-700 shadow-sm ring-2 ring-violet-200' 
+                    : 'text-gray-500 hover:text-violet-600 hover:bg-violet-50'}
                   `}
                 >
                   {type.charAt(0).toUpperCase() + type.slice(1)}
                 </button>
-              ))}
-            </div>
-
-            {/* Zona - más compacta */}
-            {isClient && (
-              <div className="relative w-32">
-                <select
-                  value={filters.selectedZone}
-                  onChange={(e) => updateFilter('selectedZone', e.target.value)}
-                  className={`
-                    w-full appearance-none rounded-full
-                    px-2.5 py-1.5 text-xs font-medium
-                    transition-all cursor-pointer
-                    ${filters.selectedZone 
-                    ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200' 
-                    : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
-                  `}
-                >
-                  <option value="">Zonas</option>
-                  {zones.map((zone) => (
-                    <option 
-                      key={zone.id} 
-                      value={zone.id}
-                      className={filters.selectedZone === zone.id ? '!text-violet-600' : ''}
-                    >
-                      {zone.name}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
+                ))}
               </div>
-            )}
 
-            {/* Precio - ajustes de tamaño */}
-            {isClient && (
-              <div className="flex items-center gap-2">
+              {/* Zona - más compacta */}
+              {isClient && (
+                <div className="relative w-28 sm:w-32">
+                  <select
+                    value={filters.selectedZone}
+                    onChange={(e) => updateFilter('selectedZone', e.target.value)}
+                    className={`
+                      w-full appearance-none rounded-full
+                      px-2.5 py-1.5 text-xs font-medium
+                      transition-all cursor-pointer
+                      ${filters.selectedZone 
+                      ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200' 
+                      : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
+                    `}
+                  >
+                    <option value="">Zonas</option>
+                    {zones.map((zone) => (
+                      <option 
+                        key={zone.id} 
+                        value={zone.id}
+                        className={filters.selectedZone === zone.id ? '!text-violet-600' : ''}
+                      >
+                        {zone.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              )}
+
+              {/* Precio - ajustes de tamaño */}
+              {isClient && (
+                <div className="flex items-center gap-2">
                 {/* Selector de moneda más pequeño */}
                 <div className="flex bg-gray-50/80 rounded-full p-0.5 shadow-inner">
                   {['MXN', 'USD'].map((curr) => (
-                    <button
-                      key={curr}
-                      onClick={() => setCurrency(curr as 'MXN' | 'USD')}
-                      className={`
-                        px-2 py-1 rounded-full text-xs font-medium transition-all duration-200
-                        ${currency === curr
-                          ? 'bg-violet-100 text-violet-700 shadow-sm ring-1 ring-violet-200'
-                          : 'text-gray-500 hover:text-violet-600 hover:bg-violet-50'}
-                      `}
-                      suppressHydrationWarning
-                    >
-                      {curr}
-                    </button>
+                  <button
+                    key={curr}
+                    onClick={() => setCurrency(curr as 'MXN' | 'USD')}
+                    className={`
+                    px-2 py-1 rounded-full text-xs font-medium transition-all duration-200
+                    cursor-pointer
+                    ${currency === curr
+                      ? 'bg-violet-100 text-violet-700 shadow-sm ring-1 ring-violet-200'
+                      : 'text-gray-500 hover:text-violet-600 hover:bg-violet-50'}
+                    `}
+                    suppressHydrationWarning
+                  >
+                    {curr}
+                  </button>
                   ))}
                 </div>
 
-                {/* Inputs de precio más pequeños */}
-                <div className={`
-                  flex items-center gap-2 rounded-full px-2.5 py-1.5
-                  ${(filters.priceRange[0] > 0 || filters.priceRange[1] < MAX_PRICE)
-                    ? 'bg-violet-50 ring-2 ring-violet-200'
-                    : 'bg-gray-50/80 border border-gray-200/75'}
-                `}>
-                  <div className="flex items-center">
-                    <input
-                      type="text"
-                      placeholder="Min"
-                      className="w-16 bg-transparent text-xs text-gray-600 placeholder-gray-400 focus:outline-none"
-                      value={minPriceInput}
-                      onChange={handleMinPriceChange}
-                      onBlur={() => {
-                        if (filters.priceRange[0] > 0) {
-                          setMinPriceInput(formatPrice(filters.priceRange[0]));
-                        }
-                      }}
-                      onFocus={(e) => {
-                        const val = e.target.value;
-                        e.target.value = '';
-                        e.target.value = val;
-                      }}
-                    />
-                    <span className="text-xs text-gray-500 ml-0.5" suppressHydrationWarning>{currency}</span>
-                  </div>
-                  
-                  <div className="h-3.5 w-px bg-gray-200"></div>
-                  
-                  <div className="flex items-center">
-                    <input
-                      type="text"
-                      placeholder="Max"
-                      className="w-16 bg-transparent text-xs text-gray-600 placeholder-gray-400 focus:outline-none"
-                      value={maxPriceInput}
-                      onChange={handleMaxPriceChange}
-                      onBlur={() => {
-                        if (filters.priceRange[1] > 0 && filters.priceRange[1] < MAX_PRICE) {
-                          setMaxPriceInput(formatPrice(filters.priceRange[1]));
-                        }
-                      }}
-                      onFocus={(e) => {
-                        const val = e.target.value;
-                        e.target.value = '';
-                        e.target.value = val;
-                      }}
-                    />
-                    <span className="text-xs text-gray-500 ml-0.5" suppressHydrationWarning>{currency}</span>
+                  {/* Inputs de precio más pequeños */}
+                  <div className={`
+                    flex items-center gap-2 rounded-full px-2.5 py-1.5
+                    ${(filters.priceRange[0] > 0 || filters.priceRange[1] < MAX_PRICE)
+                      ? 'bg-violet-50 ring-2 ring-violet-200'
+                      : 'bg-gray-50/80 border border-gray-200/75'}
+                  `}>
+                    <div className="flex items-center">
+                      <input
+                        type="text"
+                        placeholder="Min"
+                        className="w-14 sm:w-16 bg-transparent text-xs text-gray-600 placeholder-gray-400 focus:outline-none"
+                        value={minPriceInput}
+                        onChange={handleMinPriceChange}
+                        onBlur={() => {
+                          if (filters.priceRange[0] > 0) {
+                            setMinPriceInput(formatPrice(filters.priceRange[0]));
+                          }
+                        }}
+                        onFocus={(e) => {
+                          const val = e.target.value;
+                          e.target.value = '';
+                          e.target.value = val;
+                        }}
+                      />
+                      <span className="text-xs text-gray-500 ml-0.5" suppressHydrationWarning>{currency}</span>
+                    </div>
+                    
+                    <div className="h-3.5 w-px bg-gray-200"></div>
+                    
+                    <div className="flex items-center">
+                      <input
+                        type="text"
+                        placeholder="Max"
+                        className="w-14 sm:w-16 bg-transparent text-xs text-gray-600 placeholder-gray-400 focus:outline-none"
+                        value={maxPriceInput}
+                        onChange={handleMaxPriceChange}
+                        onBlur={() => {
+                          if (filters.priceRange[1] > 0 && filters.priceRange[1] < MAX_PRICE) {
+                            setMaxPriceInput(formatPrice(filters.priceRange[1]));
+                          }
+                        }}
+                        onFocus={(e) => {
+                          const val = e.target.value;
+                          e.target.value = '';
+                          e.target.value = val;
+                        }}
+                      />
+                      <span className="text-xs text-gray-500 ml-0.5" suppressHydrationWarning>{currency}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Recámaras */}
-            <div className="flex items-center gap-2">
-              <FaBed className="text-gray-400" />
-              <div className="flex gap-2">
-                {bedroomOptions.map((num) => (
-                  <button
-                    key={num}
-                    onClick={() => handleNumericFilter(num, filters.bedrooms, 'bedrooms')}
-                    className={`
-                      w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium
-                      transition-all duration-200 cursor-pointer relative group
-                      ${filters.bedrooms === (num === '3+' ? 3 : Number(num))
-                        ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
-                        : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
-                    `}
-                  >
-                    <span className={filters.bedrooms === (num === '3+' ? 3 : Number(num)) ? 'group-hover:opacity-0' : ''}>
-                      {num}
-                    </span>
-                    {filters.bedrooms === (num === '3+' ? 3 : Number(num)) && (
-                      <FaTimes className="w-3 h-3 absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Baños */}
-            <div className="flex items-center gap-2">
-              <FaBath className="text-gray-400" />
-              <div className="flex gap-2">
-                {bathroomOptions.map((num) => (
-                  <button
-                    key={num}
-                    onClick={() => handleNumericFilter(num, filters.bathrooms, 'bathrooms')}
-                    className={`
-                      w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium
-                      transition-all duration-200 cursor-pointer relative group
-                      ${filters.bathrooms === (num === '2+' ? 2 : Number(num))
-                        ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
-                        : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
-                    `}
-                  >
-                    <span className={filters.bathrooms === (num === '2+' ? 2 : Number(num)) ? 'group-hover:opacity-0' : ''}>
-                      {num}
-                    </span>
-                    {filters.bathrooms === (num === '2+' ? 2 : Number(num)) && (
-                      <FaTimes className="w-3 h-3 absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Amueblado - Solo en /explorar */}
-            {isExplorarPage && (
-              <button
-                onClick={() => updateFilter('isFurnished', !filters.isFurnished)}
-                className={`
-                  ${baseButtonStyles}
-                  ${filters.isFurnished ? selectedButtonStyles : unselectedButtonStyles}
-                  flex items-center gap-2
-                `}
-              >
-                {filters.isFurnished && <FaCheck className="w-3 h-3 text-violet-600" />}
-                Amueblado
-              </button>
-            )}
-
-            {/* Mascotas - Solo en /explorar */}
-            {isExplorarPage && (
-              <button
-                onClick={() => updateFilter('petsAllowed', !filters.petsAllowed)}
-                className={`
-                  ${baseButtonStyles}
-                  ${filters.petsAllowed ? selectedButtonStyles : unselectedButtonStyles}
-                  flex items-center gap-2
-                `}
-              >
-                {filters.petsAllowed && <FaCheck className="w-3 h-3 text-violet-600" />}
-                Mascotas
-              </button>
-            )}
-
-            {/* Estacionamientos */}
-            {isExplorarPage && (
+              {/* Recámaras */}
               <div className="flex items-center gap-2">
-                <FaCar className="text-gray-400" />
+                <FaBed className="text-gray-400" />
                 <div className="flex gap-2">
-                  {parkingOptions.map((num) => (
+                  {bedroomOptions.map((num) => (
                     <button
                       key={num}
-                      onClick={() => handleNumericFilter(num, filters.parkingSpots, 'parkingSpots')}
+                      onClick={() => handleNumericFilter(num, filters.bedrooms, 'bedrooms')}
                       className={`
                         w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium
                         transition-all duration-200 cursor-pointer relative group
-                        ${filters.parkingSpots === (num === '3+' ? 3 : Number(num))
+                        ${filters.bedrooms === (num === '3+' ? 3 : Number(num))
                           ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
                           : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
                       `}
                     >
-                      <span className={filters.parkingSpots === (num === '3+' ? 3 : Number(num)) ? 'group-hover:opacity-0' : ''}>
+                      <span className={filters.bedrooms === (num === '3+' ? 3 : Number(num)) ? 'group-hover:opacity-0' : ''}>
                         {num}
                       </span>
-                      {filters.parkingSpots === (num === '3+' ? 3 : Number(num)) && (
+                      {filters.bedrooms === (num === '3+' ? 3 : Number(num)) && (
                         <FaTimes className="w-3 h-3 absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                       )}
                     </button>
                   ))}
                 </div>
               </div>
-            )}
+
+              {/* Baños */}
+              <div className="flex items-center gap-2">
+                <FaBath className="text-gray-400" />
+                <div className="flex gap-2">
+                  {bathroomOptions.map((num) => (
+                    <button
+                      key={num}
+                      onClick={() => handleNumericFilter(num, filters.bathrooms, 'bathrooms')}
+                      className={`
+                        w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium
+                        transition-all duration-200 cursor-pointer relative group
+                        ${filters.bathrooms === (num === '2+' ? 2 : Number(num))
+                          ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
+                          : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
+                      `}
+                    >
+                      <span className={filters.bathrooms === (num === '2+' ? 2 : Number(num)) ? 'group-hover:opacity-0' : ''}>
+                        {num}
+                      </span>
+                      {filters.bathrooms === (num === '2+' ? 2 : Number(num)) && (
+                        <FaTimes className="w-3 h-3 absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Amueblado - Solo en /explorar */}
+              {isExplorarPage && (
+                <button
+                onClick={() => updateFilter('isFurnished', !filters.isFurnished)}
+                className={`
+                  ${baseButtonStyles}
+                  ${filters.isFurnished ? selectedButtonStyles : unselectedButtonStyles}
+                  flex items-center gap-2 cursor-pointer
+                `}
+                >
+                {filters.isFurnished && <FaCheck className="w-3 h-3 text-violet-600" />}
+                Amueblado
+                </button>
+              )}
+
+              {/* Mascotas - Solo en /explorar */}
+              {isExplorarPage && (
+                <button
+                onClick={() => updateFilter('petsAllowed', !filters.petsAllowed)}
+                className={`
+                  ${baseButtonStyles}
+                  ${filters.petsAllowed ? selectedButtonStyles : unselectedButtonStyles}
+                  flex items-center gap-2 cursor-pointer
+                `}
+                >
+                {filters.petsAllowed && <FaCheck className="w-3 h-3 text-violet-600" />}
+                Mascotas
+                </button>
+              )}
+
+              {/* Estacionamientos */}
+              {isExplorarPage && (
+                <div className="flex items-center gap-2">
+                  <FaCar className="text-gray-400" />
+                  <div className="flex gap-2">
+                    {parkingOptions.map((num) => (
+                      <button
+                        key={num}
+                        onClick={() => handleNumericFilter(num, filters.parkingSpots, 'parkingSpots')}
+                        className={`
+                          w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium
+                          transition-all duration-200 cursor-pointer relative group
+                          ${filters.parkingSpots === (num === '3+' ? 3 : Number(num))
+                            ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
+                            : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
+                        `}
+                      >
+                        <span className={filters.parkingSpots === (num === '3+' ? 3 : Number(num)) ? 'group-hover:opacity-0' : ''}>
+                          {num}
+                        </span>
+                        {filters.parkingSpots === (num === '3+' ? 3 : Number(num)) && (
+                          <FaTimes className="w-3 h-3 absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

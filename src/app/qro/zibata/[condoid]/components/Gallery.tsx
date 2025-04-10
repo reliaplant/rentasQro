@@ -132,16 +132,16 @@ export default function Gallery({ name, imageUrls, amenities }: GalleryProps) {
   };
 
   return (
-    <div className="mt-12 mb-12 px-6 md:px-0 border-t pt-6 border-gray-200">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold">Galería de {name}</h3>
+    <div className="mt-8 md:mt-12 mb-8 md:mb-12 px-4 md:px-6 -mx-4 md:mx-0 border-t pt-6 border-gray-200">
+      <div className="flex items-center justify-between mb-4 md:mb-6 px-4 md:px-0">
+        <h3 className="text-base md:text-lg font-semibold">Galería de {name}</h3>
         {imageUrls && imageUrls.length > 1 && (
           <button 
             onClick={() => {
               setInitialIndex(0);
               setIsGalleryOpen(true);
             }}
-            className="text-sm text-gray-400 hover:text-gray-800 cursor-pointer transition-colors flex items-center gap-1"
+            className="text-xs md:text-sm text-gray-400 hover:text-gray-800 cursor-pointer transition-colors flex items-center gap-1"
           >
             Ver todas ({imageUrls.length})
             <ArrowUpRight size={16} />
@@ -149,19 +149,19 @@ export default function Gallery({ name, imageUrls, amenities }: GalleryProps) {
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-4 md:space-y-2">
         {groupedImages && Object.entries(groupedImages).map(([category, images]) => (
-          <div key={category} className="flex gap-2">
-            {/* Category Label - Simplified */}
-            <div className="w-64 flex-shrink-0">
-              <div className="bg-white p-4 rounded-lg ">
-                <h4 className="font-medium text-xl text-gray-900">{category}</h4>
-                <p className="text-sm text-gray-500 mt-1">{images.length} fotos</p>
+          <div key={category} className="flex flex-col md:flex-row gap-2">
+            {/* Category Label - Mobile optimized */}
+            <div className="w-full md:w-64 md:flex-shrink-0 px-4 md:px-0">
+              <div className="bg-white p-3 md:p-4 rounded-lg">
+                <h4 className="font-medium text-lg md:text-xl text-gray-900">{category}</h4>
+                <p className="text-xs md:text-sm text-gray-500 mt-1">{images.length} fotos</p>
               </div>
             </div>
 
             {/* Photos Grid */}
-            <div className="flex-grow">
+            <div className="flex-grow px-4 md:px-0 mt-2 md:mt-0">
               {renderPhotoGrid(images)}
             </div>
           </div>

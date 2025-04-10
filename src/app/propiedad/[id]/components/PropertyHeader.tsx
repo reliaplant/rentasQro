@@ -88,37 +88,40 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
           </div>
 
           {/* Features grid */}
-          <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-3 gap-6">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-white rounded-lg shadow-sm">
-                <BiDoorOpen className="text-gray-600 text-xl" />
+              <BiDoorOpen className="text-gray-600 text-xl" />
               </div>
               <div>
-                <span className="block text-xl font-light">{property.bedrooms}</span>
-                <span className="text-sm text-gray-500">Habitaciones</span>
+              <span className="block text-xl font-light">{property.bedrooms}</span>
+              <span className="text-sm text-gray-500 hidden sm:block">Habitaciones</span>
+              <span className="text-sm text-gray-500 sm:hidden">Hab.</span>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
               <div className="p-2 bg-white rounded-lg shadow-sm">
-                <BiBath className="text-gray-600 text-xl" />
+              <BiBath className="text-gray-600 text-xl" />
               </div>
               <div>
-                <span className="block text-xl font-light">{property.bathrooms}</span>
-                <span className="text-sm text-gray-500">Baños</span>
+              <span className="block text-xl font-light">{property.bathrooms}</span>
+              <span className="text-sm text-gray-500 hidden sm:block">Baños</span>
+              <span className="text-sm text-gray-500 sm:hidden">Bañ.</span>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
               <div className="p-2 bg-white rounded-lg shadow-sm">
-                <BiCar className="text-gray-600 text-xl" />
+              <BiCar className="text-gray-600 text-xl" />
               </div>
               <div>
-                <span className="block text-xl font-light">{property.parkingSpots}</span>
-                <span className="text-sm text-gray-500">Estacionamiento</span>
+              <span className="block text-xl font-light">{property.parkingSpots}</span>
+              <span className="text-sm text-gray-500 hidden sm:block">Estacionamiento</span>
+              <span className="text-sm text-gray-500 sm:hidden">Est.</span>
               </div>
             </div>
-          </div>
+            </div>
         </div>
       </div>
     </div>

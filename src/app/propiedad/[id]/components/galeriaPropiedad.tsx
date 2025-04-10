@@ -194,56 +194,129 @@ export default function GaleriaPropiedad({
         </div>
 
         {/* Main Image with Navigation Controls */}
-        <div className="flex-1 flex items-center justify-center p-8 z-50 relative group">
+        <div className="flex-1 flex items-center justify-center p-0 md:p-8 z-50 relative group w-full">
             {/* Current Image */}
-            <div className="relative z-10 w-full max-w-6xl aspect-[16/9] flex items-center justify-center">
-                <div className="relative w-full h-full">
-                    <Image
-                        src={images[currentIndex]}
-                        alt={`Imagen ${currentIndex + 1}`}
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
-                        priority
-                        className="object-contain"
-                        quality={100}
-                    />
-                </div>
-            </div>
+            <motion.div 
+                className="relative z-10 w-full h-full flex items-center justify-center"
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.3}
+                onDragEnd={(e, { offset, velocity }) => {
+                    const swipe = Math.abs(offset.x) > 100 || Math.abs(velocity.x) > 300;
+                    
+                    if (swipe) {
+                        if (offset.x > 0) {
+                            // Swiped right, go to previous image
+                            setCurrentIndex(prev => (prev - 1 + images.length) % images.length);
+                        } else {
+                            // Swiped left, go to next image
+                            setCurrentIndex(prev => (prev + 1) % images.length);
+                        }
+                    }
+                }}
+            >
+                <AnimatePresence initial={false} mode="wait">
+                    <motion.div
+                        key={currentIndex}
+                        initial={{ opacity: 0, x: 100 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -100 }}
+                        transition={{ duration: 0.3 }}
+                        className="relative w-full h-full md:max-w-6xl md:aspect-[16/9]"
+                    >
+                        <Image
+                            src={images[currentIndex]}
+                            alt={`Imagen ${currentIndex + 1}`}
+                            fill
+                            sizes="100vw"
+                            priority
+                            className="object-contain w-full h-full"
+                            quality={100}
+                        />
+                    </motion.div>
+                </AnimatePresence>
+            </motion.div>
 
-            {/* Left Arrow */}
+            {/* Left Arrow - Make always visible but translucent */}
             <button 
                 onClick={() => setCurrentIndex(prev => (prev - 1 + images.length) % images.length)}
-                className="absolute left-12 p-3 
-                        opacity-20 group-hover:opacity-100 transition-opacity duration-100
-                        hover:cursor-pointer"
+                className="absolute left-2 md:left-12 p-3 z-20
+                        bg-black/10 hover:bg-black/30 rounded-full
+                        opacity-60 hover:opacity-100 transition-all duration-200
+                        hidden md:flex items-center justify-center"
             >
                 <svg 
-                className="w-16 h-16 text-violet-400 hover:text-violet-600 transition-colors" 
+                className="w-8 h-8 text-white" 
                 fill="none" 
                 viewBox="0 0 24 24" 
                 stroke="currentColor"
                 >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7"/>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
                 </svg>
             </button>
 
-            {/* Right Arrow */}
+            {/* Right Arrow - Make always visible but translucent */}
             <button 
                 onClick={() => setCurrentIndex(prev => (prev + 1) % images.length)}
-                className="absolute right-12 p-3
-                        opacity-20 group-hover:opacity-100 transition-opacity duration-100
-                        hover:cursor-pointer"
+                className="absolute right-2 md:right-12 p-3 z-20
+                        bg-black/10 hover:bg-black/30 rounded-full
+                        opacity-60 hover:opacity-100 transition-all duration-200
+                        hidden md:flex items-center justify-center"
             >
                 <svg 
-                className="w-16 h-16 text-violet-400 hover:text-violet-600 transition-colors" 
+                className="w-8 h-8 text-white" 
                 fill="none" 
                 viewBox="0 0 24 24" 
                 stroke="currentColor"
                 >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7"/>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
                 </svg>
             </button>
+
+            {/* Add explicit touch navigation buttons for mobile */}
+            <button 
+                onClick={() => setCurrentIndex(prev => (prev - 1 + images.length) % images.length)}
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 p-2 z-20
+                        bg-black/20 rounded-full
+                        md:hidden flex items-center justify-center"
+                aria-label="Previous image"
+            >
+                <svg 
+                className="w-6 h-6 text-white" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+                >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+
+            <button 
+                onClick={() => setCurrentIndex(prev => (prev + 1) % images.length)}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 z-20
+                        bg-black/20 rounded-full
+                        md:hidden flex items-center justify-center"
+                aria-label="Next image"
+            >
+                <svg 
+                className="w-6 h-6 text-white" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+                >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
+            
+            {/* Mobile swipe indicator - only visible on smaller screens */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 md:hidden">
+                <div className="flex gap-1 bg-black/40 backdrop-blur-sm px-3 py-2 rounded-full">
+                    <div className="w-8 h-1 bg-white/40 rounded-full"></div>
+                    <div className="w-2 h-1 bg-white/90 rounded-full"></div>
+                </div>
+            </div>
         </div>
+        
         {/* Thumbnails */}
         <div className="p-6 mt-4">
             <div className="max-w-8xl mx-auto flex flex-col items-center">

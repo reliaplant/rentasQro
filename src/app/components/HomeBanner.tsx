@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import AdvisorModal from './AdvisorModal';
 
 export default function HomeBanner() {
   return (
@@ -10,23 +11,30 @@ export default function HomeBanner() {
           <div className="absolute w-[300px] h-[200px] bg-cyan-400/70 rounded-full blur-3xl animate-[wave_10s_ease-in-out_infinite] top-40 left-1/2"></div>
           <div className="absolute w-[200px] h-[300px] bg-yellow-400/60 rounded-full blur-3xl animate-[float_12s_ease-in-out_infinite] bottom-0 -right-20"></div>
         </div>
-        
+
         {/* Content container */}
-        <div className="relative z-10 p-8 lg:p-16 h-full flex flex-col justify-center">
+        <div className="relative z-10 p-8 lg:p-[5vw] h-full flex flex-col justify-center">
           <div className="space-y-6 max-w-xl">
             <div className="space-y-4">
               <h1 className="text-3xl md:text-4xl font-semibold leading-tight !text-white">
-                Encuentra tu 
+                Encuentra tu
                 <span className="!bg-gradient-to-r !from-amber-300 font-normal !to-amber-500 !text-transparent !bg-clip-text shadow-2l p-2">piso</span>
                 en Querétaro
-              </h1> 
+              </h1>
               <p className="text-lg md:text-xl text-white/90">
                 La ciudad con mayor crecimiento en México
               </p>
               <div className="flex gap-4 pt-2">
-                <button className="bg-white text-black px-5 py-2.5 rounded-full font-medium hover:bg-gray-100 transition-colors cursor-pointer shadow-lg hover:shadow-xl transition-shadow">
-                  Hablar con un asesor
-                </button>
+                <AdvisorModal
+                  page="Home Page Banner"
+                  rounded="full"
+                  backgroundColor="bg-white"
+                  textColor="text-black"
+                  showIcon={true}
+                  iconName="FaChevronRight"
+                  iconPosition="right"
+                  buttonText="Habla con un asesor" 
+                />
               </div>
             </div>
 

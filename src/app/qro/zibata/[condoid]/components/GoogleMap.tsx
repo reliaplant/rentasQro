@@ -7,9 +7,9 @@ interface GoogleMapProps {
 
 export default function GoogleMap({ googlePlaceId, formattedAddress }: GoogleMapProps) {
   return (
-    <div className="space-y-4 px-6 md:px-0">
-      <h3 className="text-lg font-semibold">Ubicación en Google Maps</h3>
-      <div className="aspect-video relative rounded-xl overflow-hidden">
+    <div className="space-y-3 md:space-y-4 px-4 md:px-6">
+      <h3 className="text-base md:text-lg font-semibold">Ubicación en Google Maps</h3>
+      <div className="aspect-[4/3] md:aspect-video relative rounded-lg overflow-hidden">
         {googlePlaceId ? (
           <iframe
             width="100%"
@@ -22,7 +22,7 @@ export default function GoogleMap({ googlePlaceId, formattedAddress }: GoogleMap
           />
         ) : (
           <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-            <span className="text-gray-400">Ubicación no disponible</span>
+            <span className="text-gray-400 text-sm">Ubicación no disponible</span>
           </div>
         )}
       </div>
@@ -31,10 +31,10 @@ export default function GoogleMap({ googlePlaceId, formattedAddress }: GoogleMap
           href={`https://www.google.com/maps/place/?q=place_id:${googlePlaceId}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs md:text-sm text-gray-600 hover:text-violet-600"
+          className="text-xs md:text-sm text-gray-600 hover:text-violet-600 block"
         >
           <MapPin size={14} className="inline mr-1" />
-          {formattedAddress}
+          <span className="text-xs line-clamp-1">{formattedAddress}</span>
         </a>
       )}
     </div>

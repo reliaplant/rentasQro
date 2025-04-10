@@ -1,6 +1,5 @@
 import { MetadataRoute } from 'next'
 import { getZones, getCondominiums } from '@/app/shared/firebase'
-import { CondoData } from '@/app/shared/interfaces'
 
 type SitemapEntry = {
   url: string;
@@ -20,7 +19,7 @@ function sanitizeUrlSegment(segment: string): string {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://pizo.mx'; // Asegúrate de que esta URL sea correcta
+  const baseUrl = 'https://pizo.mx'; // Ensure this URL is correct
 
   try {
     const zones = await getZones();
@@ -59,6 +58,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
       }));
 
+    // Make sure we're returning a correctly formatted sitemap
     return [...staticRoutes, ...zoneRoutes, ...condoRoutes];
   } catch (error) {
     console.error('Error generating sitemap:', error);

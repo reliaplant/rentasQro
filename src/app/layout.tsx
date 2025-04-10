@@ -27,7 +27,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://pizo.mx'),
   title: {
-    default: "RentasQro - Propiedades en Querétaro",
+    default: "Encuentra tu piso - Propiedades en Querétaro",
     template: "%s | RentasQro"
   },
   description: "Encuentra casas y departamentos en renta y venta en los mejores condominios de Querétaro como Zibatá, Juriquilla y más",
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     telephone: false,
   },
   openGraph: {
-    title: "RentasQro - Propiedades en Querétaro",
+    title: "Encuentra tu piso - Propiedades en Querétaro",
     description: "Encuentra casas y departamentos en renta y venta en los mejores condominios de Querétaro",
     url: 'https://pizo.mx', // Actualizar para que coincida con metadataBase
     siteName: 'RentasQro',
@@ -60,24 +60,23 @@ export const metadata: Metadata = {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'RentasQro - Propiedades en Querétaro'
+        alt: 'Encuentra tu piso - Propiedades en Querétaro'
       }
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'RentasQro - Propiedades en Querétaro',
+    title: 'Encuentra tu piso - Propiedades en Querétaro',
     description: 'Encuentra casas y departamentos en renta y venta en los mejores condominios de Querétaro',
     images: ['/twitter-image.jpg'],
     creator: '@rentasqro'
   },
   icons: {
     icon: [
-      { url: '/favicon.ico' },
-      { url: '/icon.png', type: 'image/png' }
+      { url: '/assets/logos/logoPizo.svg', type: 'image/svg+xml' }
     ],
     apple: [
-      { url: '/apple-icon.png', type: 'image/png' }
+      { url: '/assets/logos/logoPizo.svg', type: 'image/svg+xml' }
     ],
   },
   manifest: '/site.webmanifest',

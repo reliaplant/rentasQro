@@ -73,7 +73,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
                   </div>
                 </div>
                 <p className="text-xs text-gray-600">
-                  Tu XXX estará ubicado en este exclusivo condominio
+                  Ubicado en este exclusivo condominio
                 </p>
               </div>
 
@@ -100,10 +100,13 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
       {/* Zibata Map Section */}
       {condoData.polygonId && (
         <div className="mt-12 mb-12">
-          <h3 className="text-lg font-semibold mb-4">Mapa interactivo de Zibata</h3>
-          <div className="bg-white rounded-lg shadow-md overflow-hidden h-[80vh]">
+            <h3 className="text-lg font-semibold mb-4">
+            <span className="hidden md:inline">Mapa interactivo de Zibata</span>
+            <span className="md:hidden">Mapa de Zibata</span>
+            </h3>
+            <div className="overflow-hidden h-[40vh] md:h-[80vh]">
             <ZibataMap highlightedPolygonId={condoData.polygonId} />
-          </div>
+            </div>
         </div>
       )}
 
@@ -191,7 +194,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
       </div>
 
       {/* Modern Photo Grid */}
-      <div className="mt-12 mb-12 px-6 md:px-0">
+      <div className="mt-12 mb-12 md:px-0">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Galería de {condoData.name}</h3>
           {condoData.imageUrls && condoData.imageUrls.length > 4 && (
@@ -261,7 +264,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
       />
 
       {/* Map */}
-      <div className="space-y-4 px-6 md:px-0">
+      <div className="space-y-4 ">
 
         <h3 className="text-lg font-semibold">Ubicación en Google Maps</h3>
         <div className="aspect-video relative rounded-xl overflow-hidden">
@@ -294,7 +297,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
         )}
       </div>
 
-      <div className="mt-16 h-[35vh] md:px-0 px-6">
+      <div className="mt-16 h-[35vh]">
 
         {/* Street View */}
         <div className="space-y-4 flex flex-col h-full">
@@ -310,12 +313,15 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
                 className="object-cover transition-all group-hover:brightness-75"
                 onClick={() => window.open(condoData.streetViewLink, '_blank')}
               />
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <div 
+                className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => window.open(condoData.streetViewLink, '_blank')}
+                >
                 <span className="text-white flex items-center gap-2 bg-black/50 px-4 py-2 rounded-full">
                 Ver en Google Street View
                 <ArrowUpRight size={16} />
                 </span>
-              </div>
+                </div>
               <button
                 className="absolute top-2 right-2 p-1.5 rounded-full border border-gray-300 bg-white shadow-[0_2px_4px_rgba(0,0,0,0.3)] hover:bg-gray-50 hover:scale-125 hover:cursor-pointer transition-transform"
                 onClick={() => window.open(condoData.streetViewLink, '_blank')}
@@ -348,7 +354,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
       </div>
 
       {/* Reviews section */}
-      <div className="mt-2 md:mt-16 mt-8 md:bg-white bg-gray-50 md:p-0 p-8">
+      <div className="mt-2 md:mt-16 mt-8 md:bg-white">
 
         <h3 className="text-xl font-semibold mb-6">Reseñas sobre {condoData.name}</h3>
 

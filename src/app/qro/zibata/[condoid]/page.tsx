@@ -110,7 +110,7 @@ export default async function CondoDetailPage(props: any) {
     } = condo;
 
     return (
-      <div className="max-w-5xl mt-24 mx-auto px-4 pb-48">
+      <div className="max-w-5xl mt-0 md:mt-24 mx-auto md:px-4 pb-48">
         <Header
           name={name}
           coverImage={portada || ''}
@@ -123,14 +123,15 @@ export default async function CondoDetailPage(props: any) {
         />
 
         {/* Amenities Section */}
+        <div className='px-4 md:px-0'>
         <AmenitiesSection amenities={condo.amenities || []} />
+        </div>
 
-
-        <div className="flex items-center gap-2 mb-8 mt-24">
+        <div className="flex items-center gap-2 mb-8 mt-24 px-4 md:px-0">
           <h3 className="text-lg font-semibold">Precios de renta y venta</h3>
         </div>
         {/* Price Information */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 gap-6 mb-8 px-4 md:px-0">
           <PriceBar
             minPrice={condo.rentPriceMin}
             avgPrice={condo.rentPriceAvg}
@@ -146,21 +147,20 @@ export default async function CondoDetailPage(props: any) {
         </div>
 
         {/* Map showing the condo location */}
-        <div className="mt-24">
+        <div className="mt-24  px-4 md:px-0">
           <h3 className="text-lg font-semibold mb-3">Ubicación en Zibatá</h3>
           <p className="text-sm text-gray-500 mt-2">
             Mapa indicativo de la ubicación del condominio
           </p>
-          <div className="mt-10 w-full h-156 rounded-lg overflow-hidden">
+            <div className="mt-10 w-full h-[300px] md:h-156 rounded-lg overflow-hidden">
             <ZibataMapWrapper
               highlightedPolygonId={polygonId}
               height="100%"
             />
-          </div>
-
+            </div>
         </div>
 
-        <div className='mt-24'></div>
+        <div className='mt-24 '></div>
         {/* Gallery Section */}
         <Gallery
           name={condo.name}
@@ -168,7 +168,7 @@ export default async function CondoDetailPage(props: any) {
           amenities={condo.amenities}
         />
 
-        <div className='mt-24'></div>
+        <div className='mt-24 px-4 md:px-0'></div>
 
         {/* Google Maps Section */}
         <GoogleMap
@@ -176,7 +176,7 @@ export default async function CondoDetailPage(props: any) {
           formattedAddress={condo.placeDetails?.formatted_address}
         />
 
-        <div className='mt-24'></div>
+        <div className='mt-24 px-4 md:px-0'></div>
 
         {/* Street View Section */}
         <StreetView

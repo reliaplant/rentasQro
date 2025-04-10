@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { Map, Building, Trees, School, LandPlot, Globe, Car, ShoppingBag, GraduationCap, Dog, Clock, Store, HeartPulse, ShoppingCart, Plane, MapPin, ArrowUpRight } from 'lucide-react';
 import { BiBall } from 'react-icons/bi';
 import { IoGolf } from 'react-icons/io5';
+import AdvisorModal from '@/app/components/AdvisorModal';
 
 export default function ZibataInfo() {
   const parkImages = [
@@ -50,9 +51,9 @@ export default function ZibataInfo() {
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow-sm">
+    <div className="bg-white ">
       {/* Hero Section */}
-      <div className="relative h-[280px] md:h-[400px] w-full overflow-hidden rounded-t-lg">
+      <div className="relative h-[280px] md:h-[400px] w-full overflow-hidden rounded-t-4xl">
         <Image
           src="/assets/zibata/zibata.jpg"
           alt="Zibatá - Vista aérea"
@@ -116,7 +117,7 @@ export default function ZibataInfo() {
           {/* Park Images Grid */}
           <div className="mt-5">
             <h4 className="font-medium text-sm text-gray-600 mb-2">Parques de Zibatá</h4>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {parkImages.map((src, index) => (
                 <div key={index} className="relative aspect-square rounded-md overflow-hidden">
                   <Image
@@ -356,14 +357,24 @@ export default function ZibataInfo() {
           </p>
         </div>
 
-        {/* Contact CTA */}
-        <div className="bg-violet-50 border border-violet-100 rounded-lg p-4 text-center">
-          <h3 className="text-lg font-medium mb-2 text-violet-800">¿Te gustaría vivir aquí?</h3>
-          <p className="text-sm text-violet-600 mb-4">Contacta a nuestros agentes para conocer las propiedades disponibles</p>
-          <button className="bg-violet-600 text-white font-medium py-2 px-6 rounded-md hover:bg-violet-700 transition-colors duration-300 text-sm">
-            Contactar ahora
-          </button>
-        </div>
+          {/* Contact CTA */}
+          <div className="bg-violet-50 border border-violet-100 rounded-lg p-6 text-center">
+            <h3 className="text-xl font-medium mb-2 text-violet-800">¿Te gustaría vivir aquí?</h3>
+            <p className="text-sm text-violet-600 mb-4">Contacta a nuestros agentes para conocer las propiedades disponibles</p>
+            <div className="flex justify-center pt-1">
+              <AdvisorModal
+                page="CTA propiedad page footer"
+                rounded="full"
+                backgroundColor="bg-violet-600"
+                textColor="text-white"
+                showIcon={true}
+                iconName="FaChevronRight"
+                iconPosition="right"
+                buttonText="Habla con un asesor" 
+              />
+            </div>
+            </div>
+
       </div>
     </div>
   );

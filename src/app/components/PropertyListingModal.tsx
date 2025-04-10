@@ -19,10 +19,12 @@ export default function PropertyListingModal({ isOpen, onClose }: PropertyListin
   // Form state
   const [step, setStep] = useState(1);
   const [userType, setUserType] = useState<UserType>(null);
+  const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   
   // Validation state
+  const [fullNameError, setFullNameError] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [emailError, setEmailError] = useState('');
   
@@ -31,8 +33,10 @@ export default function PropertyListingModal({ isOpen, onClose }: PropertyListin
     if (!isOpen) {
       setStep(1);
       setUserType(null);
+      setFullName('');
       setPhone('');
       setEmail('');
+      setFullNameError('');
       setPhoneError('');
       setEmailError('');
     }
@@ -40,6 +44,22 @@ export default function PropertyListingModal({ isOpen, onClose }: PropertyListin
   
   // Don't render anything if modal is closed
   if (!isOpen) return null;
+  
+  // Full Name validation
+  function validateFullName(value: string): boolean {
+    if (!value.trim()) {
+      setFullNameError('El nombre es requerido');
+      return false;
+    }
+    
+    if (value.trim().length < 3) {
+      setFullNameError('El nombre debe tener al menos 3 caracteres');
+      return false;
+    }
+    
+    setFullNameError('');
+    return true;
+  }
   
   // Phone validation
   function validatePhone(value: string): boolean {
@@ -80,7 +100,7 @@ export default function PropertyListingModal({ isOpen, onClose }: PropertyListin
   
   // Form validation
   const isFormValid = () => {
-    return userType && !phoneError && !emailError && phone && email;
+    return userType && !fullNameError && !phoneError && !emailError && fullName && phone && email;
   };
   
   // Handle user type selection
@@ -100,7 +120,7 @@ export default function PropertyListingModal({ isOpen, onClose }: PropertyListin
     if (!isFormValid()) return;
     
     const userTypeText = userType === 'advisor' ? 'Asesor Inmobiliario' : 'Dueño de propiedad';
-    const message = `${MESSAGE}\nTipo: ${userTypeText}\nTeléfono: ${phone}\nCorreo: ${email}`;
+    const message = `${MESSAGE}\nTipo: ${userTypeText}\nNombre: ${fullName}\nTeléfono: ${phone}\nCorreo: ${email}`;
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
     onClose();
@@ -165,6 +185,25 @@ export default function PropertyListingModal({ isOpen, onClose }: PropertyListin
                 </h2>
                 
                 <div className="space-y-4">
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Nombre completo"
+                      value={fullName}
+                      onChange={(e) => {
+                        setFullName(e.target.value);
+                        validateFullName(e.target.value);
+                      }}
+                      onBlur={(e) => validateFullName(e.target.value)}
+                      className={`w-full px-4 py-2 rounded-lg border ${
+                        fullNameError ? 'border-red-300' : 'border-gray-200'
+                      } focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all`}
+                    />
+                    {fullNameError && (
+                      <p className="mt-1 text-xs text-red-500">{fullNameError}</p>
+                    )}
+                  </div>
+
                   <div>
                     <input
                       type="tel"

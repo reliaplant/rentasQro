@@ -19,15 +19,52 @@ export default function ZibataMap({
 }: ZibataMapProps) {
   const [hoveredPolygonId, setHoveredPolygonId] = useState<string | null>(null);
   const [isInfoPanelHovered, setIsInfoPanelHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
   const infoRef = useRef<HTMLDivElement>(null);
 
   // Use passed highlightedPolygonId instead of hardcoded value
   const DESTACADO = highlightedPolygonId || null;
 
+  // Detect if user is on a mobile device
+  useEffect(() => {
+    const checkIfMobile = () => {
+      const mobileQuery = window.matchMedia('(max-width: 768px)');
+      setIsMobile(mobileQuery.matches);
+    };
+    
+    // Check immediately
+    checkIfMobile();
+    
+    // Set up listener for screen size changes
+    const mediaQueryList = window.matchMedia('(max-width: 768px)');
+    const listener = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    
+    // Add the listener (with compatibility handling)
+    if (mediaQueryList.addEventListener) {
+      mediaQueryList.addEventListener('change', listener);
+    } else {
+      // For older browsers
+      mediaQueryList.addListener(listener);
+    }
+    
+    // Clean up
+    return () => {
+      if (mediaQueryList.removeEventListener) {
+        mediaQueryList.removeEventListener('change', listener);
+      } else {
+        // For older browsers
+        mediaQueryList.removeListener(listener);
+      }
+    };
+  }, []);
+
   // This effect adds a small delay before hiding the info panel
   // to prevent flickering and improve user experience
   useEffect(() => {
+    // Skip on mobile devices
+    if (isMobile) return;
+    
     function handleMouseMove(e: MouseEvent) {
       // If we're hovering over a polygon and the info panel exists
       if (hoveredPolygonId && infoRef.current) {
@@ -47,9 +84,12 @@ export default function ZibataMap({
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, [hoveredPolygonId]);
+  }, [hoveredPolygonId, isMobile]);
   
   const handlePolygonHover = (polygonId: string | null) => {
+    // Do nothing on mobile
+    if (isMobile) return;
+    
     // Only update state if we're not hovering the info panel
     if (!isInfoPanelHovered) {
       setHoveredPolygonId(polygonId);
@@ -57,6 +97,9 @@ export default function ZibataMap({
   };
 
   const handlePolygonClick = (polygonId: string) => {
+    // Do nothing on mobile
+    if (isMobile) return;
+    
     // Call the callback if provided (for any custom handling)
     if (onPolygonClick) {
       onPolygonClick(polygonId);
@@ -125,19 +168,19 @@ export default function ZibataMap({
               strokeWidth={4}
               style={{
                 transition: "all 0.3s ease",
-                cursor: "pointer",
+                cursor: isMobile ? "default" : "pointer",
                 opacity: 0.85,
                 zIndex: 10
               }}
-              onMouseEnter={() => handlePolygonHover(polygon.id)}
-              onMouseLeave={() => handlePolygonHover(null)}
-              onClick={() => handlePolygonClick(polygon.id)}
+              onMouseEnter={isMobile ? undefined : () => handlePolygonHover(polygon.id)}
+              onMouseLeave={isMobile ? undefined : () => handlePolygonHover(null)}
+              onClick={isMobile ? undefined : () => handlePolygonClick(polygon.id)}
             />
           ))
         }
         
-        {/* Render the hovered polygon (if it's not the highlighted one) */}
-        {hoveredPolygonId && hoveredPolygonId !== DESTACADO && (
+        {/* Render the hovered polygon (if it's not the highlighted one) - Only on desktop */}
+        {!isMobile && hoveredPolygonId && hoveredPolygonId !== DESTACADO && (
           <path
             d={polygons.find(p => p.id === hoveredPolygonId)?.path}
             fill="#8A2BE2" // Purple when hovered
@@ -165,19 +208,19 @@ export default function ZibataMap({
             className="destacado"
             style={{
               transition: "all 0.3s ease",
-              cursor: "pointer",
+              cursor: isMobile ? "default" : "pointer",
               opacity: 1,
               zIndex: 30, // Highest z-index
               position: "relative" // Needed for z-index to work properly in SVG
             }}
-            onMouseEnter={() => handlePolygonHover(DESTACADO)}
-            onMouseLeave={() => handlePolygonHover(null)}
-            onClick={() => handlePolygonClick(DESTACADO)}
+            onMouseEnter={isMobile ? undefined : () => handlePolygonHover(DESTACADO)}
+            onMouseLeave={isMobile ? undefined : () => handlePolygonHover(null)}
+            onClick={isMobile ? undefined : () => handlePolygonClick(DESTACADO)}
           />
         )}
         
-        {/* If the highlighted polygon is also hovered, show it with enhanced styles */}
-        {hoveredPolygonId && hoveredPolygonId === DESTACADO && (
+        {/* If the highlighted polygon is also hovered, show it with enhanced styles - Only on desktop */}
+        {!isMobile && hoveredPolygonId && hoveredPolygonId === DESTACADO && (
           <path
             d={polygons.find(p => p.id === hoveredPolygonId)?.path}
             fill="#BD72F0" // Brighter color when highlighted and hovered
@@ -198,8 +241,8 @@ export default function ZibataMap({
         )}
       </svg>
 
-      {/* Panel de información */}
-      {(displayPolygonId || isInfoPanelHovered) && (
+      {/* Panel de información - Only shown on desktop */}
+      {!isMobile && (displayPolygonId || isInfoPanelHovered) && (
         <div 
           ref={infoRef}
           className={`absolute top-4 right-4 p-4 rounded-lg shadow-lg ${

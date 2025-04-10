@@ -21,6 +21,9 @@ interface ContactoProps {
   whatsappClicks: number;
   title?: string;
   description?: string;
+  location?: string;
+  propertyType?: string;
+  imageUrl?: string;
 }
 
 export default function Contacto({
@@ -31,7 +34,10 @@ export default function Contacto({
   views,
   whatsappClicks,
   title = 'Contacta el equipo de pizo mx',
-  description = 'Ponte en contacto con nuestro asesor inmobiliario verificado para obtener más información sobre esta propiedad.'
+  description = 'Ponte en contacto con nuestro asesor inmobiliario verificado para obtener más información sobre esta propiedad.',
+  location = '',
+  propertyType = '',
+  imageUrl = ''
 }: ContactoProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const [isFav, setIsFav] = useState(false);
@@ -77,17 +83,70 @@ export default function Contacto({
     return `Publicado hace ${diffDays} días`;
   };
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateAgent",
+    "name": advisor.name,
+    "telephone": advisor.phone,
+    "image": advisor.photo,
+    "description": advisor.bio,
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Querétaro",
+      "addressRegion": "QRO",
+      "addressCountry": "MX"
+    }
+  };
+
+  const propertyJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Property",
+    "name": title,
+    "description": description,
+    "price": `${price} MXN`,
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": location
+    },
+    "propertyType": propertyType,
+    "image": imageUrl
+  };
+
   return (
     <>
       <Head>
-        <title>{title}</title>
+        <title>{`${title} | Pizo MX`}</title>
         <meta name="description" content={description} />
+        
+        {/* OpenGraph tags */}
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-        <meta property="og:type" content="website" />
+        <meta property="og:type" content="realestate.agent" />
+        <meta property="og:image" content={advisor.photo || '/default-agent.jpg'} />
+        <meta property="og:price:amount" content={price.toString()} />
+        <meta property="og:price:currency" content="MXN" />
+        <meta property="og:availability" content="available" />
+        
+        {/* Twitter tags */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={advisor.photo || '/default-agent.jpg'} />
+        
+        {/* Additional meta tags */}
+        <meta name="robots" content="index, follow" />
+        <meta name="author" content={advisor.name} />
+        <meta name="publisher" content="Pizo MX" />
+
+        {/* Structured data */}
+        <script 
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script 
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(propertyJsonLd) }}
+        />
       </Head>
       <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-lg">
         {/* Stats Bar */}

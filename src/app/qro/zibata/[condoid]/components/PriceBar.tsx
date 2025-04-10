@@ -24,45 +24,45 @@ export default function PriceBar({ minPrice, avgPrice, maxPrice, type }: PriceBa
     };
 
     return (
-        <div className="border border-gray-100 p-8 bg-gray-50">
+        <div className="border border-gray-100 p-4 md:p-8 bg-gray-50">
             {/* Header */}
-            <div className="flex items-center gap-3 mb-6">
-                <div className={`p-3 rounded-xl ${type === 'rent' ? 'bg-indigo-50' : 'bg-orange-50'
+            <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+                <div className={`p-2 md:p-3 rounded-lg md:rounded-xl ${type === 'rent' ? 'bg-indigo-50' : 'bg-orange-50'
                     }`}>
-                    <DollarSign className={`w-6 h-6 ${type === 'rent' ? 'text-indigo-500' : 'text-orange-500'
+                    <DollarSign className={`w-4 h-4 md:w-6 md:h-6 ${type === 'rent' ? 'text-indigo-500' : 'text-orange-500'
                         }`} />
                 </div>
                 <div>
-                    <h3 className="font-medium text-gray-900">
+                    <h3 className="font-medium text-gray-900 text-sm md:text-base">
                         Precios {type === 'rent' ? 'de renta' : 'de venta'}
                     </h3>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-xs md:text-sm text-gray-500">
                         {type === 'rent' ? 'Mensualidad promedio' : 'Precio promedio de venta'}
                     </p>
                 </div>
             </div>
 
             {/* Price Stats */}
-            <div className="grid grid-cols-3 gap-4 mb-8 ">
+            <div className="grid grid-cols-3 gap-2 md:gap-4 mb-6 md:mb-8">
                 <div className="text-center">
-                    <div className="text-sm font-medium text-gray-500 mb-1">Desde</div>
-                    <div className="text-xl font-bold">{formatPrice(minPrice || RANGES[type].min)}</div>
+                    <div className="text-xs md:text-sm font-medium text-gray-500 mb-1">Desde</div>
+                    <div className="text-base md:text-xl font-bold">{formatPrice(minPrice || RANGES[type].min)}</div>
                 </div>
-                <div className={`text-center px-4 py-2 rounded-lg ${type === 'rent' ? 'bg-indigo-50' : 'bg-orange-50'
+                <div className={`text-center px-2 py-1 md:px-4 md:py-2 rounded-lg ${type === 'rent' ? 'bg-indigo-50' : 'bg-orange-50'
                     }`}>
-                    <div className={`text-sm font-medium mb-1 ${type === 'rent' ? 'text-indigo-600' : 'text-orange-600'
+                    <div className={`text-xs md:text-sm font-medium mb-1 ${type === 'rent' ? 'text-indigo-600' : 'text-orange-600'
                         }`}>Promedio</div>
-                    <div className={`text-2xl font-bold ${type === 'rent' ? 'text-indigo-700' : 'text-orange-700'
+                    <div className={`text-lg md:text-2xl font-bold ${type === 'rent' ? 'text-indigo-700' : 'text-orange-700'
                         }`}>{formatPrice(avgPrice || (RANGES[type].min + RANGES[type].max) / 2)}</div>
                 </div>
                 <div className="text-center">
-                    <div className="text-sm font-medium text-gray-500 mb-1">Hasta</div>
-                    <div className="text-xl font-bold">{formatPrice(maxPrice || RANGES[type].max)}</div>
+                    <div className="text-xs md:text-sm font-medium text-gray-500 mb-1">Hasta</div>
+                    <div className="text-base md:text-xl font-bold">{formatPrice(maxPrice || RANGES[type].max)}</div>
                 </div>
             </div>
 
             {/* Price Range Visualization */}
-            <div className="relative h-2 rounded-full overflow-hidden bg-gray-100">
+            <div className="relative h-1.5 md:h-2 rounded-full overflow-hidden bg-gray-100">
                 <div
                     className={`absolute h-full transition-all duration-500 ${type === 'rent' ? 'bg-indigo-500' : 'bg-orange-500'
                         }`}
@@ -83,7 +83,7 @@ export default function PriceBar({ minPrice, avgPrice, maxPrice, type }: PriceBa
             </div>
 
             {/* Range Labels */}
-            <div className="flex justify-between mt-2 text-xs text-gray-400">
+            <div className="flex justify-between mt-1 md:mt-2 text-2xs md:text-xs text-gray-400">
                 <span>{formatPrice(RANGES[type].min)}</span>
                 <span>{formatPrice(RANGES[type].max)}</span>
             </div>

@@ -10,12 +10,12 @@ interface AmenitiesSectionProps {
 }
 
 const AmenityCard = ({ label, icon }: { label: string; icon: JSX.Element }) => (
-  <div className="flex flex-col items-center gap-3 py-4">
+  <div className="flex flex-col items-center gap-1 py-2">
     {React.cloneElement(icon, { 
-      size: 48,
-      className: 'text-gray-500'
+      size: 24,
+      className: 'text-gray-500 w-5 h-5 sm:w-6 sm:h-6'
     })}
-    <span className="text-sm text-gray-600 text-center">
+    <span className="text-xs text-gray-600 text-center">
       {label}
     </span>
   </div>
@@ -58,7 +58,7 @@ export default function AmenitiesSection({ amenities }: AmenitiesSectionProps) {
         <span className="text-sm text-gray-500">({amenities.length})</span>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-4 gap-4">
         {(amenities || []).map((amenityId) => {
           const amenityDetails = condoAmenities.find(a => a.id === amenityId);
           if (!amenityDetails) return null;
