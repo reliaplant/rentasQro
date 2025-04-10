@@ -8,7 +8,7 @@ import ListaAdvisors from './advisors/listaAdvisors';
 import DesarrolladorasPage from './desarrolladoras/page';
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'properties' | 'zones' | 'admins' | 'advisors'>('properties');
+  const [activeTab, setActiveTab] = useState<'properties' | 'zones' | 'admins' | 'advisors' | 'desarrolladoras'>('properties');
 
   return (
     <div className="min-h-screen bg-gray-50 ">

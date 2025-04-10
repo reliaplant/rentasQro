@@ -9,12 +9,12 @@ interface AmenitiesSectionProps {
   amenities: string[];
 }
 
-const AmenityCard = ({ label, icon }: { label: string; icon: JSX.Element }) => (
+const AmenityCard = ({ label, icon }: { label: string; icon: React.ReactElement }) => (
   <div className="flex flex-col items-center gap-1 py-2">
     {React.cloneElement(icon, { 
       size: 24,
       className: 'text-gray-500 w-5 h-5 sm:w-6 sm:h-6'
-    })}
+    } as any)}
     <span className="text-xs text-gray-600 text-center">
       {label}
     </span>
