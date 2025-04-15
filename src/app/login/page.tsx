@@ -44,6 +44,8 @@ export default function Login() {
       console.log('Is admin:', isAdmin);
       
       if (isAdmin) {
+        // Store the user role in localStorage
+        localStorage.setItem('userRole', 'admin');
         console.log('Redirecting to admin dashboard');
         router.push('/admin');
         return;
@@ -54,17 +56,21 @@ export default function Login() {
       console.log('Is advisor:', isAdvisor);
       
       if (isAdvisor) {
+        // Store the user role in localStorage
+        localStorage.setItem('userRole', 'advisor');
         console.log('Redirecting to advisor dashboard');
         router.push('/asesor');
         return;
       }
       
       // Regular user
+      localStorage.setItem('userRole', 'user');
       console.log('Redirecting to regular user page');
-      router.push('/lista-propiedades');
+      router.push('/');
     } catch (error) {
       console.error('Error routing user:', error);
-      router.push('/lista-propiedades');
+      localStorage.removeItem('userRole');
+      router.push('/');
     }
   };
 

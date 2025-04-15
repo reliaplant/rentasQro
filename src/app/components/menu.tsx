@@ -96,6 +96,18 @@ export default function Menu() {
             </Link>
           </div>
 
+          {/* Mobile Explorar button - always visible */}
+          <Link
+            href="/explorar"
+            className="md:hidden flex items-center px-4 py-2 rounded-full text-sm font-semibold 
+            bg-gradient-to-r from-violet-600 to-indigo-600 text-white 
+            shadow-lg shadow-violet-200 
+            active:scale-95 transform transition-all
+            hover:from-violet-700 hover:to-indigo-700"
+          >
+            Explorar
+          </Link>
+
           {/* Desktop Navigation */}
           <nav className="hidden md:flex -mb-px space-x-8">
             <Link
@@ -194,6 +206,13 @@ export default function Menu() {
           className="md:hidden bg-white border-t border-gray-100 shadow-lg fixed inset-0 top-16 z-30 overflow-y-auto"
         >
           <div className="p-4 space-y-3">
+            <Link
+              href="/explorar"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center px-4 py-3 rounded-lg text-base font-medium bg-violet-600 text-white hover:bg-violet-700"
+            >
+              Explorar
+            </Link>
             <Link
               href="/explorar"
               onClick={handleRentClick}

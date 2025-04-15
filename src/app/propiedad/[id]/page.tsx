@@ -167,7 +167,7 @@ export default function PropertyPage() {
       <div className="max-w-7xl mx-auto px-0 md:px-4 mt-0 md:mt-24">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-16">
           {/* Main Content */}
-            <div className="lg:col-span-2 md:space-y-12 space-y-0">
+          <div className="lg:col-span-2 md:space-y-12 space-y-0">
 
             <div className="block md:hidden">
               <FotosPropiedad
@@ -179,25 +179,25 @@ export default function PropertyPage() {
             {/* Property Header */}
             <div className='px-4 md:px-0'>
               <PropertyHeader
-              property={property}
-              zoneData={zoneData}
-              condoData={condoData}
+                property={property}
+                zoneData={zoneData}
+                condoData={condoData}
               />
               <div className="hidden md:block">
-              <FotosPropiedad
-                images={property.imageUrls}
-                propertyType={property.propertyType}
-              />
+                <FotosPropiedad
+                  images={property.imageUrls}
+                  propertyType={property.propertyType}
+                />
               </div>
             </div>
 
             {/* Property Info */}
             <div className='px-4 md:px-0'>
-            <PropertyInfo
-              property={property}
-              zoneData={zoneData}
-              condoData={condoData}
-            />
+              <PropertyInfo
+                property={property}
+                zoneData={zoneData}
+                condoData={condoData}
+              />
             </div>
 
             {/* Condo Section */}
@@ -208,6 +208,19 @@ export default function PropertyPage() {
                 </div>
               </section>
             )}
+
+{property.id && (
+                <div className="mt-6 w-full px-4 md:px-0 block md:hidden">
+                  <SimilarProperties
+                  currentPropertyId={property.id}
+                  propertyType={property.propertyType || "casa"}
+                  transactionType={property.transactionType || "venta"}
+                  zone={property.zone}
+                  condo={property.condo}
+                  price={property.price}
+                  />
+                </div>
+              )}
 
             <div ref={zibataRef} className="mt-24">
               <ZibataInfo />
@@ -220,36 +233,39 @@ export default function PropertyPage() {
               Adding margin-top to position it lower initially,
               but top-1 will make it stick near the top when scrolling
             */}
-            <div className="hidden md:block sticky top-24 mt-25 space-y-6">
+            <div className="sticky top-24 mt-25 space-y-6">
+              <div className='hidden md:block '>
               <Contacto
-              price={property.price}
-              advisor={{
-                name: advisor?.name || '',
-                photo: advisor?.photo || '',
-                phone: advisor?.phone || '',
-                bio: advisor?.bio || '',
-                verified: advisor?.verified || false
-              }}
-              propertyId={property.id!}
-              publicationDate={property.publicationDate}
-              views={property.views}
-              whatsappClicks={property.whatsappClicks}
+                price={property.price}
+                advisor={{
+                  name: advisor?.name || '',
+                  photo: advisor?.photo || '',
+                  phone: advisor?.phone || '',
+                  bio: advisor?.bio || '',
+                  verified: advisor?.verified || false
+                }}
+                propertyId={property.id!}
+                publicationDate={property.publicationDate}
+                views={property.views}
+                whatsappClicks={property.whatsappClicks}
               />
 
+</div>
               {/* Simple implementation of similar properties that won't error */}
               {property.id && (
-                <div className="mt-6 w-full px-4 md:px-0">
+                <div className="mt-6 w-full px-4 md:px-0 hidden md:block ">
                   <SimilarProperties
-                  currentPropertyId={property.id}
-                  propertyType={property.propertyType || "casa"}
-                  transactionType={property.transactionType || "venta"} 
-                  zone={property.zone}
-                  condo={property.condo}
-                  price={property.price}
+                    currentPropertyId={property.id}
+                    propertyType={property.propertyType || "casa"}
+                    transactionType={property.transactionType || "venta"}
+                    zone={property.zone}
+                    condo={property.condo}
+                    price={property.price}
                   />
                 </div>
               )}
             </div>
+            
           </div>
         </div>
 

@@ -383,15 +383,17 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
         </div>
 
         {/* Mobile Reviews with Horizontal Scroll */}
-        <div className="md:hidden flex overflow-x-auto snap-x snap-mandatory -mx-8 px-8 pb-4 gap-4 scrollbar-hide">
-          {condoData.cachedReviews?.slice(0, 3).map((review) => (
-            <ReviewCard 
-              key={review.time}
-              review={review}
-              className="flex-shrink-0 w-[85vw] snap-center"
-            />
-          ))}
-        </div>
+        <div className="md:hidden relative">
+  <div className="flex overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-4 gap-4 scrollbar-hide">
+    {condoData.cachedReviews?.slice(0, 3).map((review) => (
+      <ReviewCard 
+        key={review.time}
+        review={review}
+        className="flex-shrink-0 w-[85vw] snap-center"
+      />
+    ))}
+  </div>
+</div>
 
         {/* Desktop Reviews Stacked */}
         <div className="hidden md:grid grid-cols-1 gap-4">

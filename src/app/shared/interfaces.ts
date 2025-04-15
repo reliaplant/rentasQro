@@ -99,6 +99,8 @@ export interface PropertyData {
   advisor: string;
   createdAt?: Timestamp;
   publicationDate: Timestamp;
+  propertyCondoNumber?: string; // Número de propiedad dentro del condominio
+  propertyCondoNumberPhoto?: string; // Número de propiedad dentro del condominio
   zone: string;
   condo: string;  // ID del condominio
   condoName: string;  // Nombre del condominio

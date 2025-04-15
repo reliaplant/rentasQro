@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Eye, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
-import { getProperties } from '@/app/shared/firebase';
+import { getProperties, getAdvisorData } from '@/app/shared/firebase';
 import { PropertyData } from '@/app/shared/interfaces';
-
 
 export default function AllProperties() {
   const [properties, setProperties] = useState<PropertyData[]>([]);
+  const [advisors, setAdvisors] = useState<{[key: string]: any}>({});
   const [loading, setLoading] = useState(true);
   const [sortField, setSortField] = useState<keyof PropertyData>('publicationDate');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -16,6 +16,22 @@ export default function AllProperties() {
       try {
         const data = await getProperties();
         setProperties(data);
+        
+        // Get unique advisor IDs
+        const advisorIds = [...new Set(data.map(prop => prop.advisor).filter(Boolean))];
+        
+        // Fetch advisor data for each unique ID
+        const advisorData: {[key: string]: any} = {};
+        for (const id of advisorIds) {
+          if (id) {
+            const advisor = await getAdvisorData(id);
+            if (advisor) {
+              advisorData[id] = advisor;
+            }
+          }
+        }
+        
+        setAdvisors(advisorData);
       } catch (error) {
         console.error('Error:', error);
       } finally {
@@ -25,6 +41,12 @@ export default function AllProperties() {
 
     fetchProperties();
   }, []);
+
+  // Get advisor name from advisors object
+  const getAdvisorName = (advisorId: string | undefined) => {
+    if (!advisorId) return 'No asignado';
+    return advisors[advisorId]?.name || 'Asesor desconocido';
+  };
 
   const sortProperties = (a: PropertyData, b: PropertyData) => {
     const aValue = a[sortField] ?? '';
@@ -54,17 +76,14 @@ export default function AllProperties() {
         <thead className="bg-gray-50">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => toggleSort('propertyType')}>
+              onClick={() => toggleSort('propertyType')}>
               <div className="flex items-center gap-2">
                 Propiedad
                 <SortIcon field="propertyType" />
               </div>
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Ubicación
-            </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => toggleSort('price')}>
+              onClick={() => toggleSort('price')}>
               <div className="flex items-center gap-2">
                 Precio
                 <SortIcon field="price" />
@@ -100,19 +119,20 @@ export default function AllProperties() {
                   </div>
                   <div className="ml-4">
                     <div className="text-sm font-medium text-gray-900">
-                      {property.propertyType}
+                      {property.propertyType}, {property.condoName}, #{property.propertyCondoNumber}
                     </div>
-                    <div className="text-sm text-gray-500">
-                      {property.propertyType}
-                    </div>
+                     {/* <div className="text-sm text-gray-900">{property.zone}</div> */}
+                
+                <div className="text-sm text-gray-500"></div>
+                <div className="text-xs text-gray-500 font-semibold">ID: {(property.id ?? '').slice(0, 5)}</div>
+                <div className="text-sm text-gray-900">Zibata</div>
+
                   </div>
                 </div>
               </td>
+
               <td className="px-6 py-4">
-                <div className="text-sm text-gray-900">{property.zone}</div>
-                <div className="text-sm text-gray-500">{property.condo}</div>
-              </td>
-              <td className="px-6 py-4">
+                <div className="text-sm">{property.transactionType}</div>
                 <div className="text-sm font-medium">${property.price.toLocaleString()}</div>
               </td>
               <td className="px-6 py-4">
@@ -129,13 +149,16 @@ export default function AllProperties() {
               </td>
               <td className="px-6 py-4">
                 <span className={`px-2 py-1 text-xs font-medium rounded-full
-                  ${property.status === 'publicada' ? 'bg-green-100 text-green-800' : 
+                  ${property.status === 'publicada' ? 'bg-green-100 text-green-800' :
                     property.status === 'borrador' ? 'bg-gray-100 text-gray-800' :
-                    property.status === 'vendida' ? 'bg-blue-100 text-blue-800' :
-                    'bg-red-100 text-red-800'
+                      property.status === 'vendida' ? 'bg-blue-100 text-blue-800' :
+                        'bg-red-100 text-red-800'
                   }`}>
                   {property.status}
                 </span>
+                <div className="text-sm text-gray-500 mt-1">
+                  <span className="font-medium">Asesor:</span> {getAdvisorName(property.advisor)}
+                </div>
               </td>
             </tr>
           ))}

@@ -50,6 +50,8 @@ const initialFormData: PropertyData = {
   zone: '',
   condo: '',
   condoName: '',
+  propertyCondoNumber: '', // Add this field
+  propertyCondoNumberPhoto: '', // Add this field
   publicationDate: Timestamp.fromDate(new Date()),
   imageUrls: [],
   constructionYear: null, // Initialize as null instead of current year

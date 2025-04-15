@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Images, Camera, ArrowUpRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion'; // Added Variants import
 import GaleriaPropiedad from './galeriaPropiedad';
 
 interface FotosPropiedadProps {
@@ -13,6 +13,50 @@ export default function FotosPropiedad({ images, propertyType }: FotosPropiedadP
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [preloadedImages, setPreloadedImages] = useState<string[]>([]);
+
+  // Preload images
+  useEffect(() => {
+    if (!images?.length) return;
+
+    let loadedCount = 0;
+    const imageObjects: HTMLImageElement[] = [];
+    
+    // Create a function to track loading progress
+    const onImageLoad = () => {
+      loadedCount++;
+      if (loadedCount === images.length) {
+        setImagesLoaded(true);
+        setPreloadedImages([...images]);
+      }
+    };
+
+    // Start preloading all images - use window.Image to avoid naming conflict
+    images.forEach((src, index) => {
+      const imgElement = new window.Image(); // Use window.Image instead of Image
+      imgElement.onload = onImageLoad;
+      imgElement.onerror = onImageLoad; // Count errors as loaded to prevent stalling
+      imgElement.src = src;
+      imageObjects.push(imgElement);
+    });
+
+    // Set a timeout to ensure we eventually show images even if some fail to load
+    const timeout = setTimeout(() => {
+      if (!imagesLoaded) {
+        setImagesLoaded(true);
+      }
+    }, 3000);
+
+    return () => {
+      clearTimeout(timeout);
+      // Clean up image objects
+      imageObjects.forEach(img => {
+        img.onload = null;
+        img.onerror = null;
+      });
+    };
+  }, [images, imagesLoaded]);
 
   if (!images?.length) return null;
 
@@ -44,36 +88,40 @@ export default function FotosPropiedad({ images, propertyType }: FotosPropiedadP
     }
   };
 
-  const variants = {
+  // Fix the variants type issue
+  const variants: Variants = {
     enter: (direction: number) => ({
-      x: direction > 0 ? '100%' : '-100%',
-      opacity: 0
+      x: direction > 0 ? '30%' : '-30%',
+      opacity: 0,
+      position: 'absolute', // Add position to all variants for consistency
     }),
     center: {
       x: 0,
-      opacity: 1
+      opacity: 1,
+      position: 'absolute', // Add position to all variants for consistency
     },
     exit: (direction: number) => ({
-      x: direction > 0 ? '-100%' : '100%',
-      opacity: 0
+      x: direction > 0 ? '-30%' : '30%',
+      opacity: 0,
+      position: 'absolute',
     })
   };
 
   return (
     <>
-      <section className="relative mb-8 ">
+      <section className="relative mb-8">
         {/* Mobile View */}
-        <div className="md:hidden relative h-[60vh] w-full overflow-hidden">
+        <div className="md:hidden relative h-[60vh] w-full overflow-hidden bg-neutral-900">
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-transparent h-20 z-10" />
           
           <motion.div 
-            className="absolute inset-0"
+            className="absolute inset-0 bg-neutral-900" // Add dark background to prevent white flashes
             drag="x"
             dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.2}
+            dragElastic={0.05} // Reduce bounciness even more
             onDragEnd={handleDragEnd}
           >
-            <AnimatePresence initial={false} custom={direction}>
+            <AnimatePresence initial={false} custom={direction} mode="popLayout">
               <motion.div
                 key={currentIndex}
                 custom={direction}
@@ -82,10 +130,10 @@ export default function FotosPropiedad({ images, propertyType }: FotosPropiedadP
                 animate="center"
                 exit="exit"
                 transition={{
-                  x: { type: "spring", stiffness: 500, damping: 30 },
+                  x: { type: "tween", duration: 0.25, ease: "easeOut" }, // Shortened, smoother transition
                   opacity: { duration: 0.15 }
                 }}
-                className="absolute inset-0"
+                className="absolute inset-0 bg-neutral-900" // Dark background for each slide
               >
                 <Image
                   src={images[currentIndex]}
@@ -93,7 +141,8 @@ export default function FotosPropiedad({ images, propertyType }: FotosPropiedadP
                   fill
                   sizes="100vw"
                   className="object-cover"
-                  priority={currentIndex === 0}
+                  priority={true}
+                  loading="eager"
                 />
               </motion.div>
             </AnimatePresence>
@@ -146,7 +195,8 @@ export default function FotosPropiedad({ images, propertyType }: FotosPropiedadP
                 fill
                 sizes="100vw"
                 className="object-cover"
-                priority
+                priority={true}
+                loading="eager"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               
@@ -176,6 +226,8 @@ export default function FotosPropiedad({ images, propertyType }: FotosPropiedadP
                   fill
                   sizes="50vw"
                   className="object-cover"
+                  priority={i === 0} // Prioritize the first few images
+                  loading="eager"
                 />
                 <div className="absolute inset-0 bg-black/0 hover:bg-black/30 transition-all" />
                 <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all transform translate-y-1 group-hover:translate-y-0">
@@ -199,6 +251,7 @@ export default function FotosPropiedad({ images, propertyType }: FotosPropiedadP
                   fill
                   sizes="50vw"
                   className="object-cover"
+                  loading="eager"
                 />
                 <div className="absolute inset-0 bg-black/0 hover:bg-black/30 transition-all" />
                 <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all transform translate-y-1 group-hover:translate-y-0">
@@ -219,6 +272,7 @@ export default function FotosPropiedad({ images, propertyType }: FotosPropiedadP
           images={images}
           onClose={() => setShowAllPhotos(false)}
           initialIndex={currentIndex}
+          preloadedImages={preloadedImages}
         />
       )}
     </>

@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { PropertyData } from '@/app/shared/interfaces';
 import { motion } from 'framer-motion';
-import { getZones, getCondosByZone } from '@/app/shared/firebase';
+import { getZones, getCondosByZone, uploadImages } from '@/app/shared/firebase';
 import { ZoneData, CondoData } from '@/app/shared/interfaces';
+import Image from 'next/image';
 
 interface PropertyTypeProps {
   data: PropertyData;
@@ -18,6 +19,8 @@ interface ValidationErrors {
   condo?: string;
   maintenance?: string;
   services?: string;
+  propertyCondoNumber?: string;
+  propertyCondoNumberPhoto?: string;
 }
 
 export default function PropertyType({ data, onChange, onError }: PropertyTypeProps) {
@@ -35,6 +38,10 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
   });
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
+
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(data.propertyCondoNumberPhoto || null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Define property types with images
   const propertyTypes = [
@@ -410,6 +417,59 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
     return () => clearTimeout(timer);
   }, [data, onError]);
 
+  // Handle file upload
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    const file = files[0];
+    if (!file.type.startsWith('image/')) {
+      setValidationErrors({
+        ...validationErrors,
+        propertyCondoNumberPhoto: 'El archivo debe ser una imagen'
+      });
+      return;
+    }
+    
+    setImageFile(file);
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target?.result) {
+        setImagePreview(e.target.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+  
+  const handleUploadImage = async () => {
+    if (!imageFile) return;
+    
+    try {
+      setUploadingImage(true);
+      const urls = await uploadImages([imageFile]);
+      if (urls.length > 0) {
+        onChange({ propertyCondoNumberPhoto: urls[0] });
+        setValidationErrors({ ...validationErrors, propertyCondoNumberPhoto: undefined });
+      }
+    } catch (error) {
+      setValidationErrors({
+        ...validationErrors,
+        propertyCondoNumberPhoto: 'Error al subir la imagen'
+      });
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+  
+  // Upload image when file is selected
+  useEffect(() => {
+    if (imageFile) {
+      handleUploadImage();
+    }
+  }, [imageFile]);
+
   return (
     <div className="space-y-8">
       <h2 className="text-xl font-medium">¿Qué tipo de propiedad deseas publicar?</h2>
@@ -535,6 +595,8 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
               )}
             </div>
           </div>
+
+          
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -567,6 +629,98 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
             </div>
             <p className="mt-1 text-xs text-gray-500">
               {!data.zone ? 'Primero selecciona una zona' : ''}
+            </p>
+          </div>
+
+          {/* Add Property Number Input */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Numero de Casa/Depa
+            </label>
+            <input
+              type="text"
+              value={data.propertyCondoNumber || ''}
+              onChange={(e) => {
+                onChange({ propertyCondoNumber: e.target.value });
+                if (e.target.value) {
+                  setValidationErrors({ ...validationErrors, propertyCondoNumber: undefined });
+                }
+              }}
+              className={`py-3 px-4 block w-full rounded-lg border ${
+                validationErrors.propertyCondoNumber ? 'border-red-500' : 'border-gray-300'
+              } focus:ring-violet-500 focus:border-violet-500`}
+              placeholder="Ej: Casa 42, Depto 301"
+            />
+            {validationErrors.propertyCondoNumber && (
+              <p className="text-sm text-red-600 mt-1">{validationErrors.propertyCondoNumber}</p>
+            )}
+          </div>
+          
+          {/* Add Property Number Photo Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Foto del número de la propiedad
+            </label>
+            <div className="mt-1 flex items-center space-x-4">
+              <label className={`flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed rounded-lg cursor-pointer ${
+                uploadingImage ? 'opacity-50 cursor-wait' : ''
+              } ${
+                validationErrors.propertyCondoNumberPhoto ? 'border-red-500' : 'border-gray-300'
+              } hover:bg-gray-50`}>
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  {uploadingImage ? (
+                    <svg className="animate-spin h-6 w-6 text-violet-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  ) : (
+                    <>
+                      <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                      </svg>
+                      <p className="mt-1 text-xs text-gray-500">
+                        Subir foto
+                      </p>
+                    </>
+                  )}
+                </div>
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  disabled={uploadingImage}
+                />
+              </label>
+              
+              {imagePreview && (
+                <div className="relative w-32 h-32 border rounded-lg overflow-hidden">
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="w-full h-full object-cover" 
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setImagePreview(null);
+                      setImageFile(null);
+                      onChange({ propertyCondoNumberPhoto: '' });
+                    }}
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
+            {validationErrors.propertyCondoNumberPhoto && (
+              <p className="text-sm text-red-600 mt-1">{validationErrors.propertyCondoNumberPhoto}</p>
+            )}
+            <p className="mt-1 text-xs text-gray-500">
+              Sube una foto clara del número de la propiedad.
             </p>
           </div>
         </div>
