@@ -153,6 +153,16 @@ export default function Menu() {
             >
               Zibatá
             </Link>
+            <Link
+              href="/blog"
+              className={`${
+              pathname?.startsWith('/blog')
+                ? 'border-violet-800 text-violet-800'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+            >
+              Blog
+            </Link>
           </nav>
         </div>
 

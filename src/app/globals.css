@@ -145,3 +145,230 @@ html {
   100% { transform: translateX(-10px) translateY(0); }
 }
 
+/* TipTap Editor Styles */
+.ProseMirror {
+  min-height: 300px;
+  padding: 0.5rem;
+  outline: none;
+}
+
+.ProseMirror p {
+  margin-bottom: 1em;
+}
+
+.ProseMirror h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin: 1em 0 0.5em;
+}
+
+.ProseMirror h2 {
+  font-size: 1.75em;
+  font-weight: bold;
+  margin: 1em 0 0.5em;
+}
+
+.ProseMirror h3 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin: 1em 0 0.5em;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+}
+
+.ProseMirror blockquote {
+  border-left: 3px solid #b8b8b8;
+  padding-left: 1em;
+  margin-left: 0;
+  font-style: italic;
+  color: #595959;
+}
+
+.ProseMirror-focused {
+  border-color: #2563eb;
+}
+
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1em auto;
+}
+
+.ProseMirror a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+/* TipTap content styling for preview */
+.tiptap-content h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin: 1em 0 0.5em;
+}
+
+.tiptap-content h2 {
+  font-size: 1.75em;
+  font-weight: bold;
+  margin: 1em 0 0.5em;
+}
+
+.tiptap-content h3 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin: 1em 0 0.5em;
+}
+
+.tiptap-content p {
+  margin-bottom: 1em;
+}
+
+.tiptap-content ul {
+  list-style-type: disc;
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.tiptap-content ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.tiptap-content li {
+  margin-bottom: 0.25em;
+}
+
+.tiptap-content blockquote {
+  border-left: 3px solid #b8b8b8;
+  padding-left: 1em;
+  margin-left: 0;
+  margin-bottom: 1em;
+  font-style: italic;
+  color: #595959;
+}
+
+.tiptap-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1em auto;
+}
+
+.tiptap-content a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.tiptap-content strong,
+.tiptap-content b {
+  font-weight: bold;
+}
+
+.tiptap-content em,
+.tiptap-content i {
+  font-style: italic;
+}
+
+.tiptap-content u {
+  text-decoration: underline;
+}
+
+/* Add some space between elements */
+.tiptap-content > * + * {
+  margin-top: 0.75em;
+}
+
+/* Add these styles at the end of your globals.css file */
+
+/* TipTap content styling for blog posts */
+.tiptap-content h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin: 1em 0 0.5em;
+}
+
+.tiptap-content h2 {
+  font-size: 1.75em;
+  font-weight: bold;
+  margin: 1em 0 0.5em;
+}
+
+.tiptap-content h3 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin: 1em 0 0.5em;
+}
+
+.tiptap-content p {
+  margin-bottom: 1em;
+}
+
+.tiptap-content ul {
+  list-style-type: disc;
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.tiptap-content ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.tiptap-content li {
+  margin-bottom: 0.25em;
+}
+
+.tiptap-content blockquote {
+  border-left: 3px solid #b8b8b8;
+  padding-left: 1em;
+  margin-left: 0;
+  margin-bottom: 1em;
+  font-style: italic;
+  color: #595959;
+}
+
+.tiptap-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1em auto;
+}
+
+.tiptap-content a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.tiptap-content strong,
+.tiptap-content b {
+  font-weight: bold;
+}
+
+.tiptap-content em,
+.tiptap-content i {
+  font-style: italic;
+}
+
+.tiptap-content u {
+  text-decoration: underline;
+}
+
+/* Add some space between elements */
+.tiptap-content > * + * {
+  margin-top: 0.75em;
+}
+

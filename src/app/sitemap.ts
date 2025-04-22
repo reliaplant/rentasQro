@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next'
-import { getZones, getCondominiums } from '@/app/shared/firebase'
+import { getZones, getCondominiums, getPublishedBlogPosts } from '@/app/shared/firebase'
 
 type SitemapEntry = {
   url: string;
@@ -24,6 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const zones = await getZones();
     const condos = await getCondominiums();
+    const blogPosts = await getPublishedBlogPosts();
 
     const staticRoutes: SitemapEntry[] = [
       {
@@ -38,6 +39,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: 'monthly',
         priority: 0.8,
       },
+      {
+        url: `${baseUrl}/blog`,
+        lastModified: new Date(),
+        changeFrequency: 'daily',
+        priority: 0.9,
+      }
     ];
 
     const zoneRoutes: SitemapEntry[] = zones
@@ -58,8 +65,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
       }));
 
+    // Add blog routes
+    const blogRoutes: SitemapEntry[] = blogPosts
+      .filter(post => post.published && (post.slug || post.id))
+      .map((post) => ({
+        url: `${baseUrl}/blog/${post.slug || post.id}`,
+        lastModified: post.updatedAt ? new Date(post.updatedAt) : new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.7,
+      }));
+
     // Make sure we're returning a correctly formatted sitemap
-    return [...staticRoutes, ...zoneRoutes, ...condoRoutes];
+    return [...staticRoutes, ...zoneRoutes, ...condoRoutes, ...blogRoutes];
   } catch (error) {
     console.error('Error generating sitemap:', error);
     

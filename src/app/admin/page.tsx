@@ -1,16 +1,44 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import AllProperties from './components/allProperties';
 import Zones from './zones/zones';
 import ListaAdmins from './admins/listaAdmins';
 import ListaAdvisors from './advisors/listaAdvisors';
 import DesarrolladorasPage from './desarrolladoras/page';
+import BlogManager from './components/BlogManager';
 
+type AdminTab = 'properties' | 'zones' | 'admins' | 'advisors' | 'desarrolladoras' | 'blog';
+
+// Simple loading component
+const AdminLoading = () => (
+  <div className="min-h-screen flex items-center justify-center">Cargando...</div>
+);
+
+// Main component that wraps everything in Suspense
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'properties' | 'zones' | 'admins' | 'advisors' | 'desarrolladoras'>('properties');
+  return (
+    <Suspense fallback={<AdminLoading />}>
+      <AdminContent />
+    </Suspense>
+  );
+}
+
+// Actual content component with useSearchParams
+function AdminContent() {
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<AdminTab>('properties');
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
+
+  // Check for tab in URL query parameter
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl && ['properties', 'zones', 'admins', 'advisors', 'desarrolladoras', 'blog'].includes(tabFromUrl)) {
+      setActiveTab(tabFromUrl as AdminTab);
+    }
+  }, [searchParams]);
 
   // Simple check for admin status
   useEffect(() => {
@@ -118,6 +146,15 @@ export default function AdminDashboard() {
             >
               Asesores
             </button>
+            <button
+              onClick={() => setActiveTab('blog')}
+              className={`${activeTab === 'blog'
+                ? 'border-[#6981d3] text-[#6981d3]'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-3 px-1 pt-4 border-b-3 font-medium text-sm cursor-pointer`}
+            >
+              Blog
+            </button>
           </nav>
         </div>
       </div>
@@ -129,6 +166,7 @@ export default function AdminDashboard() {
           {activeTab === 'admins' && <ListaAdmins />}
           {activeTab === 'advisors' && <ListaAdvisors />}
           {activeTab === 'desarrolladoras' && <DesarrolladorasPage />}
+          {activeTab === 'blog' && <BlogManager />}
         </div>
       </div>
     </div>
