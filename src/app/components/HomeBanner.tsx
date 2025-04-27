@@ -21,7 +21,7 @@ export default function HomeBanner() {
                 <span className="!bg-gradient-to-r !from-amber-300 font-normal !to-amber-500 !text-transparent !bg-clip-text shadow-2l p-2">piso</span>
                 en Querétaro
               </h1>
-              <p className="text-lg md:text-xl text-white/90">
+              <p className="text-lg md:text-xl !text-white/90">
                 La ciudad con mayor crecimiento en México
               </p>
               <div className="flex gap-4 pt-2">
@@ -42,40 +42,40 @@ export default function HomeBanner() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <div className="text-2xl font-bold mb-1 text-white">+120</div>
-                  <p className="text-sm text-white/80 mb-1">
+                  <p className="text-sm !text-white/80 mb-1">
                     Nuevos residentes cada día. Más de 8,000 personas eligen Querétaro mensualmente
                   </p>
-                  <p className="text-xs italic text-white/60">
+                  <p className="text-xs italic !text-white/60">
                     Fuente: El Universal Querétaro, 2023
                   </p>
                 </div>
 
                 <div>
                   <div className="text-2xl font-bold mb-1 text-white">$1,200M</div>
-                  <p className="text-sm text-white/80 mb-1">
+                  <p className="text-sm !text-white/80 mb-1">
                     USD en inversión industrial. Más de 52 nuevos proyectos durante 2023
                   </p>
-                  <p className="text-xs italic text-white/60">
+                  <p className="text-xs italic !text-white/60">
                     Fuente: The Logistics World, 2023
                   </p>
                 </div>
 
                 <div>
                   <div className="text-2xl font-bold mb-1 text-white">+7.22%</div>
-                  <p className="text-sm text-white/80 mb-1">
+                  <p className="text-sm !text-white/80 mb-1">
                     Plusvalía anual en 2023. La más alta entre las principales ciudades de México
                   </p>
-                  <p className="text-xs italic text-white/60">
+                  <p className="text-xs italic !text-white/60">
                     Fuente: El Economista, 2023
                   </p>
                 </div>
 
                 <div>
                   <div className="text-2xl font-bold mb-1 text-white">#1</div>
-                  <p className="text-sm text-white/80 mb-1">
+                  <p className="text-sm !text-white/80 mb-1">
                     En Estado de Derecho. Segundo año consecutivo liderando el índice nacional
                   </p>
-                  <p className="text-xs italic text-white/60">
+                  <p className="text-xs italic !text-white/60">
                     Fuente: World Justice Project, 2023
                   </p>
                 </div>

@@ -872,12 +872,68 @@ export const polygons = [
     "slug": "inspira"
   },
   {
-    "id": "Vector 217",
-    "path": "M1711 1745L1593 1819.5H1469L1435.5 1832.5L1372 1835L1376.5 1756.5L1419.5 1723.5L1421.5 1591.5L1368.5 1612.5H1325L1339.5 1350L1446.5 1346.5L1513 1441L1550.5 1534L1711 1745Z",
+    "id": "ACANTHA",
+    "path": "M1448 1347L1336.5 1350.5L1327 1518.5H1417.5L1533.5 1494.5L1514 1438.5L1448 1347Z",
     "fill": "#D3D3D3",
-    "name": "VECTOR 217",
+    "name": "ACANTHA",
     "photo": "/assets/condos/Sabino.png",
-    "slug": "vector 217"
+    "slug": "acantha"
+  },
+  {
+    "id": "LUKS",
+    "path": "M1533 1494.5L1417.5 1518V1588.5H1460.5H1508.5L1547 1532.5L1533 1494.5Z",
+    "fill": "#D3D3D3",
+    "name": "LUKS",
+    "photo": "/assets/condos/Sabino.png",
+    "slug": "LUKS"
+  },
+  {
+    "id": "ARAGO",
+    "path": "M1417.5 1518H1326.5L1321 1607.5L1368.5 1611L1417.5 1588.5V1518Z",
+    "fill": "#D3D3D3",
+    "name": "ARAGO",
+    "photo": "/assets/condos/Sabino.png",
+    "slug": "ARAGO"
+  },
+  {
+    "id": "HUIZACHE",
+    "path": "M1547 1533L1508.5 1588.5L1522 1635.5L1537.5 1617L1609.5 1705L1642.5 1651.5L1547 1533Z",
+    "fill": "#D3D3D3",
+    "name": "HUIZACHE",
+    "photo": "/assets/condos/Sabino.png",
+    "slug": "HUIZCHE"
+  },
+  {
+    "id": "ARVEN",
+    "path": "M1509 1588.5H1418V1659H1461H1522.5V1636.5L1509 1588.5Z",
+    "fill": "#D3D3D3",
+    "name": "ARVEN",
+    "photo": "/assets/condos/Sabino.png",
+    "slug": "ARVEN"
+  },
+  {
+    "id": "HIGHGARDEN",
+    "path": "M1377.5 1759L1369.5 1832H1434.5L1465.5 1819H1523V1726.5H1420L1377.5 1759Z",
+    "fill": "#D3D3D3",
+    "name": "HIGH GARDEN",
+    "photo": "/assets/condos/Sabino.png",
+    "slug": "HIGHGARDEN"
+  },
+  {
+    "id": "SAVANT",
+    "path": "M1522.5 1659H1418L1421.5 1724.5H1464.5H1522.5V1685.5V1659Z",
+    "fill": "#D3D3D3",
+    "name": "SAVANT",
+    "photo": "/assets/condos/Sabino.png",
+    "slug": "SAVANT"
+  },
+    {
+    "id": "ROYALVIEW",
+    "path": "M1522.5 1726.5V1819H1593L1628 1797.5L1714 1745.5L1641.5 1651.5L1606.5 1707L1522.5 1726.5Z",
+    "fill": "#D3D3D3",
+    "name": "ROYAL VIEW",
+    "photo": "/assets/condos/Sabino.png",
+    "slug": "ROYALVIEW"
   },
   {
     "id": "ARTESSA",
@@ -1214,5 +1270,6 @@ export const polygons = [
     "name": "UNK78",
     "photo": "/assets/condos/Sabino.png",
     "slug": "unk78"
-  }
+  },
+
 ];

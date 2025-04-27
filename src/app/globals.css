@@ -100,6 +100,13 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Ensure paragraphs always have a readable gray color by default */
+p {
+  color: #333333;
+}
+
+
+
 /* Luxury Components Styles */
 .font-light {
   font-weight: 300;
@@ -233,6 +240,7 @@ html {
 
 .tiptap-content p {
   margin-bottom: 1em;
+  color: #333333;
 }
 
 .tiptap-content ul {
@@ -314,6 +322,7 @@ html {
 
 .tiptap-content p {
   margin-bottom: 1em;
+  color: #333333;
 }
 
 .tiptap-content ul {
@@ -370,5 +379,13 @@ html {
 /* Add some space between elements */
 .tiptap-content > * + * {
   margin-top: 0.75em;
+}
+
+/* Make sure blog and article content is always readable */
+.blog-content p,
+.article-content p,
+.post-content p,
+.prose p {
+  color: #333333 !important;
 }
 
