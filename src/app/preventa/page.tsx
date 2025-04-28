@@ -233,7 +233,7 @@ export default function PreVenta() {
                     </div>
                   </div>
 
-                  <Link href={`/desarrollo/${project.id}`}
+                  <Link href={`/preventa/zibata/${project.id}`}
                         className="inline-block bg-gray-900 text-white px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm rounded-lg hover:bg-gray-800 transition-colors">
                     Ver Desarrollo
                   </Link>

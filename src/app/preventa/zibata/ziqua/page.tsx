@@ -1,27 +1,26 @@
+"use client";
+
 import Image from 'next/image';
 import Link from 'next/link';
-import { Metadata } from 'next';
+import { useState } from 'react';
 import { 
   ArrowUpRight, MapPin, Leaf, Trees, Droplet, Bird, 
   Circle, CircleDot, MountainSnow, Flower2, Key, Shield, 
-  Clock, Paintbrush, Palette, Ship, Waves, Building, Eye, Heart, BadgeCheck
+  Clock, Paintbrush, Palette, Ship, Waves, Building, Eye, Heart, BadgeCheck,
+  Home, Bath, BedDouble, SquareArrowOutUpRight, Users, Landmark, Ruler
 } from 'lucide-react';
 import { IoGolf } from 'react-icons/io5';
-import { FaTree, FaLeaf, FaMountain, FaWater } from 'react-icons/fa';
+import { FaTree, FaLeaf, FaMountain, FaWater, FaParking } from 'react-icons/fa';
+import ZibataInfo from '@/app/propiedad/[id]/components/zibata';
+import ZibataMapWrapper from '@/app/components/ZibataMapWrapper';
+import ModelGalleryModal, { HousingModel } from './components/ModelGalleryModal';
 
-export const metadata: Metadata = {
-  title: 'Ziqua Land Art | Exclusivo desarrollo en Zibatá',
-  description: 'Descubre Ziqua Land Art, un concepto único que integra arte, naturaleza y arquitectura en un desarrollo exclusivo en Zibatá, Querétaro.',
-  keywords: 'Ziqua, Land Art, Zibatá, terrenos, lotes, desarrollo residencial, arte, naturaleza, Querétaro',
-  openGraph: {
-    title: 'Ziqua Land Art | Exclusivo desarrollo en Zibatá',
-    description: 'Un concepto único que integra arte, naturaleza y arquitectura',
-    images: [{ url: '/assets/zibata/ziqua-header.jpg' }],
-    type: 'website',
-  },
-}
+// Metadata is now handled in layout.tsx
 
 export default function ZiquaPage() {
+  const [selectedModel, setSelectedModel] = useState<HousingModel | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   // Amenidades y características
   const amenities = [
     { icon: <MountainSnow size={18} />, name: "Vistas panorámicas" },
@@ -66,43 +65,87 @@ export default function ZiquaPage() {
     { value: "3", unit: "niveles", label: "Altura máxima" }
   ];
 
-  // Nuevas amenidades principales
-  const mainAmenities = [
-    { 
-      icon: <IoGolf className="w-16 h-16" />, 
-      name: "Campo de Golf", 
-      description: "18 hoyos diseñados por expertos" 
+
+
+  // Nuevos modelos de vivienda
+  const housingModels: HousingModel[] = [
+    {
+      name: "Garden Residence",
+      image: "/assets/preventa/ziqua/modelocasa2.png",
+      price: "MXN 5,890,000",
+      area: 165,
+      bedrooms: 2,
+      bathrooms: 2.5,
+      features: ["Jardín privado", "Roof Garden", "Cocina equipada"],
+      available: true
     },
-    { 
-      icon: <Trees className="w-16 h-16" />, 
-      name: "Áreas Verdes", 
-      description: "Más de 40 hectáreas de espacios naturales" 
+    {
+      name: "Sky Residence",
+      image: "/assets/preventa/ziqua/modelocasa2.png",
+      price: "MXN 6,450,000",
+      area: 185,
+      bedrooms: 3,
+      bathrooms: 3,
+      features: ["Vista al campo", "Terraza", "Walk-in closet"],
+      available: true
     },
-    { 
-      icon: <Paintbrush className="w-16 h-16" />, 
-      name: "Land Art", 
-      description: "Instalaciones artísticas integradas" 
-    },
-    { 
-      icon: <Building className="w-16 h-16" />, 
-      name: "Club House", 
-      description: "Amenidades exclusivas para residentes" 
-    },
-    { 
-      icon: <Shield className="w-16 h-16" />, 
-      name: "Seguridad", 
-      description: "Control de acceso y vigilancia 24/7" 
+    {
+      name: "Luxury Penthouse",
+      image: "/assets/preventa/ziqua/modelocasa2.png",
+      price: "$8,750,000",
+      area: 235,
+      bedrooms: 3,
+      bathrooms: 3.5,
+      features: ["Doble altura", "Jacuzzi", "Acceso privado"],
+      available: false
     }
   ];
 
+  // Información general del desarrollo
+  const developmentInfo = [
+    { icon: <Users size={20} />, value: "232", label: "Unidades" },
+    { icon: <Landmark size={20} />, value: "60,000", label: "m² totales" },
+    { icon: <Home size={20} />, value: "60-111", label: "m² construcción" },
+    { icon: <BedDouble size={20} />, value: "1-3", label: "Recámaras" },
+    { icon: <FaParking size={20} />, value: "1-2", label: "Estacionamientos" },
+    { icon: <Bath size={20} />, value: "1-2", label: "Baños" },
+  ];
+
+  const openModal = (model: HousingModel) => {
+    setSelectedModel(model);
+    setIsModalOpen(true);
+    // Prevent scrolling when modal is open
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedModel(null);
+    // Restore scrolling
+    document.body.style.overflow = 'auto';
+  };
+
   return (
     <main className="min-h-screen">
-      {/* Header Sticky */}
-      <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-neutral-200">
-        <div className="max-w-7xl mx-auto px-4 h-[100px] flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 relative">
-              <Image
+      {/* Hero Cover Image */}
+      <section className="relative w-full h-[70vh]">
+        <Image
+          src="/assets/preventa/ziqua/entradaziqua.png"
+          alt="Ziqua Land Art"
+          fill
+          className="object-cover"
+          priority
+        />
+        {/* Darker overlay for better contrast with white logos */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
+        
+        {/* Container to ensure alignment of all elements */}
+        <div className="absolute inset-0 flex flex-col justify-between">
+          <div className="max-w-7xl w-full mx-auto !px-8 md:px-12 pt-12">
+            {/* Ziqua Logo in header */}
+            <div className="min-h-40 min-w-40 max-h-40 max-w-40 relative rounded-lg ">
+
+            <Image
                 src="/assets/preventa/ziqua/logoZiqua.png"
                 alt="Logo Ziqua"
                 fill
@@ -110,203 +153,334 @@ export default function ZiquaPage() {
                 priority
               />
             </div>
-            <div>
-              <h1 className="text-neutral-900 text-xl font-medium">ZIQUA</h1>
-              <p className="text-neutral-500 text-xs">Land Art Living</p>
-            </div>
+
           </div>
           
-          <div className="flex items-center gap-6">
-            <div className="hidden md:block">
-              <div className="flex items-center gap-4">
-                <span className="text-neutral-600 text-sm">Desde $4.5M MXN</span>
-                <span className="h-4 w-[1px] bg-neutral-200"></span>
-                <span className="text-neutral-600 text-sm">Zibatá, Qro</span>
-              </div>
-            </div>
-            
-            <Link
-              href="/contacto"
-              className="bg-neutral-900 text-white px-4 py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm"
-            >
-              Agendar visita
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* Banner inicial con tema blanco */}
-      <section className="relative">
-        {/* Background image */}
-        <div className="absolute inset-0 bg-white">
-          <Image
-            src="/assets/zibata/zibata.jpg" // Imagen de alta calidad
-            alt="Ziqua Land Art"
-            fill
-            className="object-cover opacity-10"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-white via-white/95 to-white/90" />
-        </div>
-
-        {/* Contenido del banner */}
-        <div className="relative max-w-7xl mx-auto px-4 py-16 flex flex-col justify-center">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-end">
-            {/* Información principal */}
-            <div className="space-y-6">
-              <div className="flex items-center gap-2">
-                <div className="h-12 w-12 relative">
-                  <Image
-                    src="/assets/preventa/ziqua/logoZiqua.png"
-                    alt="Logo Ziqua"
-                    fill
-                    className="object-contain"
-                    priority
-                  />
-                </div>
-                <div>
-                  <p className="text-neutral-500 text-sm">Desarrollo exclusivo</p>
-                  <h1 className="text-neutral-900 text-xl font-medium">ZIQUA LAND ART</h1>
+          {/* Info section at the bottom - Using the same container width */}
+          <div className="w-full pb-8 md:pb-12">
+            <div className="max-w-7xl mx-auto px-8 md:px-12">
+              <div>
+                <h1 className="!text-white text-3xl md:text-4xl font-medium">ZIQUA LAND ART</h1>
+                <div className="flex items-center gap-3 text-white/90 mt-2">
+                  <MapPin size={18} />
+                  <span className="text-base md:text-lg">Zibatá, El Marqués, Querétaro</span>
                 </div>
               </div>
-
-              <div className="flex items-center gap-2 text-neutral-600">
-                <MapPin size={18} />
-                <span className="text-sm">Zibatá, Querétaro</span>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
+              
+              <div className="flex flex-wrap gap-3 mt-4">
                 {["Premium", "Vista al campo", "Land Art", "Preventa"].map((tag) => (
                   <span
                     key={tag}
-                    className="px-3 py-1 bg-neutral-100 text-neutral-600 text-xs rounded-full"
+                    className="px-4 py-1.5 bg-white/20 backdrop-blur-sm text-white text-sm rounded-full"
                   >
                     {tag}
                   </span>
                 ))}
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-              <div className="space-y-1">
-                <p className="text-neutral-500 text-sm">Desde</p>
-                <p className="text-neutral-900 text-3xl font-light">$4,500,000 MXN</p>
-                <p className="text-neutral-500 text-sm">Terrenos de 500 - 700 m²</p>
+      {/* Información General */}
+      <section className="relative w-full bg-white py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-light mb-4">Información General</h2>
+            <p className="text-neutral-600 max-w-2xl mx-auto">
+              Un exclusivo desarrollo que integra el arte y la naturaleza para crear una experiencia única de vida.
+            </p>
+          </div>
+
+          <div className="mt-12 bg-neutral-50 p-6 rounded-xl">
+            <div className="flex items-start gap-4">
+              <MapPin className="text-neutral-700 mt-1 flex-shrink-0" size={24} />
+              <div>
+                <h3 className="text-lg font-medium text-neutral-900 mb-1">Ubicación Privilegiada</h3>
+                <p className="text-neutral-600">
+                  Ziqua se encuentra estratégicamente ubicado en Zibatá, una de las zonas con mayor plusvalía de El Marqués, Querétaro. 
+                  A solo 15 minutos del centro comercial Antea y con fácil acceso a las principales vías de comunicación.
+                </p>
               </div>
             </div>
+          </div>
 
-            {/* Características y CTA */}
-            <div className="space-y-8">
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  { label: "Superficie", value: "500-700 m²" },
-                  { label: "Entrega", value: "Inmediata" },
-                  { label: "Amenidades", value: "Premium" },
-                  { label: "Financiamiento", value: "Disponible" },
-                ].map((item) => (
-                  <div key={item.label} className="bg-neutral-50 p-4 rounded-lg border border-neutral-100">
-                    <p className="text-neutral-500 text-xs mb-1">{item.label}</p>
-                    <p className="text-neutral-900 font-medium">{item.value}</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mt-12">
+            {developmentInfo.map((info, index) => (
+              <div key={index} className="flex flex-col items-center p-6 bg-neutral-50 rounded-xl">
+                <div className="text-neutral-700 mb-2">
+                  {info.icon}
+                </div>
+                <p className="text-xl font-medium text-neutral-900">{info.value}</p>
+                <p className="text-sm text-neutral-600">{info.label}</p>
+              </div>
+            ))}
+          </div>
+
+
+        </div>
+      </section>
+
+      {/* Modelos de Vivienda */}
+      <section className="relative w-full bg-white py-8 bg-neutral-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-light mb-4">Elige tu espacio ideal</h2>
+            <p className="text-neutral-600 max-w-2xl mx-auto">
+              Diseños arquitectónicos que se adaptan a diferentes estilos de vida y necesidades
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {housingModels.map((model, index) => (
+              <div 
+                key={index} 
+                className={`bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 ${!model.available ? 'opacity-75' : ''}`}
+              >
+                <div className="relative aspect-[4/3]">
+                  <Image
+                    src={model.image as string}
+                    alt={model.name}
+                    fill
+                    className="object-cover"
+                  />
+                  {!model.available && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                      <span className="bg-white/90 text-gray-900 px-4 py-2 rounded-md font-medium text-sm">
+                        Agotado
+                      </span>
+                    </div>
+                  )}
+                  <div className="absolute top-4 right-4 bg-neutral-900/80 text-white px-3 py-1 rounded-md text-sm backdrop-blur-sm">
+                    {model.price}
                   </div>
-                ))}
+                </div>
+                
+                <div className="p-6">
+                  <h3 className="text-lg font-medium text-neutral-900 mb-2">
+                    {model.name}
+                  </h3>
+                  
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="flex items-center gap-1 text-neutral-600">
+                      <Home size={16} />
+                      <span className="text-sm">{model.area} m²</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-neutral-600">
+                      <BedDouble size={16} />
+                      <span className="text-sm">{model.bedrooms} Rec</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-neutral-600">
+                      <Bath size={16} />
+                      <span className="text-sm">{model.bathrooms} Baños</span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 mb-6">
+                    {model.features.map((feature, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <CircleDot size={14} className="text-violet-500" />
+                        <span className="text-sm text-neutral-600">{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <button 
+                    className={`w-full flex items-center justify-center gap-2 rounded-lg py-3 px-4 text-sm transition-colors
+                      ${model.available 
+                        ? 'bg-neutral-900 text-white hover:bg-neutral-800' 
+                        : 'bg-neutral-100 text-neutral-400 cursor-not-allowed'}`}
+                    disabled={!model.available}
+                    onClick={() => model.available && openModal(model)}
+                  >
+                    {model.available ? (
+                      <>
+                        Ver detalles
+                        <SquareArrowOutUpRight size={16} />
+                      </>
+                    ) : 'No disponible'}
+                  </button>
+                </div>
               </div>
-
-              <div className="flex flex-wrap gap-4">
-                <Link
-                  href="/contacto"
-                  className="bg-neutral-900 text-white px-8 py-3 rounded-lg hover:bg-neutral-800 transition-colors flex-1 text-center"
-                >
-                  Agendar visita
-                </Link>
-                <button
-                  className="bg-neutral-100 text-neutral-900 px-8 py-3 rounded-lg hover:bg-neutral-200 transition-colors flex-1"
-                >
-                  Descargar brochure
-                </button>
-              </div>
-            </div>
+            ))}
+          </div>
+          
+          <div className="mt-4 text-center">
+            <span className="text-sm text-neutral-500 block mb-3">
+              Precios sujetos a cambios sin previo aviso
+            </span>
           </div>
         </div>
       </section>
 
-      {/* Nueva Galería */}
-      <section className="relative w-full bg-white">
-        <div className="max-w-7xl mx-auto px-4 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 h-[80vh]">
-            {/* Imagen Cuadrada */}
-            <div className="md:col-span-6 relative rounded-xl overflow-hidden">
-              <Image
-                src="/assets/zibata/zibata.jpg"
-                alt="Ziqua Land Art Vista Principal"
-                fill
-                className="object-cover hover:scale-105 transition-transform duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-            </div>
-
-            {/* Contenedor de imágenes verticales */}
-            <div className="md:col-span-6 grid grid-rows-2 gap-4 h-full">
-              {/* Imagen Vertical 1 */}
-              <div className="relative rounded-xl overflow-hidden">
-                <Image
-                  src="/assets/zibata/zibata.jpg"
-                  alt="Ziqua Land Art Detalle 1"
-                  fill
-                  className="object-cover hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-              </div>
-
-              {/* Imagen Vertical 2 */}
-              <div className="relative rounded-xl overflow-hidden">
-                <Image
-                  src="/assets/zibata/zibata.jpg"
-                  alt="Ziqua Land Art Detalle 2"
-                  fill
-                  className="object-cover hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Nueva sección de Amenidades */}
-      <section className="relative w-full bg-white py-24">
+      {/* Amenidades con imágenes */}
+      <section className="relative w-full bg-white py-12">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
             <span className="inline-block bg-neutral-100 text-neutral-600 px-4 py-1 rounded-full text-sm mb-4">
               Amenidades
             </span>
-            <h2 className="text-4xl font-light mb-4">Vive la experiencia Ziqua</h2>
+            <h2 className="text-3xl font-light mb-4">Vive la experiencia Ziqua</h2>
             <p className="text-neutral-600 max-w-2xl mx-auto">
               Descubre los espacios exclusivos diseñados para brindarte una experiencia única
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8">
-            {mainAmenities.map((amenity, index) => (
-              <div 
-                key={index} 
-                className="group bg-neutral-50 p-8 rounded-xl hover:bg-white hover:shadow-lg transition-all duration-300"
-              >
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="text-neutral-300 group-hover:text-neutral-900 transition-colors duration-300">
-                    {amenity.icon}
-                  </div>
-                  <h3 className="text-lg font-medium text-neutral-900">
-                    {amenity.name}
-                  </h3>
-                  <p className="text-sm text-neutral-500">
-                    {amenity.description}
+          {/* Vista general de las amenidades */}
+          <div className="mb-16">
+            <div className="relative w-full aspect-video rounded-xl overflow-hidden">
+              <Image
+                src="/assets/preventa/ziqua/Casa-Club-Ziqua-Land-Art (1).webp"
+                alt="Vista general de amenidades"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent flex items-end">
+                <div className="p-8">
+                  <h3 className="!text-white text-2xl font-medium mb-2">Club House Ziqua</h3>
+                  <p className="!text-white/90 max-w-2xl">
+                    Nuestro Club House cuenta con todas las comodidades que necesitas para disfrutar de un estilo de vida premium.
                   </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Listado de amenidades con imágenes */}
+          <div className="space-y-24">
+            {[
+              {
+                name: "Área de Meditación",
+                description: "Un espacio tranquilo diseñado para el bienestar y la relajación.",
+                image: "/assets/preventa/ziqua/meditacion.png"
+              },
+              {
+                name: "Juegos Infantiles",
+                description: "Zona recreativa especialmente diseñada para el disfrute de los más pequeños.",
+                image: "/assets/preventa/ziqua/juegosinfantiles.png"
+              },
+              {
+                name: "Alberca con Jacuzzi y Pool Bar",
+                description: "Disfruta de momentos refrescantes en nuestra alberca de diseño con jacuzzi y servicio de bar.",
+                image: "/assets/preventa/ziqua/alberca.png"
+              },
+              {
+                name: "Fogateros",
+                description: "Áreas sociales con fogateros para disfrutar de momentos especiales al aire libre.",
+                image: "/assets/preventa/ziqua/fogatero.png"
+              },
+              {
+                name: "Área Techada para Ping-Pong",
+                description: "Espacio recreativo techado ideal para disfrutar en cualquier temporada.",
+                image: "/assets/preventa/ziqua/pingpong.png"
+              },
+              {
+                name: "Gimnasio",
+                description: "Instalaciones con equipo de última generación para mantener un estilo de vida activo.",
+                image: "/assets/preventa/ziqua/gym.png"
+              },
+              {
+                name: "Salón de Usos Múltiples con Terraza y Cocineta",
+                description: "Espacio versátil para eventos sociales, reuniones y celebraciones con vistas panorámicas.",
+                image: "/assets/preventa/ziqua/salon.png"
+              }
+            ].map((amenity, index) => (
+              <div key={index} className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} gap-8 items-center`}>
+                <div className="w-full md:w-1/2 space-y-4">
+                  <h3 className="text-2xl font-light text-neutral-900">{amenity.name}</h3>
+                  <p className="text-neutral-600">{amenity.description}</p>
+                </div>
+                <div className="w-full md:w-1/2 h-[300px] relative rounded-xl overflow-hidden">
+                  <Image
+                    src={amenity.image}
+                    alt={amenity.name}
+                    fill
+                    className="object-cover"
+                  />
                 </div>
               </div>
             ))}
           </div>
+
         </div>
       </section>
 
-      {/* Rest of the sections... */}
+      {/* Sección de Lotes - Renamed to Mapa del Desarrollo and removed shadow/Master Plan text */}
+      <section className="relative w-full bg-neutral-50 py-24">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-light mb-4">Mapa del Desarrollo</h2>
+            <p className="text-neutral-600 max-w-2xl mx-auto">
+              Visualiza la distribución de los terrenos en nuestro exclusivo desarrollo
+            </p>
+          </div>
+
+          <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden">
+            <Image
+              src="/assets/preventa/ziqua/lotesZiqua.png"
+              alt="Mapa Ziqua Land Art"
+              fill
+              className="object-contain bg-white"
+            />
+          </div>
+          
+          <div className="mt-8 text-center">
+            <Link 
+              href="/contacto"
+              className="inline-flex items-center gap-2 bg-neutral-900 hover:bg-neutral-800 text-white px-6 py-3 rounded-lg transition-colors"
+            >
+              Consultar disponibilidad
+              <ArrowUpRight size={16} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Mapa de Zibatá */}
+      <section className="relative w-full bg-white py-24">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <span className="inline-block bg-neutral-100 text-neutral-600 px-4 py-1 rounded-full text-sm mb-4">
+              Ubicación
+            </span>
+            <h2 className="text-3xl font-light mb-4">Ziqua en Zibatá</h2>
+            <p className="text-neutral-600 max-w-2xl mx-auto">
+              Ubicación estratégica dentro de la ciudad planeada Zibatá
+            </p>
+          </div>
+
+          <div className="w-full h-[500px] rounded-xl overflow-hidden">
+            <ZibataMapWrapper 
+              highlightedPolygonId="ziqua" 
+              height="100%"
+            />
+          </div>
+          
+          <div className="mt-6 text-center">
+            <Link 
+              href="/qro/zibata"
+              className="inline-flex items-center gap-2 text-neutral-700 hover:text-neutral-900"
+            >
+              <span>Ver más sobre Zibatá</span>
+              <ArrowUpRight size={16} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Sección de ZibataInfo */}
+      <section className="relative w-full bg-neutral-50 py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <ZibataInfo />
+        </div>
+      </section>
+
+      {/* Modal for displaying model details */}
+      <ModelGalleryModal 
+        model={selectedModel} 
+        isOpen={isModalOpen} 
+        onClose={closeModal}
+      />
     </main>
   );
 }

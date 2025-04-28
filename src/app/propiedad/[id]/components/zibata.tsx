@@ -3,6 +3,8 @@ import { Map, Building, Trees, School, LandPlot, Globe, Car, ShoppingBag, Gradua
 import { BiBall } from 'react-icons/bi';
 import { IoGolf } from 'react-icons/io5';
 import AdvisorModal from '@/app/components/AdvisorModal';
+import Link from 'next/link';
+import React from 'react';
 
 export default function ZibataInfo() {
   const parkImages = [

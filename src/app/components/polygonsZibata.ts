@@ -48,12 +48,12 @@ export const polygons = [
     "slug": "path-5"
   },
   {
-    "id": "path_6",
+    "id": "JAMADI",
     "path": "M1740.5 1265.5L1688 1272L1644.5 1289L1641.5 1295.5L1650.5 1304L1732 1344.5L1799.5 1368L1902.5 1388.5L1910 1373L1902.5 1341.5L1884.5 1307L1815.5 1283L1779 1274.5L1740.5 1265.5Z",
     "fill": "#E7E7E7",
-    "name": "PATH 6",
+    "name": "Parque Jamadi",
     "photo": "/assets/condos/Sabino.png",
-    "slug": "path-6"
+    "slug": "Parque Jamadi"
   },
   {
     "id": "ARIETTA",
@@ -1270,6 +1270,13 @@ export const polygons = [
     "name": "UNK78",
     "photo": "/assets/condos/Sabino.png",
     "slug": "unk78"
+  },
+  {
+    "id": "CAMPO_GOLF",
+    "path": "M1550 800m-70,0a70,70 0 1,0 140,0a70,70 0 1,0 -140,0",
+    "name": "Campo de Golf",
+    "photo": "/assets/condos/Sabino.png",
+    "slug": "campo-golf"
   },
 
 ];
