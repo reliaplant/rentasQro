@@ -57,8 +57,8 @@ const JAMADI: PolygonIcon = {
   icon: JAMADIMINI,
   width: 80,             // Reducimos el tamaño para mejor integración
   height: 80,
-  offsetX: 60,
-  offsetY: 30,
+  offsetX: 0,
+  offsetY: 0,
   tooltip: "Parque Jamadi",
   isImageIcon: true,     // Marcamos como imagen real
   backgroundColor: "rgba(255, 255, 255, 0.9)", // Fondo blanco semi-transparente
@@ -71,8 +71,8 @@ const PARQUESAKI: PolygonIcon = {
   icon: ZAKIIMINI,
   width: 80,             // Reducimos el tamaño para mejor integración
   height: 80,
-  offsetX: -20,
-  offsetY: 30,
+  offsetX: -60,
+  offsetY: -60,
   tooltip: "Parque Jamadi",
   isImageIcon: true,     // Marcamos como imagen real
   backgroundColor: "rgba(255, 255, 255, 0.9)", // Fondo blanco semi-transparente
@@ -85,7 +85,7 @@ const COLEGIONWL: PolygonIcon = {
   icon: NWL,
   width: 80,             // Reducimos el tamaño para mejor integración
   height: 80,
-  offsetX: 0,
+  offsetX: 80,
   offsetY: 0,
   tooltip: "Parque Jamadi",
   isImageIcon: true,     // Marcamos como imagen real
@@ -98,20 +98,20 @@ const WALMART: PolygonIcon = {
   icon: "/assets/icons/walmart.svg",
   width: 200,
   height: 200,
-  offsetX: 60,    // Ajuste horizontal (20 = mover 20px a la derecha)
-  offsetY: -60,    // Ajuste vertical (10 = mover 10px hacia abajo)
+  offsetX: 0,    // Ajuste horizontal (20 = mover 20px a la derecha)
+  offsetY: 0,    // Ajuste vertical (10 = mover 10px hacia abajo)
   tooltip: "Walmart Zibata"
 }
 
-const ANAHUAC: PolygonIcon = {
-  polygonId: "WALMART",
-  icon: "/assets/icons/anahuac.png",
-  width: 300,
-  height: 300,
-  offsetX: 300,    // Ajuste horizontal (20 = mover 20px a la derecha)
-  offsetY: 40,    // Ajuste vertical (10 = mover 10px hacia abajo)
-  tooltip: "Anahuac Querétaro"
-}
+// const ANAHUAC: PolygonIcon = {
+//   polygonId: "WALMART",
+//   icon: "/assets/icons/anahuac.png",
+//   width: 300,
+//   height: 300,
+//   offsetX: 0,    // Ajuste horizontal (20 = mover 20px a la derecha)
+//   offsetY: 0,    // Ajuste vertical (10 = mover 10px hacia abajo)
+//   tooltip: "Anahuac Querétaro"
+// }
 
 // Actualizamos el ícono del campo de golf para que use el nuevo polígono
 const GOLF_COURSE: PolygonIcon = {
@@ -135,8 +135,8 @@ const PLAZA_PASEO_ZIBATA_ICON: PolygonIcon = {
   icon: PLAZA_PASEO_ZIBATA,
   width: 100,
   height: 100,
-  offsetX: -150,
-  offsetY: -20,
+  offsetX: 0,
+  offsetY: 0,
   tooltip: "Plaza Paseo Zibata",
   isImageIcon: true,
   backgroundColor: "rgba(255, 255, 255, 0.9)",
@@ -149,8 +149,8 @@ const PLAZA_XENTRICA_ANAHUAC_ICON: PolygonIcon = {
   icon: PLAZA_XENTRICA,
   width: 100,
   height: 100,
-  offsetX:-150,
-  offsetY: 40,
+  offsetX:0,
+  offsetY: 0,
   tooltip: "Plaza Xentrica Anahuac",
   isImageIcon: true,
   backgroundColor: "rgba(255, 255, 255, 0.9)",
@@ -163,7 +163,7 @@ const STARBUCKS: PolygonIcon = {
   icon: STARBUCKS_ICON,
   width: 150,
   height: 150,
-  offsetX: -90,  // Colocamos un poco hacia la izquierda dentro de UNK77
+  offsetX: 0,  // Colocamos un poco hacia la izquierda dentro de UNK77
   offsetY: 0,   // Ligeramente hacia abajo
   tooltip: "Starbucks Zibata",
   isImageIcon: false,
@@ -177,15 +177,15 @@ const SANTANDER: PolygonIcon = {
   icon: SANTANDER_ICON,
   width: 200,
   height: 200,
-  offsetX: 0,   // Colocamos un poco hacia la derecha dentro de UNK77
-  offsetY: -100,   // Ligeramente hacia abajo
+  offsetX: 80,   // Colocamos un poco hacia la derecha dentro de UNK77
+  offsetY: -40,   // Ligeramente hacia abajo
   tooltip: "Banco Santander",
   isImageIcon: false,
   backgroundColor: "rgba(255, 255, 255, 0.9)",
   borderColor: "#EC0000"  // Color rojo Santander
 }
 
-// Función utilitaria para calcular el centro de un polígono a partir de su path
+// Función utilitaria mejorada para calcular el centro de un polígono a partir de su path
 const calculatePolygonCenter = (path: string): { x: number, y: number } | null => {
   // Si es un path circular (como el del Campo de Golf), extraemos las coordenadas del centro directamente
   if (path.includes('m-70,0a70,70')) {
@@ -199,28 +199,86 @@ const calculatePolygonCenter = (path: string): { x: number, y: number } | null =
     }
   }
   
-  // Extraemos los puntos del path SVG
-  const coords = path.match(/[ML]?\s*(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)/g);
-  if (!coords) return null;
-
-  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  // Expresión regular mejorada para capturar todos los tipos de comandos en SVG path
+  const coordsRegex = /([MLHVCSQTA])\s*([^MLHVCSQTA]+)/gi;
+  let points: {x: number, y: number}[] = [];
+  let match;
   
-  coords.forEach(coord => {
-    const [_, x, y] = coord.match(/[ML]?\s*(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)/) || [];
-    if (x && y) {
-      const numX = parseFloat(x);
-      const numY = parseFloat(y);
-      minX = Math.min(minX, numX);
-      minY = Math.min(minY, numY);
-      maxX = Math.max(maxX, numX);
-      maxY = Math.max(maxY, numY);
+  // Estado actual (para comandos relativos)
+  let currentX = 0, currentY = 0;
+  
+  // Extraemos todos los comandos y coordenadas
+  while ((match = coordsRegex.exec(path)) !== null) {
+    const command = match[1].toUpperCase();
+    const params = match[2].trim().split(/[\s,]+/).map(parseFloat);
+    
+    // Procesamos según el tipo de comando SVG
+    switch (command) {
+      case 'M': // Moveto absoluto
+      case 'L': // Lineto absoluto
+        for (let i = 0; i < params.length; i += 2) {
+          if (i + 1 < params.length) {
+            points.push({x: params[i], y: params[i+1]});
+            currentX = params[i];
+            currentY = params[i+1];
+          }
+        }
+        break;
+      // Se pueden agregar más casos para otros comandos SVG si es necesario
     }
-  });
+  }
+  
+  // Si no pudimos extraer puntos, usamos el método anterior como fallback
+  if (points.length === 0) {
+    const simpleCoords = path.match(/[ML]?\s*(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)/g);
+    if (!simpleCoords) return null;
 
-  // Calculamos el centro
+    simpleCoords.forEach(coord => {
+      const [_, x, y] = coord.match(/[ML]?\s*(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)/) || [];
+      if (x && y) {
+        points.push({x: parseFloat(x), y: parseFloat(y)});
+      }
+    });
+  }
+  
+  // Si aún no tenemos puntos, no podemos calcular el centro
+  if (points.length === 0) return null;
+  
+  // Calculamos el centroide (promedio de todos los puntos)
+  const totalPoints = points.length;
+  const sum = points.reduce((acc, point) => ({x: acc.x + point.x, y: acc.y + point.y}), {x: 0, y: 0});
+  
   return {
-    x: (minX + maxX) / 2,
-    y: (minY + maxY) / 2
+    x: sum.x / totalPoints,
+    y: sum.y / totalPoints
+  };
+}
+
+// Función mejorada para aplicar correcciones manuales a la posición de los iconos
+const applyManualCorrections = (icon: PolygonIcon, x: number, y: number): {x: number, y: number} => {
+  // Correcciones específicas para ciertos polígonos - ajustadas con valores más precisos
+  const corrections: Record<string, {xOffset: number, yOffset: number}> = {
+    "HEB": { xOffset: -40, yOffset: 0 }, // Ajuste significativo para HEB (moverlo a la izquierda)
+    "WALMART": { xOffset: -200, yOffset: -20 },
+    "JAMADI": { xOffset: 0, yOffset: -10 }, // Parque Jamadi está bien centrado
+    "PARQUESAKI": { xOffset: 0, yOffset: -15 },
+    "PLAZAPASEOZIBATA": { xOffset: -200, yOffset: -5 },
+    "PLAZAXENTRICANAHUAC": { xOffset: -240, yOffset: 10 },
+    "UNK77": { xOffset: 0, yOffset: 0 },
+    "CAMPO_GOLF": { xOffset: -40, yOffset: 20 }, // Campo de golf tiene coordenadas fijas
+    "ARIETTA": { xOffset: -40, yOffset: 0 },
+    "CARDON": { xOffset: -20, yOffset: 0 },
+    "YAVIA": { xOffset: -25, yOffset: 0 },
+    "BELVERDE": { xOffset: -30, yOffset: 0 },
+    "PARQUEZIELO": { xOffset: -20, yOffset: 0 },
+    "CONDESA": { xOffset: -30, yOffset: -10 }
+  };
+  
+  const correction = corrections[icon.polygonId] || { xOffset: 0, yOffset: 0 };
+  
+  return {
+    x: x + (correction.xOffset || 0) + (icon.offsetX || 0),
+    y: y + (correction.yOffset || 0) + (icon.offsetY || 0)
   };
 }
 
@@ -230,28 +288,37 @@ export default function ZibataMap({
   className = "w-full h-full",
   height = "100%",
   polygonIcons = [
-    HEB, 
+    {
+      ...HEB,
+      offsetX: -80, // Ajuste específico para HEB
+    }, 
     WALMART, 
-    ANAHUAC, 
     JAMADI, 
     PARQUESAKI, 
     COLEGIONWL, 
     GOLF_COURSE,
     PLAZA_PASEO_ZIBATA_ICON,
     PLAZA_XENTRICA_ANAHUAC_ICON,
-    STARBUCKS,        // Agregamos Starbucks
-    SANTANDER         // Agregamos Santander
+    STARBUCKS,
+    SANTANDER         
   ] 
 }: ZibataMapProps) {
   const [hoveredPolygonId, setHoveredPolygonId] = useState<string | null>(null);
-  const [isInfoPanelHovered, setIsInfoPanelHovered] = useState(false);
+  const [hoveredPolygonCenter, setHoveredPolygonCenter] = useState<{x: number, y: number} | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
-  const infoRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
   // Use passed highlightedPolygonId instead of hardcoded value
   const DESTACADO = highlightedPolygonId || null;
+
+  // Agregar console.log para debug
+  useEffect(() => {
+    if (highlightedPolygonId) {
+      console.log("Polígono a destacar:", highlightedPolygonId);
+      console.log("¿Existe este polígono?", polygons.some(p => p.id === highlightedPolygonId));
+    }
+  }, [highlightedPolygonId]);
 
   // Detect if user is on a mobile device
   useEffect(() => {
@@ -286,40 +353,26 @@ export default function ZibataMap({
     };
   }, []);
 
-  // This effect adds a small delay before hiding the info panel
-  // to prevent flickering and improve user experience
-  useEffect(() => {
-    // Skip on mobile devices
-    if (isMobile) return;
-
-    function handleMouseMove(e: MouseEvent) {
-      // If we're hovering over a polygon and the info panel exists
-      if (hoveredPolygonId && infoRef.current) {
-        // Check if the mouse is over the info panel
-        const rect = infoRef.current.getBoundingClientRect();
-        const isOverInfoPanel =
-          e.clientX >= rect.left &&
-          e.clientX <= rect.right &&
-          e.clientY >= rect.top &&
-          e.clientY <= rect.bottom;
-
-        setIsInfoPanelHovered(isOverInfoPanel);
-      }
-    }
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, [hoveredPolygonId, isMobile]);
-
-  const handlePolygonHover = (polygonId: string | null) => {
+  const handlePolygonHover = (polygonId: string | null, event?: React.MouseEvent) => {
     // Do nothing on mobile
     if (isMobile) return;
 
-    // Only update state if we're not hovering the info panel
-    if (!isInfoPanelHovered) {
-      setHoveredPolygonId(polygonId);
+    // Update hovered polygon ID
+    setHoveredPolygonId(polygonId);
+    
+    // Si tenemos un polygonId, calculamos su centro para posicionar el tooltip
+    if (polygonId) {
+      const polygon = polygons.find(p => p.id === polygonId);
+      if (polygon) {
+        const center = calculatePolygonCenter(polygon.path);
+        if (center) {
+          setHoveredPolygonCenter(center);
+        } else {
+          setHoveredPolygonCenter(null);
+        }
+      }
+    } else {
+      setHoveredPolygonCenter(null);
     }
   };
 
@@ -327,12 +380,17 @@ export default function ZibataMap({
     // Do nothing on mobile
     if (isMobile) return;
 
+    // Find the polygon
+    const polygon = polygons.find(p => p.id === polygonId);
+    
+    // Don't process if non-interactive
+    if (polygon?.interactive === false) return;
+
     // Call the callback if provided (for any custom handling)
     if (onPolygonClick) {
       onPolygonClick(polygonId);
     } else {
       // Default behavior - navigate to the condo page
-      const polygon = polygons.find(p => p.id === polygonId);
       if (polygon && polygon.slug) {
         router.push(`/qro/zibata/${polygon.slug}`);
       }
@@ -346,17 +404,20 @@ export default function ZibataMap({
     return 0;
   });
 
-  // Determine which polygon info to show - either the hovered one or the highlighted one if hovered
-  const displayPolygonId = hoveredPolygonId || null;
+  // Determine which polygon info to show
+  const displayPolygonId = hoveredPolygonId || DESTACADO; // También mostrar info del destacado si no hay hover
+  const displayPolygon = displayPolygonId ? polygons.find(p => p.id === displayPolygonId) : null;
 
   // Preparamos los iconos, calculando las coordenadas si no están definidas
   const preparedIcons = polygonIcons.map(icon => {
-    // Si ya tiene coordenadas x,y, las usamos pero aún aplicamos los offsets
+    // Si ya tiene coordenadas x,y definidas explícitamente, las usamos directamente
     if (icon.x !== undefined && icon.y !== undefined) {
+      // Incluso para coordenadas definidas, aplicamos las correcciones manuales
+      const { x, y } = applyManualCorrections(icon, icon.x, icon.y);
       return {
         ...icon,
-        x: icon.x + (icon.offsetX || 0),
-        y: icon.y + (icon.offsetY || 0)
+        x,
+        y
       };
     }
     
@@ -374,21 +435,31 @@ export default function ZibataMap({
       return null;
     }
     
-    // Devolvemos el icono con las coordenadas calculadas y aplicamos los offsets
+    // Aplicamos correcciones manuales específicas para cada polígono
+    const { x, y } = applyManualCorrections(icon, center.x, center.y);
+    
+    // Devolvemos el icono con las coordenadas calculadas y corregidas
     return {
       ...icon,
-      x: center.x + (icon.offsetX || 0),
-      y: center.y + (icon.offsetY || 0)
+      x,
+      y
     };
   }).filter(Boolean) as PolygonIcon[]; // Eliminamos los valores null
 
   return (
     <div className={`${className} relative`} style={{ height }}>
-      <img
-        src="/assets/zibata/mapaZibataFondo.svg"
-        alt="Mapa base de Zibata"
-        className="absolute top-0 left-0 w-full h-full object-contain"
-      />
+      {/* Reemplazar imagen de fondo con componente Image de Next.js */}
+      <div className="absolute top-0 left-0 w-full h-full">
+        <Image
+          src="/assets/zibata/mapaZibataFondo.svg"
+          alt="Mapa base de Zibata"
+          layout="fill"
+          objectFit="contain"
+          priority={true}
+          quality={90}
+        />
+      </div>
+      
       <svg
         ref={svgRef}
         className="absolute top-0 left-0 w-full h-full"
@@ -419,23 +490,42 @@ export default function ZibataMap({
 
         {/* Render regular polygons (not highlighted and not hovered) */}
         {sortedPolygons
-          .filter(poly => poly.id !== hoveredPolygonId && poly.id !== DESTACADO)
+          .filter(poly => poly.id !== hoveredPolygonId && poly.id !== DESTACADO && poly.id !== "CAMPO_GOLF") // Excluimos el Campo de Golf
           .map(polygon => (
             <path
               key={polygon.id}
               d={polygon.path}
-              fill="#D3D3D3"  // Light gray
-              stroke="#ffffff" // White
+              fill={polygon.fill || "#D3D3D3"}
+              stroke="#ffffff"
               strokeWidth={4}
               style={{
                 transition: "all 0.3s ease",
-                cursor: isMobile ? "default" : "pointer",
-                opacity: 0.85,
-                zIndex: 10
+                cursor: polygon.interactive !== false ? (isMobile ? "default" : "pointer") : "default",
+                opacity: polygon.interactive !== false ? 0.85 : 0.6,
+                zIndex: 10,
+                pointerEvents: polygon.interactive !== false ? "auto" : "none"
               }}
-              onMouseEnter={isMobile ? undefined : () => handlePolygonHover(polygon.id)}
-              onMouseLeave={isMobile ? undefined : () => handlePolygonHover(null)}
-              onClick={isMobile ? undefined : () => handlePolygonClick(polygon.id)}
+              onMouseEnter={(e) => polygon.interactive !== false && !isMobile ? handlePolygonHover(polygon.id, e) : undefined}
+              onMouseLeave={polygon.interactive !== false && !isMobile ? () => handlePolygonHover(null) : undefined}
+              onClick={polygon.interactive !== false && !isMobile ? () => handlePolygonClick(polygon.id) : undefined}
+            />
+          ))
+        }
+
+        {/* Renderizamos el Campo de Golf con opacidad 0 pero manteniendo su definición para que el icono funcione */}
+        {sortedPolygons
+          .filter(poly => poly.id === "CAMPO_GOLF")
+          .map(polygon => (
+            <path
+              key={polygon.id}
+              d={polygon.path}
+              fill="transparent"
+              stroke="transparent"
+              strokeWidth={0}
+              style={{
+                opacity: 0,
+                pointerEvents: "none" // Completamente no interactivo
+              }}
             />
           ))
         }
@@ -445,15 +535,15 @@ export default function ZibataMap({
           <path
             d={polygons.find(p => p.id === hoveredPolygonId)?.path}
             fill="#8A2BE2" // Purple when hovered
-            stroke="#4B0082" // Darker purple
-            strokeWidth={6}
+            stroke="transparent" // Eliminar el borde morado
+            strokeWidth={0} // Sin grosor de borde
             style={{
               cursor: "pointer",
               opacity: 1,
-              filter: "drop-shadow(0 0 5px rgba(138, 43, 226, 1))",
+              filter: "drop-shadow(0 0 8px rgba(138, 43, 226, 0.8))", // Agregar sombra más pronunciada
               zIndex: 20 // Higher than normal polygons
             }}
-            onMouseEnter={() => handlePolygonHover(hoveredPolygonId)}
+            onMouseEnter={(e) => handlePolygonHover(hoveredPolygonId, e)}
             onMouseLeave={() => handlePolygonHover(null)}
             onClick={() => handlePolygonClick(hoveredPolygonId)}
           />
@@ -474,9 +564,9 @@ export default function ZibataMap({
               zIndex: 30, // Highest z-index
               position: "relative" // Needed for z-index to work properly in SVG
             }}
-            onMouseEnter={isMobile ? undefined : () => handlePolygonHover(DESTACADO)}
-            onMouseLeave={isMobile ? undefined : () => handlePolygonHover(null)}
-            onClick={isMobile ? undefined : () => handlePolygonClick(DESTACADO)}
+            onMouseEnter={(e) => isMobile ? undefined : handlePolygonHover(DESTACADO, e)}
+            onMouseLeave={() => isMobile ? undefined : handlePolygonHover(null)}
+            onClick={() => isMobile ? undefined : handlePolygonClick(DESTACADO)}
           />
         )}
 
@@ -485,8 +575,8 @@ export default function ZibataMap({
           <path
             d={polygons.find(p => p.id === hoveredPolygonId)?.path}
             fill="#BD72F0" // Brighter color when highlighted and hovered
-            stroke="#FF1493" // Hot pink
-            strokeWidth={6}
+            stroke="transparent" // Mantener el borde rosa para el polígono destacado
+            strokeWidth={5}
             className="destacado"
             style={{
               cursor: "pointer",
@@ -500,127 +590,118 @@ export default function ZibataMap({
             onClick={() => handlePolygonClick(hoveredPolygonId)}
           />
         )}
-        
-        {/* Colocamos los iconos normales (no isImageIcon) directamente dentro del SVG */}
-        {preparedIcons.filter(icon => !icon.isImageIcon).map((icon, index) => (
-          <g
-            key={`icon-${index}-${icon.polygonId}`}
-            transform={`translate(${icon.x}, ${icon.y})`}
-            style={{ 
-              cursor: 'pointer',
-              pointerEvents: 'none'
-            }}
-          >
-            <image
-              href={icon.icon}
-              x={-(icon.width || 30) / 2}
-              y={-(icon.height || 30) / 2}
-              width={icon.width || 30}
-              height={icon.height || 30}
-              style={{
-                filter: "drop-shadow(0 2px 2px rgba(0,0,0,0.3))",
-                transition: "transform 0.2s ease",
-                pointerEvents: 'auto'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "scale(1.5)";
-                
-                if (icon.tooltip) {
-                  e.currentTarget.setAttribute("title", icon.tooltip);
-                }
-                
-                if (!isMobile) {
-                  handlePolygonHover(icon.polygonId);
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "scale(1)";
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                handlePolygonClick(icon.polygonId);
-              }}
-            />
-          </g>
-        ))}
       </svg>
 
-      {/* Renderizamos solo los iconos especiales (isImageIcon) en un div separado */}
+      {/* Ahora colocamos los tooltips fuera del SVG, como elementos DOM independientes */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-        {preparedIcons.filter(icon => icon.isImageIcon).map((icon, index) => {
+        {preparedIcons.map((icon, index) => {
           if (icon.x === undefined || icon.y === undefined) return null;
+          
+          // Determinar si el icono es uno de los que necesita fondo blanco y ajuste de contener
+          const needsWhiteBackground = ["HEB", "WALMART", "UNK77"].includes(icon.polygonId);
           
           return (
             <div
-              key={`special-icon-${index}-${icon.polygonId}`}
-              className="absolute rounded overflow-hidden"
+              key={`tooltip-icon-${index}-${icon.polygonId}`}
+              className="absolute rounded-full overflow-visible tooltip-container"
               style={{ 
                 left: `${(icon.x / 3307) * 100}%`, 
                 top: `${(icon.y / 2108) * 100}%`,
-                width: `${icon.width || 80}px`,
-                // height: `${icon.height || 60}px`,
-                background: icon.backgroundColor || "white",
-                border: `3px solid ${icon.borderColor || "#4B5563"}`,
-                boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
-                transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                pointerEvents: 'auto',
-                cursor: 'pointer',
                 transform: 'translate(-50%, -50%)',
-                transformOrigin: 'center center'
+                pointerEvents: 'auto',
+                zIndex: 50
               }}
-              title={icon.tooltip || ''}
-              onMouseEnter={(e) => {
-                // Importante: solo cambiamos la escala manteniendo la misma traducción
-                e.currentTarget.style.transform = "translate(-50%, -50%) scale(1.5)";
-                e.currentTarget.style.boxShadow = "0 4px 15px rgba(0,0,0,0.3)";
-                
-                if (!isMobile) {
-                  handlePolygonHover(icon.polygonId);
-                }
-              }}
-              onMouseLeave={(e) => {
-                // Restauramos al estado original
-                e.currentTarget.style.transform = "translate(-50%, -50%) scale(1)";
-                e.currentTarget.style.boxShadow = "0 2px 10px rgba(0,0,0,0.2)";
-              }}
-              onClick={() => handlePolygonClick(icon.polygonId)}
             >
-              <img
-                src={icon.icon}
-                alt={`Imagen para ${icon.polygonId}`}
-                className="w-full h-full object-cover"
-              />
+              {/* Mostramos directamente el icono sin el borde blanco interior */}
+              <div 
+                className="h-10 w-10 rounded-full flex items-center justify-center shadow-md cursor-pointer overflow-hidden"
+                style={{ 
+                  backgroundColor: icon.borderColor || "#3B82F6",
+                  transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                  boxShadow: "0 2px 5px rgba(0,0,0,0.2)"
+                }}
+                onMouseEnter={(e) => {
+                  // Solo aplicamos el efecto visual de escalado
+                  e.currentTarget.style.transform = "scale(1.2)";
+                  e.currentTarget.style.boxShadow = "0 4px 10px rgba(0,0,0,0.3)";
+                  
+                  // Pasamos el hover al polígono para mostrar su tooltip
+                  if (!isMobile) {
+                    handlePolygonHover(icon.polygonId);
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  // Restaurar tamaño normal
+                  e.currentTarget.style.transform = "scale(1)";
+                  e.currentTarget.style.boxShadow = "0 2px 5px rgba(0,0,0,0.2)";
+                  
+                  if (!isMobile) {
+                    handlePolygonHover(null);
+                  }
+                }}
+                onClick={() => handlePolygonClick(icon.polygonId)}
+              >
+                {/* Para los iconos específicos, usamos fondo blanco y contain */}
+                {needsWhiteBackground ? (
+                  <div className="w-full h-full bg-white flex items-center justify-center">
+                    <Image 
+                      src={icon.icon} 
+                      alt={icon.tooltip || ""} 
+                      width={32}
+                      height={32}
+                      className="object-contain"
+                    />
+                  </div>
+                ) : (
+                  // Para los demás iconos, mantenemos el comportamiento de cover
+                  <Image 
+                    src={icon.icon} 
+                    alt={icon.tooltip || ""} 
+                    width={40}
+                    height={40}
+                    className="object-cover w-full h-full"
+                  />
+                )}
+              </div>
             </div>
           );
         })}
+        
+        {/* Tooltip para polígonos: posicionado sobre el centro del polígono, pero no tan arriba */}
+        {!isMobile && displayPolygon && hoveredPolygonCenter && (
+          <div 
+            className="absolute bg-white rounded-lg p-3 shadow-lg flex flex-col items-center z-[100] pointer-events-none"
+            style={{
+              left: `${(hoveredPolygonCenter.x / 3307) * 100}%`, 
+              top: `${(hoveredPolygonCenter.y / 2108) * 100}%`,
+              maxWidth: "220px",
+              border: displayPolygonId === DESTACADO 
+                ? "2px solid #FF1493" 
+                : "2px solid #8A2BE2",
+              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)",
+              transform: "translate(-50%, -120%)" // Mantiene la posición ajustada anteriormente
+            }}
+          >
+            <span className={`text-base font-bold mb-1 ${
+              displayPolygonId === DESTACADO ? "text-pink-600" : "text-purple-600"
+            }`}>
+              {displayPolygon.name}
+            </span>
+            {displayPolygon.photo && (
+              <div className="relative w-40 h-28 rounded-md overflow-hidden">
+                <Image
+                  src={displayPolygon.photo}
+                  alt={`Foto de ${displayPolygon.name}`}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover"
+                  loading="eager"
+                />
+              </div>
+            )}
+          </div>
+        )}
       </div>
-
-      {/* Panel de información - Only shown on desktop */}
-      {!isMobile && (displayPolygonId || isInfoPanelHovered) && (
-        <div
-          ref={infoRef}
-          className={`absolute top-4 right-4 p-4 rounded-lg shadow-lg ${
-            displayPolygonId === DESTACADO ? 'bg-pink-100 border-2 border-pink-500' : 'bg-white'
-          }`}
-          style={{ zIndex: 100 }}
-          onMouseEnter={() => setIsInfoPanelHovered(true)}
-          onMouseLeave={() => setIsInfoPanelHovered(false)}
-        >
-          <h2 className={`text-xl font-bold ${displayPolygonId === DESTACADO ? 'text-pink-600' : ''}`}>
-            {polygons.find(p => p.id === displayPolygonId)?.name || ''}
-          </h2>
-          <img
-            src={polygons.find(p => p.id === displayPolygonId)?.photo || ''}
-            alt={`Foto de ${polygons.find(p => p.id === displayPolygonId)?.name || ''}`}
-            className="mt-2 w-48 h-32 object-cover rounded-md"
-          />
-          {displayPolygonId === DESTACADO && (
-            <div className="mt-2 text-sm text-pink-700">
-              ¡Polígono destacado!
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }

@@ -1,0 +1,41 @@
+[debug] [2025-04-28T17:56:01.053Z] ----------------------------------------------------------------------
+[debug] [2025-04-28T17:56:01.058Z] Command:       /Users/guillermomoran/.nvm/versions/node/v20.10.0/bin/node /Users/guillermomoran/.nvm/versions/node/v20.10.0/bin/firebase deploy --only hosting
+[debug] [2025-04-28T17:56:01.058Z] CLI Version:   13.35.1
+[debug] [2025-04-28T17:56:01.058Z] Platform:      darwin
+[debug] [2025-04-28T17:56:01.058Z] Node Version:  v20.10.0
+[debug] [2025-04-28T17:56:01.059Z] Time:          Mon Apr 28 2025 11:56:01 GMT-0600 (Central Standard Time)
+[debug] [2025-04-28T17:56:01.059Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-04-28T17:56:01.062Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2025-04-28T17:56:01.234Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-04-28T17:56:01.234Z] > authorizing via signed-in user (reliaplant@gmail.com)
+[debug] [2025-04-28T17:56:01.234Z] [iam] checking project rentasqro-bc53f for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2025-04-28T17:56:01.234Z] Checked if tokens are valid: false, expires at: 1745539704707
+[debug] [2025-04-28T17:56:01.235Z] Checked if tokens are valid: false, expires at: 1745539704707
+[debug] [2025-04-28T17:56:01.235Z] > refreshing access token with scopes: []
+[debug] [2025-04-28T17:56:01.235Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-28T17:56:01.235Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-28T17:56:01.347Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2025-04-28T17:56:01.347Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2025-04-28T17:56:01.360Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-04-28T17:56:01.360Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-28T17:56:01.365Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f:testIamPermissions [none]
+[debug] [2025-04-28T17:56:01.365Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f:testIamPermissions x-goog-quota-user=projects/rentasqro-bc53f
+[debug] [2025-04-28T17:56:01.365Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-04-28T17:56:01.774Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f:testIamPermissions 200
+[debug] [2025-04-28T17:56:01.775Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-04-28T17:56:01.775Z] Checked if tokens are valid: true, expires at: 1745866560360
+[debug] [2025-04-28T17:56:01.775Z] Checked if tokens are valid: true, expires at: 1745866560360
+[debug] [2025-04-28T17:56:01.775Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/rentasqro-bc53f [none]
+[debug] [2025-04-28T17:56:02.095Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/rentasqro-bc53f 200
+[debug] [2025-04-28T17:56:02.095Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/rentasqro-bc53f {"projectId":"rentasqro-bc53f","projectNumber":"706566534125","displayName":"RentasQRO","name":"projects/rentasqro-bc53f","resources":{"hostingSite":"rentasqro-bc53f"},"state":"ACTIVE","etag":"1_e6399bb0-5b39-4cdb-b74d-863009e097d9"}
+[debug] [2025-04-28T17:56:12.509Z] SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at findDependency (/Users/guillermomoran/.nvm/versions/node/v20.10.0/lib/node_modules/firebase-tools/lib/frameworks/utils.js:190:23)
+    at prepareFrameworks (/Users/guillermomoran/.nvm/versions/node/v20.10.0/lib/node_modules/firebase-tools/lib/frameworks/index.js:124:67)
+    at deploy (/Users/guillermomoran/.nvm/versions/node/v20.10.0/lib/node_modules/firebase-tools/lib/deploy/index.js:76:50)
+    at Command.actionFn (/Users/guillermomoran/.nvm/versions/node/v20.10.0/lib/node_modules/firebase-tools/lib/commands/deploy.js:136:32)
+    at /Users/guillermomoran/.nvm/versions/node/v20.10.0/lib/node_modules/firebase-tools/lib/command.js:243:25
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[error] 
+[error] Error: An unexpected error has occurred.

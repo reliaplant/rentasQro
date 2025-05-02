@@ -451,8 +451,9 @@ export default function ZiquaPage() {
 
           <div className="w-full h-[500px] rounded-xl overflow-hidden">
             <ZibataMapWrapper 
-              highlightedPolygonId="ziqua" 
+              highlightedPolygonId="ZIQUA" 
               height="100%"
+              className="w-full h-full"
             />
           </div>
           
