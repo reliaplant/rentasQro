@@ -1,19 +1,22 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Eye, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
-import { getProperties, getAdvisorData } from '@/app/shared/firebase';
+import { Eye, MessageSquare, ChevronDown, ChevronUp, UserCheck } from 'lucide-react';
+import { getProperties, getAdvisorData, getAllAdvisors, updateProperty } from '@/app/shared/firebase';
 import { PropertyData } from '@/app/shared/interfaces';
 
 export default function AllProperties() {
   const [properties, setProperties] = useState<PropertyData[]>([]);
   const [advisors, setAdvisors] = useState<{[key: string]: any}>({});
+  const [allAdvisorsList, setAllAdvisorsList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortField, setSortField] = useState<keyof PropertyData>('publicationDate');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [updatingAdvisor, setUpdatingAdvisor] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProperties = async () => {
       try {
+        setLoading(true);
         const data = await getProperties();
         setProperties(data);
         
@@ -24,14 +27,24 @@ export default function AllProperties() {
         const advisorData: {[key: string]: any} = {};
         for (const id of advisorIds) {
           if (id) {
+            console.log(`Fetching data for advisor ${id}`);
             const advisor = await getAdvisorData(id);
             if (advisor) {
+              console.log(`Found advisor data:`, advisor);
               advisorData[id] = advisor;
+            } else {
+              console.log(`No data found for advisor ${id}`);
             }
           }
         }
         
+        console.log("Advisors data:", advisorData);
         setAdvisors(advisorData);
+        
+        // Fetch all advisors for dropdown
+        const advisorsList = await getAllAdvisors();
+        console.log("All advisors:", advisorsList);
+        setAllAdvisorsList(advisorsList);
       } catch (error) {
         console.error('Error:', error);
       } finally {
@@ -45,7 +58,38 @@ export default function AllProperties() {
   // Get advisor name from advisors object
   const getAdvisorName = (advisorId: string | undefined) => {
     if (!advisorId) return 'No asignado';
+    console.log(`Getting name for advisor ${advisorId}, data:`, advisors[advisorId]);
     return advisors[advisorId]?.name || 'Asesor desconocido';
+  };
+
+  // Handle advisor change
+  const handleAdvisorChange = async (propertyId: string | undefined, advisorId: string) => {
+    if (!propertyId) return;
+    
+    setUpdatingAdvisor(propertyId);
+    try {
+      await updateProperty(propertyId, { advisor: advisorId });
+      
+      // Update local state
+      setProperties(prevProps => 
+        prevProps.map(p => 
+          p.id === propertyId ? { ...p, advisor: advisorId } : p
+        )
+      );
+      
+      // If this is a new advisor we don't have data for, fetch it
+      if (advisorId && !advisors[advisorId]) {
+        const advisor = await getAdvisorData(advisorId);
+        if (advisor) {
+          setAdvisors(prev => ({ ...prev, [advisorId]: advisor }));
+        }
+      }
+    } catch (error) {
+      console.error('Error updating advisor:', error);
+      alert('Error al asignar asesor');
+    } finally {
+      setUpdatingAdvisor(null);
+    }
   };
 
   const sortProperties = (a: PropertyData, b: PropertyData) => {
@@ -95,6 +139,9 @@ export default function AllProperties() {
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Estado
             </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Asesor
+            </th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
@@ -121,12 +168,23 @@ export default function AllProperties() {
                     <div className="text-sm font-medium text-gray-900">
                       {property.propertyType}, {property.condoName}, #{property.propertyCondoNumber}
                     </div>
-                     {/* <div className="text-sm text-gray-900">{property.zone}</div> */}
-                
-                <div className="text-sm text-gray-500"></div>
-                <div className="text-xs text-gray-500 font-semibold">ID: {(property.id ?? '').slice(0, 5)}</div>
-                <div className="text-sm text-gray-900">Zibata</div>
-
+                    <div className="text-sm text-gray-900">Zibata</div>
+                    <div className="text-xs text-gray-500 font-semibold">ID: {(property.id ?? '').slice(0, 5)}</div>
+                    {/* Add edit button */}
+                    <a 
+                      href={`/admin/editarPropiedad?id=${property.id}`}
+                      className="mt-1 inline-flex items-center px-2 py-1 text-xs text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-md font-medium"
+                    >
+                      <svg 
+                        className="w-3 h-3 mr-1" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                      Editar
+                    </a>
                   </div>
                 </div>
               </td>
@@ -135,6 +193,7 @@ export default function AllProperties() {
                 <div className="text-sm">{property.transactionType}</div>
                 <div className="text-sm font-medium">${property.price.toLocaleString()}</div>
               </td>
+              
               <td className="px-6 py-4">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1">
@@ -147,6 +206,7 @@ export default function AllProperties() {
                   </div>
                 </div>
               </td>
+              
               <td className="px-6 py-4">
                 <span className={`px-2 py-1 text-xs font-medium rounded-full
                   ${property.status === 'publicada' ? 'bg-green-100 text-green-800' :
@@ -156,9 +216,34 @@ export default function AllProperties() {
                   }`}>
                   {property.status}
                 </span>
-                <div className="text-sm text-gray-500 mt-1">
-                  <span className="font-medium">Asesor:</span> {getAdvisorName(property.advisor)}
+              </td>
+              
+              <td className="px-6 py-4">
+                <div className="flex items-center gap-2">
+                  <UserCheck size={16} className={property.advisor ? "text-green-500" : "text-gray-400"} />
+                  
+                  {updatingAdvisor === property.id ? (
+                    <span className="text-xs text-blue-500">Actualizando...</span>
+                  ) : (
+                    <select 
+                      className="text-sm border border-gray-200 rounded px-2 py-1 bg-white w-full max-w-[200px]"
+                      value={property.advisor || ''}
+                      onChange={(e) => handleAdvisorChange(property.id, e.target.value)}
+                    >
+                      <option value="">Seleccionar asesor</option>
+                      {allAdvisorsList.map(advisor => (
+                        <option key={advisor.id} value={advisor.id}>
+                          {advisor.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
+                {property.advisor && (
+                  <div className="text-xs text-gray-500 mt-1">
+                    {getAdvisorName(property.advisor)}
+                  </div>
+                )}
               </td>
             </tr>
           ))}

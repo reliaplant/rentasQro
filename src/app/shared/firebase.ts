@@ -206,15 +206,17 @@ export const getProperty = async (id: string): Promise<PropertyData> => {
   }
 };
 
-export const updateProperty = async (id: string, propertyData: Partial<PropertyData>): Promise<void> => {
+// Merged updateProperty function - combines both implementations
+export const updateProperty = async (id: string, propertyData: Partial<PropertyData>): Promise<boolean> => {
   try {
-    const docRef = doc(db, "properties", id);
+    const propertyRef = doc(db, "properties", id);
     const updateData = {
       ...propertyData,
       updatedAt: Timestamp.now(),
     };
     
-    await updateDoc(docRef, updateData);
+    await updateDoc(propertyRef, updateData);
+    return true;
   } catch (error) {
     console.error("Error updating property:", error);
     throw error;
@@ -904,6 +906,29 @@ export async function getAdvisorData(userId: string) {
   }
 }
 
+// New function to get advisor by document ID
+export const getAdvisorById = async (advisorId: string): Promise<AdvisorData | null> => {
+  try {
+    console.log(`[ADVISOR LOOKUP] Looking up advisor with document ID: ${advisorId}`);
+    const advisorRef = doc(db, "advisors", advisorId);
+    const advisorDoc = await getDoc(advisorRef);
+    
+    if (advisorDoc.exists()) {
+      console.log(`[ADVISOR LOOKUP] Found advisor document:`, advisorDoc.data());
+      return {
+        id: advisorDoc.id,
+        ...advisorDoc.data()
+      } as AdvisorData;
+    }
+    
+    console.log(`[ADVISOR LOOKUP] No advisor found with document ID: ${advisorId}`);
+    return null;
+  } catch (error) {
+    console.error(`[ADVISOR LOOKUP] Error fetching advisor by ID:`, error);
+    return null;
+  }
+};
+
 // Add new function to fetch similar properties
 interface SimilarPropertiesParams {
   currentPropertyId: string;
@@ -1403,5 +1428,20 @@ export async function uploadContributorPhoto(file: File, contributorId: string):
     throw error;
   }
 }
+
+// Get all advisors from Firestore
+export const getAllAdvisors = async () => {
+  try {
+    const advisorsRef = collection(db, 'advisors');
+    const snapshot = await getDocs(advisorsRef);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error('Error fetching advisors:', error);
+    return [];
+  }
+};
 
 export { db, auth, storage };

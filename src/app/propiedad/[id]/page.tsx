@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, HomeIcon, CalendarIcon, PawPrint, Sofa, Banknote, MapPinIcon, BuildingIcon, Star, MapPin, Building, Home, Shield, CheckCircle, CheckCircle2, Map, Tv, WashingMachine, Flower, DoorOpen, AirVent, Car, Bed, BedDouble } from 'lucide-react';
-import { getProperty, getAdvisorProfile, AdvisorData, getZoneById, getCondoById } from '@/app/shared/firebase';
+import { getProperty, getAdvisorProfile, getAdvisorById, AdvisorData, getZoneById, getCondoById } from '@/app/shared/firebase';
 import { ZoneData, CondoData, PropertyData } from '@/app/shared/interfaces';
 import FotosPropiedad from './components/fotosPropiedad';
 import Contacto from './components/contacto';
@@ -67,11 +67,59 @@ export default function PropertyPage() {
         setProperty(propertyData);
 
         if (propertyData?.advisor) {
-          const advisorData = await getAdvisorProfile(propertyData.advisor);
-          setAdvisor(advisorData);
+          console.log("Property has advisor ID:", propertyData.advisor);
+          // Try getting advisor by direct document ID first
+          const advisorData = await getAdvisorById(propertyData.advisor);
+          
+          if (advisorData) {
+            console.log("Found advisor by document ID:", advisorData);
+            setAdvisor(advisorData);
+          } else {
+            console.log("Advisor not found by ID, trying profile lookup");
+            // Fall back to profile lookup
+            const profileData = await getAdvisorProfile(propertyData.advisor);
+            if (profileData) {
+              console.log("Found advisor by profile lookup:", profileData);
+              setAdvisor(profileData);
+            } else {
+              console.log("No advisor found with any method, using default");
+              // Use default
+              setAdvisor({
+                id: 'default',
+                name: 'Asesor Pizo',
+                phone: '4421234567',
+                email: 'contacto@pizomx.com',
+                bio: 'Asesor inmobiliario de Pizo MX',
+                userId: 'default',
+                verified: true
+              });
+            }
+          }
+        } else {
+          console.log("No advisor ID found in property data");
+          // Set a default advisor when none is assigned
+          setAdvisor({
+            id: 'default',
+            name: 'Asesor Pizo',
+            phone: '4421234567',
+            email: 'contacto@pizomx.com',
+            bio: 'Asesor inmobiliario de Pizo MX',
+            userId: 'default',
+            verified: true
+          });
         }
       } catch (error) {
         console.error("Error fetching property:", error);
+        // Set default advisor on error
+        setAdvisor({
+          id: 'default',
+          name: 'Asesor Pizo',
+          phone: '4421234567',
+          email: 'contacto@pizomx.com',
+          bio: 'Asesor inmobiliario de Pizo MX',
+          userId: 'default',
+          verified: true
+        });
       } finally {
         setLoading(false);
       }

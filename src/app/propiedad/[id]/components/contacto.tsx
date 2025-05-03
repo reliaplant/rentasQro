@@ -5,6 +5,7 @@ import { incrementWhatsappClicks } from '@/app/shared/firebase';
 import { useEffect, useState } from 'react';
 import { useFavorites } from '@/app/hooks/useFavorites';
 import Head from 'next/head';
+import { calculatePolicyCost, calculateDiscountedPolicyCost } from '@/app/shared/services/policyCalculator';
 
 interface ContactoProps {
   price: number;
@@ -39,6 +40,15 @@ export default function Contacto({
   propertyType = '',
   imageUrl = ''
 }: ContactoProps) {
+  // Add logging for debugging
+  console.log("Contacto component - Advisor data:", advisor);
+  
+  // Create fallback data when advisor info is missing
+  const advisorName = advisor?.name || 'Asesor Pizo';
+  const advisorPhone = advisor?.phone || '4421234567';
+  const advisorPhoto = advisor?.photo || '';
+  const isVerified = advisor?.verified !== false; // Default to true unless explicitly false
+  
   const { isFavorite, toggleFavorite } = useFavorites();
   const [isFav, setIsFav] = useState(false);
   
@@ -47,8 +57,9 @@ export default function Contacto({
     setIsFav(isFavorite(propertyId));
   }, [propertyId, isFavorite]);
   
-  const legalPolicyPrice = price * 0.75; // 75% of rent price
-  const discountedPolicyPrice = legalPolicyPrice * 0.65; // 35% discount
+  // Calculate policy costs using the service
+  const legalPolicyPrice = calculatePolicyCost(price, 'elemental');
+  const discountedPolicyPrice = calculateDiscountedPolicyCost(price, 'elemental', 35);
 
   const handleWhatsAppClick = async () => {
     try {
@@ -201,16 +212,16 @@ export default function Contacto({
           {/* Avatar */}
           <div className="relative">
             <div className="w-14 h-14 rounded-full bg-gray-100 overflow-hidden relative flex-shrink-0">
-              {advisor.photo ? (
+              {advisorPhoto ? (
                 <Image
-                  src={advisor.photo}
-                  alt={advisor.name}
+                  src={advisorPhoto}
+                  alt={advisorName}
                   fill
                   className="object-cover"
                 />
               ) : (
                 <div className="w-full h-full bg-[#F5E6D3] text-[#D2B48C] grid place-items-center">
-                  {advisor.name[0]}
+                  {advisorName[0]}
                 </div>
               )}
             </div>
@@ -218,12 +229,14 @@ export default function Contacto({
           <div>
             <div className="flex flex-col">
               <span className='text-violet-800 text-[10px]'>Asesor inmobiliario</span>
-              <span className='text-black text-sm'>{advisor.name} </span>
+              <span className='text-black text-sm'>{advisorName}</span>
               <div className='mt-0.5 flex flex-row gap-3 items-center'>
-                <span className="bg-violet-100 rounded-full border border-violet-500 flex flex-row items-center gap-1 text-[9px] px-2 text-violet-700 w-fit pl-1.5">
-                  <CheckCircle size={9} className="text-violet-700" />
-                  Verificado
-                </span>
+                {isVerified && (
+                  <span className="bg-violet-100 rounded-full border border-violet-500 flex flex-row items-center gap-1 text-[9px] px-2 text-violet-700 w-fit pl-1.5">
+                    <CheckCircle size={9} className="text-violet-700" />
+                    Verificado
+                  </span>
+                )}
                 <div className="flex items-center gap-1.5 text-[10px] text-black">
                   <Star size={12} className="text-black" />
                   4.9/5
@@ -236,7 +249,7 @@ export default function Contacto({
 
         {/* WhatsApp button */}
         <a
-          href={`https://wa.me/${advisor.phone?.replace(/\D/g, '')}?text=Hola, me interesa esta propiedad`}
+          href={`https://wa.me/${advisorPhone?.replace(/\D/g, '')}?text=Hola, me interesa esta propiedad`}
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleWhatsAppClick}

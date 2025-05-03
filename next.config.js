@@ -1,43 +1,30 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Images configuration for optimization
   images: {
-    domains: [], // Añadir aquí cualquier dominio externo si es necesario
-    // Configuración para permitir SVG en el componente Image
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-    ],
-    // Incrementar tamaño máximo si es necesario para SVGs grandes
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    domains: ['firebasestorage.googleapis.com', 'localhost'],
+    deviceSizes: [640, 750, 828, 1080, 1200], // Customize breakpoints
+    imageSizes: [16, 32, 48, 64, 96, 128, 256], // Smaller image sizes
+    formats: ['image/webp'], // Prefer WebP for better compression
+    minimumCacheTTL: 60, // Cache optimized images
+    // Remove the 'quality' option as it's not recognized at the 'images' level
   },
-  webpack(config) {
-    config.module.rules.push({
-      test: /\.svg$/,
-      use: ['@svgr/webpack'],
-    });
-    return config;
+  
+  // Move outputFileTracingExcludes from experimental to root level
+  outputFileTracingExcludes: {
+    // Add your exclusions here if needed
   },
-  // Add optimization options for Firebase deployment
-  poweredByHeader: false,
-  reactStrictMode: true,
-  swcMinify: true,
-  // Disable CSS modules to help with build issues
-  cssModules: false,
+  
+  // Remove deprecated swcMinify (it's enabled by default in newer versions)
+  // Remove cssModules (use the built-in CSS Modules support instead)
+  
+  // Set experimental features if needed
   experimental: {
-    // Reduce the size of error stack traces in production
-    outputFileTracingExcludes: {
-      '*': [
-        'node_modules/@swc/core-darwin-x64',
-        'node_modules/@swc/core-linux-x64-gnu',
-        'node_modules/@swc/core-linux-x64-musl',
-        'node_modules/@esbuild/darwin-x64',
-        'node_modules/@esbuild/linux-x64',
-      ],
-    },
-  }
-};
+    // Add valid experimental features here if needed
+  },
+  
+  // Other valid Next.js configuration options
+  reactStrictMode: true,
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig

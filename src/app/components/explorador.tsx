@@ -174,7 +174,7 @@ const Explorador = () => {
     };
 
     const currentIndex = property.id ? currentImageIndices[property.id] || 0 : 0;
-    const maxImages = property.imageUrls?.length || 1;
+    const maxImages = property.imageUrls ? Math.min(property.imageUrls.length, 5) : 1;
 
     const formatPropertyType = (type: string) => {
       if (type === 'departamento') return 'Depa';
@@ -208,7 +208,7 @@ const Explorador = () => {
                 transform: `translateX(-${currentIndex * 100}%)`,
               }}
             >
-              {property.imageUrls?.map((url, index) => (
+              {property.imageUrls?.slice(0, 5).map((url, index) => (
                 <div key={index} className="flex-shrink-0 w-full h-full relative">
                   <Image 
                     src={url || '/placeholder.jpg'} 
