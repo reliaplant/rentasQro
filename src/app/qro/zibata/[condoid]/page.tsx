@@ -194,6 +194,8 @@ export default async function CondoDetailPage(props: any) {
           totalRatings={condo.totalRatings}
           googlePlaceId={condo.googlePlaceId ?? undefined}
           cachedReviews={condo.cachedReviews}
+          selectedGoogleReviews={condo.selectedGoogleReviews} // Add this prop
+          manualReviews={condo.manualReviews} // Add manual reviews
         />
 
         <div className='mt-24'></div>

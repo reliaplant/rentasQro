@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Eye, MessageSquare, ChevronDown, ChevronUp, UserCheck } from 'lucide-react';
+import { Eye, MessageSquare, ChevronDown, ChevronUp, UserCheck, PlusCircle } from 'lucide-react';
+import Link from 'next/link';
 import { getProperties, getAdvisorData, getAllAdvisors, updateProperty } from '@/app/shared/firebase';
 import { PropertyData } from '@/app/shared/interfaces';
 
@@ -116,6 +117,17 @@ export default function AllProperties() {
 
   return (
     <div className="overflow-x-auto">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-medium text-gray-900">Administrar Propiedades</h2>
+        <Link
+          href="/admin/editarPropiedad?id=new"
+          className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+        >
+          <PlusCircle className="w-[18px] h-[18px]" />
+          <span>Crear Nueva Propiedad</span>
+        </Link>
+      </div>
+      
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>

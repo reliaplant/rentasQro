@@ -82,6 +82,49 @@ export default function PropertyReview({ data, onChange }: PropertyReviewProps) 
               </dd>
             </div>
 
+            {/* Construction & Property Details Section */}
+            <div className="mb-6 pb-6 border-b border-gray-200">
+              <h3 className="text-sm font-medium text-gray-500 mb-3">Detalles de la propiedad</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {data.construccionM2 && data.construccionM2 > 0 && (
+                  <div>
+                    <p className="text-xs text-gray-500">M² de construcción</p>
+                    <p className="text-sm font-medium">{data.construccionM2 || 0} m²</p>
+                  </div>
+                )}
+                
+                {data.terrenoM2 && data.terrenoM2 > 0 && (
+                  <div>
+                    <p className="text-xs text-gray-500">M² de terreno</p>
+                    <p className="text-sm font-medium">{data.terrenoM2 || 0} m²</p>
+                  </div>
+                )}
+                
+                {data.constructionYear && (
+                  <div>
+                    <p className="text-xs text-gray-500">Año construcción</p>
+                    <p className="text-sm font-medium">{data.constructionYear}</p>
+                  </div>
+                )}
+                
+                {data.estadoConservacion && (
+                  <div>
+                    <p className="text-xs text-gray-500">Estado</p>
+                    <p className="text-sm font-medium capitalize">
+                      {data.estadoConservacion.replace('_', ' ')}
+                    </p>
+                  </div>
+                )}
+                
+                {data.nivelesCasa && data.nivelesCasa > 0 && (
+                  <div>
+                    <p className="text-xs text-gray-500">Niveles</p>
+                    <p className="text-sm font-medium">{data.nivelesCasa || 0}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Additional Features */}
             {(data.cuartoEstudio || data.cuartoLavado || data.balcon || data.jardin || data.roofGarden || data.bodega) && (
               <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">

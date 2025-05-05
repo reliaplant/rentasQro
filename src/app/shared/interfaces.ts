@@ -18,6 +18,7 @@ export interface CondoData {
   shortDescription?: string;
   zoneId: string;
   zoneName: string;
+  qualityLevel?: 'high' | 'medium' | 'low'; // New property for quality level
   polygonId?: string; // Nuevo campo para identificar el polígono en el mapa
   polygonPath?: string;
   rentPriceMin?: number;
@@ -115,6 +116,7 @@ export interface PropertyData {
   parkingSpots: number;
   constructionYear?: number | null; // Make it optional and nullable
   construccionM2?: number;
+  terrenoM2?: number; // Add this field
   cuartoEstudio?: boolean;
   cuartoLavado?: boolean;   
   nivelesCasa?: number;

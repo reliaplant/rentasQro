@@ -132,7 +132,7 @@ export default function Menu() {
             >
               Comprar
             </Link>
-            <Link
+            {/* <Link
               href="/preventa"
               onClick={() => setIsMobileMenuOpen(false)}
               className={`${
@@ -142,7 +142,7 @@ export default function Menu() {
               } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
             >
               Preventa
-            </Link>
+            </Link> */}
             <Link
               href="/qro/zibata"
               className={`${

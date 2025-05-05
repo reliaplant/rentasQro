@@ -10,59 +10,137 @@ interface ReviewsProps {
   totalRatings?: number;
   googlePlaceId?: string;
   cachedReviews?: Review[];
+  selectedGoogleReviews?: string[]; // Add this to track selected reviews
+  manualReviews?: Review[]; // Add this for manual reviews
 }
 
-export default function Reviews({ condoName, googleRating, totalRatings, googlePlaceId, cachedReviews }: ReviewsProps) {
+export default function Reviews({
+  condoName,
+  googleRating = 0,
+  totalRatings = 0,
+  googlePlaceId,
+  cachedReviews = [],
+  selectedGoogleReviews = [], // Default to empty array
+  manualReviews = [] // Default to empty array
+}: ReviewsProps) {
+  // Filter reviews to show only selected ones or all if none are selected
+  const filteredReviews = cachedReviews.filter(review => 
+    // If we have selected reviews, only show those
+    selectedGoogleReviews.length === 0 || 
+    selectedGoogleReviews.includes(review.time.toString())
+  );
+
+  // Combine filtered Google reviews with manual reviews
+  const allReviews = [...filteredReviews, ...manualReviews];
+
+  // If we have no reviews to show after filtering, return nothing
+  if (allReviews.length === 0 && googleRating === 0) {
+    return null;
+  }
+
   return (
-    <div className="mt-2 md:mt-16 mb-8 md:mt-8 md:bg-white md:p-0 p-4">
-      <h3 className="text-lg md:text-xl font-semibold mb-4 md:mb-6">Reseñas sobre {condoName}</h3>
+    <div className="px-4 md:px-0">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-semibold">Reseñas</h3>
+        {googlePlaceId && (
+          <a 
+            href={`https://search.google.com/local/reviews?placeid=${googlePlaceId}`}
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-sm text-violet-600 hover:text-violet-800"
+          >
+            Ver en Google Maps
+          </a>
+        )}
+      </div>
 
-      {/* Rating Overview - Mobile Only */}
-      <div className="md:hidden">
-        <div className="flex items-center justify-between p-3 bg-white rounded-lg mb-3">
-          <div className="flex items-center gap-2">
-            <Star size={18} className="fill-yellow-400 text-yellow-400" />
-            <div>
-              <div className="text-xl font-semibold">{googleRating}</div>
-              <div className="text-2xs text-gray-500">{totalRatings} reseñas</div>
-            </div>
+      {/* Rating Summary */}
+      {googleRating > 0 && (
+        <div className="flex items-center gap-2 mb-6">
+          <div className="flex items-center">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                size={20}
+                className={star <= Math.round(googleRating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
+              />
+            ))}
           </div>
-          {googlePlaceId && (
-            <a
-              href={`https://www.google.com/maps/place/?q=place_id:${googlePlaceId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-2xs text-gray-600 hover:text-gray-800 flex flex-row items-center gap-1"
-            >
-              Ver en Google
-              <ArrowUpRight size={18} className="text-black" />
-            </a>
-          )}
+          <span className="text-lg font-semibold">{googleRating.toFixed(1)}</span>
+          <span className="text-sm text-gray-500">({totalRatings} reseñas)</span>
         </div>
-      </div>
+      )}
 
-      {/* Reviews Display - Desktop */}
-      <div className="hidden md:grid grid-cols-1 gap-4">
-        {cachedReviews?.slice(0, 3).map((review) => (
-          <ReviewCard 
-            key={review.time}
-            review={review}
-          />
+      {/* Reviews Grid */}
+      <div className="grid md:grid-cols-2 gap-6">
+        {allReviews.map((review, index) => (
+          <div 
+            key={`${review.author_name}-${index}`}
+            className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              {/* User Image */}
+              <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 relative">
+                {review.profile_photo_url ? (
+                  <Image
+                    src={review.profile_photo_url}
+                    alt={review.author_name}
+                    fill
+                    sizes="40px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-violet-100 flex items-center justify-center text-violet-600 font-semibold">
+                    {review.author_name?.charAt(0) || '?'}
+                  </div>
+                )}
+              </div>
+              
+              {/* User Info */}
+              <div>
+                <p className="font-medium">{review.author_name}</p>
+                <div className="flex items-center">
+                  {/* Star Rating */}
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        size={14}
+                        className={star <= review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
+                      />
+                    ))}
+                  </div>
+                  
+                  {/* Time */}
+                  {review.relative_time_description && (
+                    <span className="text-xs text-gray-500 ml-2">
+                      {review.relative_time_description}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            {/* Review Text */}
+            <p className="text-sm text-gray-600 line-clamp-4">
+              {review.text}
+            </p>
+          </div>
         ))}
       </div>
-
-      {/* Mobile Reviews - Changed to grid/column layout instead of horizontal scroll */}
-      <div className="md:hidden grid grid-cols-1 gap-3">
-        {cachedReviews?.slice(0, 3).map((review) => (
-          <ReviewCard 
-            key={review.time}
-            review={review}
+      
+      {/* Google Attribution */}
+      {googlePlaceId && (
+        <div className="mt-4 text-xs text-gray-500 flex items-center justify-end">
+          <span>Reseñas de </span>
+          <Image
+            src="/assets/google-logo.svg"
+            alt="Google"
+            width={50}
+            height={20}
+            className="ml-1"
           />
-        ))}
-      </div>
-
-      {(!cachedReviews || cachedReviews.length === 0) && (
-        <p className="text-gray-500 italic text-sm">No hay reseñas disponibles</p>
+        </div>
       )}
     </div>
   );

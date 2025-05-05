@@ -55,6 +55,8 @@ const initialFormData: PropertyData = {
   publicationDate: Timestamp.fromDate(new Date()),
   imageUrls: [],
   constructionYear: null, // Initialize as null instead of current year
+  construccionM2: 0,
+  terrenoM2: 0, // Add this field with default value
   maintenanceCost: 0,
   maintenanceIncluded: true,
   servicesIncluded: false,

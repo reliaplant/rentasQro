@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Star, MapPin, Globe, RefreshCw, Pencil, Trash } from 'lucide-react';
 import { CondoData, Review } from '@/app/shared/interfaces';
@@ -19,6 +19,44 @@ export default function CondoGoogleData({ id, formData, onFormDataChange }: Cond
   const streetViewInputRef = useRef<HTMLInputElement>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [editingReview, setEditingReview] = useState<Review | undefined>();
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+
+  // Load reviews when the component mounts if we have a valid Google Place ID
+  useEffect(() => {
+    const loadReviewsOnMount = async () => {
+      if (
+        id && 
+        id !== 'new' && 
+        formData.googlePlaceId && 
+        (!formData.cachedReviews || formData.cachedReviews.length === 0) &&
+        !initialLoadComplete
+      ) {
+        console.log('Loading reviews for condo on mount:', id);
+        setIsLoadingReviews(true);
+        try {
+          await updateCondoReviews(id);
+          const updatedCondo = await getCondoById(id);
+          if (updatedCondo) {
+            console.log('Loaded reviews from Google:', updatedCondo.cachedReviews?.length || 0);
+            onFormDataChange({
+              ...formData,
+              ...updatedCondo
+            });
+          }
+        } catch (error) {
+          console.error('Error loading reviews on mount:', error);
+          setReviewError('Error al cargar las reseñas automáticamente');
+        } finally {
+          setIsLoadingReviews(false);
+          setInitialLoadComplete(true);
+        }
+      } else {
+        setInitialLoadComplete(true);
+      }
+    };
+
+    loadReviewsOnMount();
+  }, [id, formData.googlePlaceId, initialLoadComplete]);
 
   const handleStreetViewImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -68,6 +106,47 @@ export default function CondoGoogleData({ id, formData, onFormDataChange }: Cond
       });
     } catch (error) {
       console.error('Error updating selected reviews:', error);
+    }
+  };
+
+  const handleRefreshReviews = async () => {
+    if (!id || id === 'new') {
+      setReviewError('Guarde primero el condominio');
+      return;
+    }
+    if (!formData.googlePlaceId) {
+      setReviewError('Se requiere un Google Place ID');
+      return;
+    }
+    
+    setIsLoadingReviews(true);
+    setReviewError(null);
+    try {
+      console.log('Refreshing reviews for Place ID:', formData.googlePlaceId);
+      // First ensure the googlePlaceId is saved
+      await updateDoc(doc(db, "condominiums", id), {
+        googlePlaceId: formData.googlePlaceId
+      });
+      
+      // Then update the reviews
+      await updateCondoReviews(id);
+      
+      // Get the updated data
+      const updatedCondo = await getCondoById(id);
+      if (updatedCondo) {
+        console.log('Fresh reviews loaded:', updatedCondo.cachedReviews?.length || 0);
+        onFormDataChange({
+          ...formData,
+          ...updatedCondo
+        });
+      } else {
+        throw new Error('No se pudo obtener los datos actualizados');
+      }
+    } catch (error) {
+      console.error('Error refreshing reviews:', error);
+      setReviewError('Error al obtener datos de Google Places');
+    } finally {
+      setIsLoadingReviews(false);
     }
   };
 
@@ -135,33 +214,7 @@ export default function CondoGoogleData({ id, formData, onFormDataChange }: Cond
             />
             <button
               type="button"
-              onClick={async () => {
-                if (!id || id === 'new') {
-                  setReviewError('Guarde primero el condominio');
-                  return;
-                }
-                if (!formData.googlePlaceId) return;
-                
-                setIsLoadingReviews(true);
-                setReviewError(null);
-                try {
-                  await updateDoc(doc(db, "condominiums", id), {
-                    googlePlaceId: formData.googlePlaceId
-                  });
-                  await updateCondoReviews(id);
-                  const updatedCondo = await getCondoById(id);
-                  if (updatedCondo) {
-                    onFormDataChange({
-                      ...formData,
-                      ...updatedCondo
-                    });
-                  }
-                } catch (error) {
-                  setReviewError('Error al obtener datos');
-                } finally {
-                  setIsLoadingReviews(false);
-                }
-              }}
+              onClick={handleRefreshReviews}
               disabled={isLoadingReviews || !formData.googlePlaceId || id === 'new'}
               className="px-4 py-2 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 disabled:opacity-50 flex items-center"
             >
@@ -182,6 +235,14 @@ export default function CondoGoogleData({ id, formData, onFormDataChange }: Cond
           </p>
         </div>
       </div>
+
+      {/* Loading indicator for initial load */}
+      {!initialLoadComplete && (
+        <div className="flex justify-center items-center py-8">
+          <RefreshCw size={24} className="animate-spin text-blue-500" />
+          <span className="ml-2 text-blue-500">Cargando reseñas...</span>
+        </div>
+      )}
 
       {/* Place Details */}
       {formData.placeDetails && (
@@ -292,53 +353,83 @@ export default function CondoGoogleData({ id, formData, onFormDataChange }: Cond
           <h3 className="text-lg font-medium text-gray-900">
             Reseñas de Google
           </h3>
-          <p className="text-sm text-gray-500">
-            {formData.selectedGoogleReviews?.length || 0} reseñas seleccionadas
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-gray-500">
+              {formData.selectedGoogleReviews?.length || 0} reseñas seleccionadas
+            </p>
+            {formData.googlePlaceId && (
+              <button
+                onClick={handleRefreshReviews}
+                disabled={isLoadingReviews || id === 'new'}
+                className="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-xs flex items-center gap-1"
+              >
+                <RefreshCw size={12} className={isLoadingReviews ? "animate-spin" : ""} />
+                <span>Actualizar</span>
+              </button>
+            )}
+          </div>
         </div>
 
+        {/* Reviews info box */}
         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6">
-          <p className="text-sm text-gray-600">
-            Selecciona las reseñas de Google que quieres mostrar en tu página. Las reseñas seleccionadas aparecerán en tu sitio web.
-          </p>
+          <div className="flex justify-between items-start">
+            <p className="text-sm text-gray-600">
+              Selecciona las reseñas de Google que quieres mostrar en tu página. Las reseñas seleccionadas aparecerán en tu sitio web.
+            </p>
+            {formData.reviewsLastUpdated && (
+              <p className="text-xs text-gray-500">
+                Última actualización: {new Date(formData.reviewsLastUpdated.toDate()).toLocaleDateString()}
+              </p>
+            )}
+          </div>
         </div>
 
+        {/* Reviews list */}
         <div className="space-y-3">
-          {formData.cachedReviews?.map((review, index) => (
-            <div key={index} className="p-4 border rounded-lg bg-white">
-              <div className="flex items-start gap-3">
-                <input
-                  type="checkbox"
-                  checked={formData.selectedGoogleReviews?.includes(review.time.toString()) || false}
-                  onChange={(e) => handleReviewSelection(review.time.toString(), e.target.checked)}
-                  className="mt-1 h-5 w-5 rounded text-blue-600 focus:ring-blue-500"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    {renderProfilePhoto(review.profile_photo_url, review.author_name)}
-                    <div>
-                      <div className="font-medium">{review.author_name}</div>
-                      <div className="flex items-center gap-2">
-                        {renderRatingStars(review.rating)}
-                        <span className="text-xs text-gray-500">
-                          {review.relative_time_description}
-                        </span>
+          {isLoadingReviews ? (
+            <div className="flex justify-center items-center py-8">
+              <RefreshCw size={24} className="animate-spin text-blue-500" />
+              <span className="ml-2 text-blue-500">Cargando reseñas...</span>
+            </div>
+          ) : (
+            <>
+              {formData.cachedReviews?.map((review, index) => (
+                <div key={index} className="p-4 border rounded-lg bg-white">
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={formData.selectedGoogleReviews?.includes(review.time.toString()) || false}
+                      onChange={(e) => handleReviewSelection(review.time.toString(), e.target.checked)}
+                      className="mt-1 h-5 w-5 rounded text-blue-600 focus:ring-blue-500"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        {renderProfilePhoto(review.profile_photo_url, review.author_name)}
+                        <div>
+                          <div className="font-medium">{review.author_name}</div>
+                          <div className="flex items-center gap-2">
+                            {renderRatingStars(review.rating)}
+                            <span className="text-xs text-gray-500">
+                              {review.relative_time_description}
+                            </span>
+                          </div>
+                        </div>
                       </div>
+                      <p className="text-sm text-gray-600">{review.text}</p>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-600">{review.text}</p>
                 </div>
-              </div>
-            </div>
-          ))}
+              ))}
 
-          {(!formData.cachedReviews || formData.cachedReviews.length === 0) && (
-            <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-              <p className="text-gray-500">No hay reseñas disponibles</p>
-              <p className="text-sm text-gray-400 mt-1">
-                Actualiza las reseñas o agrega una manualmente
-              </p>
-            </div>
+              {(!formData.cachedReviews || formData.cachedReviews.length === 0) && (
+                <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                  <p className="text-gray-500">No hay reseñas disponibles</p>
+                  <p className="text-sm text-gray-400 mt-1">
+                    Actualiza las reseñas o agrega una manualmente
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

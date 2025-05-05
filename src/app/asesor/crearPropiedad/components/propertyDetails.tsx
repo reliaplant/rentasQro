@@ -444,7 +444,98 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
         </div>
       </div>
       
-     
+      {/* Construction Details */}
+      <div className="space-y-4 mt-6">
+        <h3 className="text-lg font-medium text-gray-900">Detalles de construcción</h3>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Metros cuadrados de construcción
+            </label>
+            <div className="relative rounded-md shadow-sm">
+              <input
+                type="number"
+                name="construccionM2"
+                id="construccionM2"
+                className="block w-full rounded-md border-gray-300 pl-3 pr-12 focus:border-violet-500 focus:ring-violet-500 sm:text-sm"
+                placeholder="0"
+                value={data.construccionM2 || ''}
+                onChange={(e) => onChange({
+                  ...data,
+                  construccionM2: parseInt(e.target.value) || 0
+                })}
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                <span className="text-gray-500 sm:text-sm">m²</span>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Metros cuadrados de terreno
+            </label>
+            <div className="relative rounded-md shadow-sm">
+              <input
+                type="number"
+                name="terrenoM2"
+                id="terrenoM2"
+                className="block w-full rounded-md border-gray-300 pl-3 pr-12 focus:border-violet-500 focus:ring-violet-500 sm:text-sm"
+                placeholder="0"
+                value={data.terrenoM2 || ''}
+                onChange={(e) => onChange({
+                  ...data,
+                  terrenoM2: parseInt(e.target.value) || 0
+                })}
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                <span className="text-gray-500 sm:text-sm">m²</span>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Año de construcción
+            </label>
+            <input
+              type="number"
+              name="constructionYear"
+              id="constructionYear"
+              className="block w-full rounded-md border-gray-300 focus:border-violet-500 focus:ring-violet-500 sm:text-sm"
+              placeholder="2023"
+              value={data.constructionYear || ''}
+              onChange={(e) => onChange({
+                ...data,
+                constructionYear: parseInt(e.target.value) || null
+              })}
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Estado de conservación
+            </label>
+            <select
+              name="estadoConservacion"
+              id="estadoConservacion"
+              className="block w-full rounded-md border-gray-300 focus:border-violet-500 focus:ring-violet-500 sm:text-sm"
+              value={data.estadoConservacion || 'como_nuevo'}
+              onChange={(e) => onChange({
+                ...data,
+                estadoConservacion: e.target.value as "como_nuevo" | "nuevo" | "remodelado" | "aceptable" | "requiere_reparaciones"
+              })}
+            >
+              <option value="como_nuevo">Como nuevo</option>
+              <option value="nuevo">Nuevo</option>
+              <option value="remodelado">Remodelado</option>
+              <option value="aceptable">Aceptable</option>
+              <option value="requiere_reparaciones">Requiere reparaciones</option>
+            </select>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

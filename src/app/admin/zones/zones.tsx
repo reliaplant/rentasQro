@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, ChevronDown, ChevronRight, Eye } from 'lucide-react';
-import { getZones, getCondosByZone } from '@/app/shared/firebase';
+import { getZones, getCondosByZone, updateCondoQualityLevel } from '@/app/shared/firebase';
 import { ZoneData, CondoData } from '@/app/shared/interfaces';
 import EditZone from '@/app/admin/zones/editZone';
 import { useRouter } from 'next/navigation';
@@ -16,9 +16,26 @@ export default function Zones() {
   // Edit states
   const [selectedZone, setSelectedZone] = useState<ZoneData | undefined>();
   const [isEditZoneOpen, setIsEditZoneOpen] = useState(false);
+    const [qualityMenuOpen, setQualityMenuOpen] = useState<string | null>(null);
 
   useEffect(() => {
     fetchZones();
+  }, []);
+
+  // Close quality menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      // Comprueba si el clic fue en un elemento con la clase 'quality-indicator'
+      const target = e.target as HTMLElement;
+      if (!target.closest('.quality-menu') && !target.closest('.quality-indicator')) {
+        setQualityMenuOpen(null);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   const fetchZones = async () => {
@@ -29,7 +46,11 @@ export default function Zones() {
       const condosData: {[key: string]: CondoData[]} = {};
       for (const zone of zonesData) {
         if (zone.id) {
-          condosData[zone.id] = await getCondosByZone(zone.id);
+          // Obtenemos los condominios y los ordenamos alfabéticamente por nombre
+          const zoneCondos = await getCondosByZone(zone.id);
+          condosData[zone.id] = zoneCondos.sort((a, b) => 
+            a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+          );
         }
       }
       setCondos(condosData);
@@ -57,6 +78,52 @@ export default function Zones() {
   const handleAddZone = () => {
     setSelectedZone(undefined);
     setIsEditZoneOpen(true);
+  };
+
+  // Modificación para asegurar que el toggleQualityMenu funcione correctamente
+  const toggleQualityMenu = (e: React.MouseEvent, condoId: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    console.log("Toggle quality menu for condo:", condoId); // Añadir log para depuración
+    setQualityMenuOpen(prevState => {
+      console.log("Current menu state:", prevState, "Setting to:", prevState === condoId ? null : condoId);
+      return prevState === condoId ? null : condoId;
+    });
+  };
+
+  const updateQualityLevel = async (e: React.MouseEvent, condo: CondoData, level: 'high' | 'medium' | 'low') => {
+    e.stopPropagation();
+    try {
+      // Actualizar en Firebase
+      if (condo.id) {
+        await updateCondoQualityLevel(condo.id, level);
+      }
+      
+      toast.success(`Nivel de calidad actualizado`);
+      
+      // Update local state 
+      const updatedCondos = {...condos};
+      if (condo.id && condo.zoneId) {
+        updatedCondos[condo.zoneId] = updatedCondos[condo.zoneId].map(c => 
+          c.id === condo.id ? {...c, qualityLevel: level} : c
+        );
+        setCondos(updatedCondos);
+      }
+    } catch (error) {
+      console.error('Error updating quality level:', error);
+      toast.error('Error al actualizar el nivel de calidad');
+    } finally {
+      setQualityMenuOpen(null);
+    }
+  };
+
+  const getQualityColor = (level?: 'high' | 'medium' | 'low') => {
+    switch (level) {
+      case 'high': return 'bg-green-500';
+      case 'medium': return 'bg-yellow-500';
+      case 'low': return 'bg-red-500';
+      default: return 'bg-gray-300';
+    }
   };
 
   return (
@@ -133,6 +200,47 @@ export default function Zones() {
                         <div className='flex flex-row gap-2'>
                         <Edit2 size={16} className="text-gray-500 hover:text-blue-500 " />
                         <Eye size={16} className="text-gray-500 hover:text-blue-500 " />
+                        <div className="relative" style={{ position: 'relative' }}>
+                          <button 
+                            className={`w-4 h-4 rounded-full ${getQualityColor(condo.qualityLevel)} cursor-pointer quality-indicator`}
+                            onClick={(e) => toggleQualityMenu(e, condo.id!)}
+                          ></button>
+                          {qualityMenuOpen === condo.id && (
+                            <div 
+                              className="absolute right-0 mt-1 bg-white shadow-lg rounded-md py-1 quality-menu"
+                              style={{ 
+                                minWidth: '80px', 
+                                zIndex: 9999,
+                                position: 'absolute',
+                                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08)',
+                                transform: 'translateZ(0)'
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div 
+                                className="flex items-center gap-2 px-3 py-1 hover:bg-gray-100 cursor-pointer"
+                                onClick={(e) => updateQualityLevel(e, condo, 'high')}
+                              >
+                                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                <span className="text-xs">Alto</span>
+                              </div>
+                              <div 
+                                className="flex items-center gap-2 px-3 py-1 hover:bg-gray-100 cursor-pointer"
+                                onClick={(e) => updateQualityLevel(e, condo, 'medium')}
+                              >
+                                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <span className="text-xs">Medio</span>
+                              </div>
+                              <div 
+                                className="flex items-center gap-2 px-3 py-1 hover:bg-gray-100 cursor-pointer"
+                                onClick={(e) => updateQualityLevel(e, condo, 'low')}
+                              >
+                                <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                <span className="text-xs">Bajo</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                         </div>
                         </div>
                       ))

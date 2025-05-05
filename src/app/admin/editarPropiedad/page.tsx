@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getCurrentUser, getProperty, updateProperty, addProperty, getAllAdvisors, checkIfUserIsAdmin } from '@/app/shared/firebase';
@@ -31,6 +31,8 @@ const initialFormData: PropertyData = {
   publicationDate: Timestamp.fromDate(new Date()),
   imageUrls: [],
   constructionYear: null,
+  construccionM2: 0,
+  terrenoM2: 0, // Add this field with default value
   maintenanceCost: 0,
   maintenanceIncluded: true,
   servicesIncluded: false,
@@ -67,7 +69,8 @@ const steps = [
   { id: 'review', label: 'Revisión' },
 ];
 
-export default function AdminEditPropertyPage() {
+// This component uses useSearchParams and needs to be wrapped in Suspense
+function EditPropertyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const propertyId = searchParams?.get('id') || null;
@@ -110,8 +113,8 @@ export default function AdminEditPropertyPage() {
         const advisors = await getAllAdvisors();
         setAdvisorsList(advisors);
 
-        // If we have a propertyId, load the existing property
-        if (propertyId) {
+        // If we have a propertyId and it's not 'new', load the existing property
+        if (propertyId && propertyId !== 'new') {
           const existingProperty = await getProperty(propertyId);
           if (existingProperty) {
             console.log('Loaded existing property:', existingProperty);
@@ -126,8 +129,10 @@ export default function AdminEditPropertyPage() {
           }
         } else {
           // Initialize new property with empty advisor
+          console.log('Creating new property from initialFormData');
           setFormData({
             ...initialFormData,
+            publicationDate: Timestamp.now(), // Ensure publication date is set for new properties
             advisor: '',
           });
         }
@@ -171,21 +176,32 @@ export default function AdminEditPropertyPage() {
   const handleSubmit = async () => {
     if (!formData || isSubmitting) return;
     
+    if (!selectedAdvisor) {
+      setError('Debe seleccionar un asesor antes de guardar la propiedad');
+      return;
+    }
+    
     setIsSubmitting(true);
     try {
       // Ensure the advisor is set in the submitted data
       const dataToSubmit = { 
         ...formData, 
         advisor: selectedAdvisor,
-        status: 'publicada' as const // Add 'as const' to narrow the type
+        status: 'publicada' as const,
+        publicationDate: formData.publicationDate || Timestamp.now(), // Ensure publication date exists
+        createdAt: formData.createdAt || Timestamp.now(), // Set creation date for new properties
+        views: formData.views || 0,
+        whatsappClicks: formData.whatsappClicks || 0
       };
       
-      if (propertyId) {
+      if (propertyId && propertyId !== 'new') {
         // Update existing property
         await updateProperty(propertyId, dataToSubmit);
+        console.log('Property updated successfully');
       } else {
         // Add new property
         await addProperty(dataToSubmit);
+        console.log('New property created successfully');
       }
       
       setIsComplete(true);
@@ -195,7 +211,7 @@ export default function AdminEditPropertyPage() {
       
     } catch (error) {
       console.error('Error submitting property:', error);
-      setError('Hubo un error al guardar la propiedad. Por favor intenta de nuevo.');
+      setError(`Error al guardar: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -381,5 +397,19 @@ export default function AdminEditPropertyPage() {
         </>
       )}
     </div>
+  );
+}
+
+// Main component that wraps the content in Suspense
+export default function AdminEditPropertyPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-violet-500"></div>
+        <p className="ml-3">Cargando...</p>
+      </div>
+    }>
+      <EditPropertyContent />
+    </Suspense>
   );
 }

@@ -1444,4 +1444,22 @@ export const getAllAdvisors = async () => {
   }
 };
 
+// Function to update the quality level of a condominium
+export const updateCondoQualityLevel = async (
+  condoId: string, 
+  qualityLevel: 'high' | 'medium' | 'low'
+): Promise<void> => {
+  try {
+    console.log(`Updating condo ${condoId} quality level to ${qualityLevel}`);
+    const condoRef = doc(db, "condominiums", condoId);
+    await updateDoc(condoRef, {
+      qualityLevel: qualityLevel
+    });
+    console.log('Quality level updated successfully');
+  } catch (error) {
+    console.error('Error updating condo quality level:', error);
+    throw error;
+  }
+};
+
 export { db, auth, storage };

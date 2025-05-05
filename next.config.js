@@ -2,10 +2,16 @@
 const nextConfig = {
   // Images configuration for optimization
   images: {
-    domains: ['firebasestorage.googleapis.com', 'localhost'],
+    domains: [
+      'firebasestorage.googleapis.com', 
+      'localhost',
+      'lh3.googleusercontent.com', // Add Google user profile photos
+      'maps.googleapis.com',      // Add Google Maps images
+      'maps.gstatic.com',         // Add Google Static Maps
+    ],
     deviceSizes: [640, 750, 828, 1080, 1200], // Customize breakpoints
     imageSizes: [16, 32, 48, 64, 96, 128, 256], // Smaller image sizes
-    formats: ['image/webp'], // Prefer WebP for better compression
+    formats: ['image/avif'], // Prefer WebP for better compression
     minimumCacheTTL: 60, // Cache optimized images
     // Remove the 'quality' option as it's not recognized at the 'images' level
   },
