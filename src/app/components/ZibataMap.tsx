@@ -469,11 +469,13 @@ export default function ZibataMap({
         <defs>
           <style>
             {`
+            
           @keyframes highlightPulse {
             0% { opacity: 0.7; }
             50% { opacity: 1; }
             100% { opacity: 0.7; }
-          }
+          }   
+         
           .destacado {
             fill: #BD72F0 !important;
             stroke: #FF1493;

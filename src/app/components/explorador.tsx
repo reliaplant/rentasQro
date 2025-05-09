@@ -1,39 +1,85 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { getProperties } from '../shared/firebase';
+import { useEffect, useState, useCallback } from 'react';
+import { getPropertiesWithPagination } from '../shared/firebase';
 import type { PropertyData } from '../shared/interfaces';
 import Link from 'next/link';
 import Image from 'next/image';
 import { FaHeart, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { useFavorites } from '../hooks/useFavorites';
 import { useFilters } from '../context/FilterContext';
+import { useInView } from 'react-intersection-observer';
+
+// Número de propiedades a cargar por lote
+const PROPERTIES_PER_PAGE = 10;
+
+// Función para determinar la prioridad de carga de imágenes
+const getImagePriority = (propertyIndex: number, imageIndex: number) => {
+  // Las primeras 5-10 propiedades (depende del tamaño de pantalla) son prioritarias
+  const isPriorityProperty = propertyIndex < 10;
+  
+  // Solo la primera imagen de cada propiedad prioritaria se carga con prioridad
+  const isPriorityImage = imageIndex === 0;
+  
+  return isPriorityProperty && isPriorityImage;
+};
 
 const Explorador = () => {
   const [properties, setProperties] = useState<PropertyData[]>([]);
   const [filteredProperties, setFilteredProperties] = useState<PropertyData[]>([]);
   const [currentImageIndices, setCurrentImageIndices] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true); // Nuevo estado para la carga inicial
+  const [lastDoc, setLastDoc] = useState<any>(null);
+  const [hasMore, setHasMore] = useState(true);
   
   // Get filters from context
   const { filters } = useFilters();
 
-  // Cargar propiedades
-  useEffect(() => {
-    const loadProperties = async () => {
+  // Configurar el observador para detección de scroll (infinite loading)
+  const { ref, inView } = useInView({
+    threshold: 0,
+    rootMargin: '300px 0px',
+  });
+
+  // Cargar propiedades con paginación
+  const loadProperties = useCallback(async (reset = false) => {
+    if (!hasMore && !reset) return;
+    
+    try {
       setIsLoading(true);
-      try {
-        const allProperties = await getProperties();
-        const publishedProperties = allProperties.filter(p => p.status === 'publicada');
+      const { properties: newProperties, lastVisible, hasMoreDocs } = 
+        await getPropertiesWithPagination(reset ? null : lastDoc, PROPERTIES_PER_PAGE);
+      
+      const publishedProperties = newProperties.filter(p => p.status === 'publicada');
+      
+      if (reset) {
         setProperties(publishedProperties);
-      } catch (error) {
-        console.error('Error loading properties:', error);
-      } finally {
-        setIsLoading(false);
+      } else {
+        setProperties(prev => [...prev, ...publishedProperties]);
       }
-    };
-    loadProperties();
+      
+      setLastDoc(lastVisible);
+      setHasMore(hasMoreDocs);
+    } catch (error) {
+      console.error('Error loading properties:', error);
+    } finally {
+      setIsLoading(false);
+      setIsInitialLoading(false); // Marcar que ya no estamos en la carga inicial
+    }
+  }, [lastDoc, hasMore]);
+
+  // Cargar propiedades iniciales
+  useEffect(() => {
+    loadProperties(true);
   }, []);
+
+  // Cargar más propiedades cuando el usuario haga scroll
+  useEffect(() => {
+    if (inView && !isLoading) {
+      loadProperties();
+    }
+  }, [inView, loadProperties, isLoading]);
 
   // Efecto para filtrar propiedades basado en los filtros del contexto
   useEffect(() => {
@@ -150,7 +196,7 @@ const Explorador = () => {
   );
 
   // Componente PropertyCard
-  const PropertyCard = ({ property }: { property: PropertyData }) => {
+  const PropertyCard = ({ property, index }: { property: PropertyData, index: number }) => {
     // Add favorites functionality
     const { isFavorite, toggleFavorite } = useFavorites();
     const [isFav, setIsFav] = useState(false);
@@ -208,18 +254,30 @@ const Explorador = () => {
                 transform: `translateX(-${currentIndex * 100}%)`,
               }}
             >
-              {property.imageUrls?.slice(0, 5).map((url, index) => (
-                <div key={index} className="flex-shrink-0 w-full h-full relative">
-                  <Image 
-                    src={url || '/placeholder.jpg'} 
-                    alt={`${property.descripcion || 'Imagen de propiedad'} ${index + 1}`}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    priority={index === 0}
-                    className="object-cover rounded-lg"
-                  />
-                </div>
-              ))}
+              {property.imageUrls?.slice(0, 5).map((url, imageIndex) => {
+                const shouldPrioritize = getImagePriority(index, imageIndex);
+                
+                return (
+                  <div key={imageIndex} className="flex-shrink-0 w-full h-full relative">
+                    <Image 
+                      src={url || '/placeholder.jpg'} 
+                      alt={`${property.descripcion || 'Imagen de propiedad'} ${imageIndex + 1}`}
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 25vw, (max-width: 1024px) 17vw, 15vw"
+                      priority={shouldPrioritize}
+                      loading={shouldPrioritize ? 'eager' : 'lazy'}
+                      className="object-cover rounded-lg"
+                      quality={imageIndex === 0 ? 80 : 40}
+                      placeholder="blur"
+                      blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mM0M/d5DwAChQGFAyGkvgAAAABJRU5ErkJggg=="
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/placeholder.jpg';
+                      }}
+                    />
+                  </div>
+                );
+              })}
             </div>
             {/* Overlay para oscurecer en hover - sin transición */}
             <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 z-10 pointer-events-none"></div>
@@ -289,37 +347,53 @@ const Explorador = () => {
     );
   };
 
+  // Renderizar esqueletos de carga durante la carga inicial
+  const renderSkeletons = () => (
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4 w-full">
+      {[...Array(10)].map((_, index) => (
+        <PropertySkeleton key={`skeleton-${index}`} />
+      ))}
+    </div>
+  );
+
   return (
     <div className="mx-auto px-3 sm:px-[5vw] py-8 sm:py-12">
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
-        {isLoading ? (
-          // Mostrar skeletons durante la carga
-          [...Array(10)].map((_, index) => (
-            <PropertySkeleton key={index} />
-          ))
-        ) : filteredProperties.length > 0 ? (
-          // Mostrar propiedades filtradas cuando están cargadas
-          filteredProperties.map((property) => (
-            <Link 
-              href={`/propiedad/${property.id}`} 
-              key={property.id}
-              className="cursor-pointer mb-2 sm:mb-4"
-            >
-              <PropertyCard property={property} />
-            </Link>
-          ))
-        ) : (
-          // Mensaje cuando no hay propiedades disponibles
-          <div className="col-span-full py-12 sm:py-20 text-center">
-            <h3 className="text-base sm:text-lg font-medium text-gray-700">
-              No hay propiedades disponibles
-            </h3>
-            <p className="text-sm sm:text-base text-gray-500 mt-1">
-              Intenta cambiar tus filtros de búsqueda
-            </p>
-          </div>
-        )}
-      </div>
+      {isInitialLoading ? (
+        // Mostrar los esqueletos durante la carga inicial
+        renderSkeletons()
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
+          {filteredProperties.length > 0 ? (
+            // Mostrar propiedades filtradas cuando están cargadas
+            filteredProperties.map((property, index) => (
+              <Link 
+                href={`/propiedad/${property.id}`} 
+                key={property.id}
+                className="cursor-pointer mb-2 sm:mb-4"
+              >
+                <PropertyCard property={property} index={index} />
+              </Link>
+            ))
+          ) : (
+            // Mensaje cuando no hay propiedades disponibles
+            <div className="col-span-full py-12 sm:py-20 text-center">
+              <h3 className="text-base sm:text-lg font-medium text-gray-700">
+                No hay propiedades disponibles
+              </h3>
+              <p className="text-sm sm:text-base text-gray-500 mt-1">
+                Intenta cambiar tus filtros de búsqueda
+              </p>
+            </div>
+          )}
+          
+          {/* Elemento de observación para infinite scroll */}
+          {hasMore && (
+            <div ref={ref} className="col-span-full flex justify-center py-8">
+              {isLoading && !isInitialLoading && renderSkeletons()}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { FaBed, FaBath, FaCheck, FaCar, FaTimes } from 'react-icons/fa';
 import { getZones } from '../shared/firebase';
 import type { ZoneData } from '../shared/interfaces';
@@ -9,6 +9,88 @@ import { useFilters } from '../context/FilterContext';
 
 // Define MAX_PRICE constant locally
 const MAX_PRICE = 50000;
+const USD_TO_MXN_RATE = 20;
+
+// Memoized select component for better performance
+const ZoneSelect = memo(({ 
+  selectedZone, 
+  zones, 
+  onChange 
+}: { 
+  selectedZone: string, 
+  zones: ZoneData[], 
+  onChange: (zone: string) => void 
+}) => {
+  return (
+    <div className="relative w-28 sm:w-32">
+      <select
+        value={selectedZone}
+        onChange={(e) => onChange(e.target.value)}
+        className={`
+          w-full appearance-none rounded-full
+          px-2.5 py-1.5 text-xs font-medium
+          transition-all cursor-pointer
+          ${selectedZone 
+          ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200' 
+          : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
+        `}
+      >
+        <option value="">Zonas</option>
+        {zones.map((zone) => (
+          <option 
+            key={zone.id} 
+            value={zone.id}
+            className={selectedZone === zone.id ? '!text-violet-600' : ''}
+          >
+            {zone.name}
+          </option>
+        ))}
+      </select>
+      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+        <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
+    </div>
+  );
+});
+
+ZoneSelect.displayName = 'ZoneSelect';
+
+// Memoized numeric filter buttons for better performance
+const NumericFilterButton = memo(({ 
+  value, 
+  currentValue, 
+  onClick 
+}: { 
+  value: string | number, 
+  currentValue: number | null, 
+  onClick: () => void 
+}) => {
+  const isSelected = currentValue === (value === '3+' ? 3 : value === '2+' ? 2 : Number(value));
+  
+  return (
+    <button
+      onClick={onClick}
+      className={`
+        w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium
+        transition-all duration-200 cursor-pointer relative group
+        ${isSelected
+          ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
+          : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
+      `}
+    >
+      <span className={isSelected ? 'group-hover:opacity-0' : ''}>
+        {value}
+      </span>
+      {isSelected && (
+        <FaTimes className="w-3 h-3 absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+      )}
+    </button>
+  );
+});
+
+NumericFilterButton.displayName = 'NumericFilterButton';
 
 const FilterExplorador = () => {
   const pathname = usePathname();
@@ -18,9 +100,8 @@ const FilterExplorador = () => {
   const { filters, updateFilter } = useFilters();
   const [zones, setZones] = useState<ZoneData[]>([]);
   const [currency, setCurrency] = useState<'MXN' | 'USD'>('MXN');
-  const USD_TO_MXN_RATE = 20;
 
-  // Add local state for input values
+  // Add local state for input values with lazy initialization
   const [minPriceInput, setMinPriceInput] = useState('');
   const [maxPriceInput, setMaxPriceInput] = useState('');
   const [isClient, setIsClient] = useState(false);
@@ -28,37 +109,49 @@ const FilterExplorador = () => {
   // Define types for numeric values
   type NumericValue = number | '2+' | '3+';
 
-  // Update arrays with proper typing
+  // Update arrays with proper typing - moved outside component for better performance
   const bedroomOptions: NumericValue[] = [1, 2, '3+'];
   const bathroomOptions: NumericValue[] = [1, '2+'];
   const parkingOptions: NumericValue[] = [1, 2, '3+'];
 
-  // Add isClient state to prevent hydration mismatch
+  // Add isClient state to prevent hydration mismatch - this only needs to run once
   useEffect(() => {
     setIsClient(true);
   }, []);
 
+  // Load zones data once
   useEffect(() => {
+    let mounted = true;
     const loadZones = async () => {
-      const zonesData = await getZones();
-      setZones(zonesData);
+      try {
+        const zonesData = await getZones();
+        if (mounted) {
+          setZones(zonesData);
+        }
+      } catch (error) {
+        console.error('Error loading zones:', error);
+      }
     };
+    
     loadZones();
+    
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  // Función para formatear números según la moneda (without adding currency suffix)
-  const formatPrice = (value: number): string => {
+  // Memoize format functions to prevent unnecessary re-creations
+  const formatPrice = useCallback((value: number): string => {
     if (!value) return '';
     const displayValue = currency === 'USD' ? value / USD_TO_MXN_RATE : value;
     return new Intl.NumberFormat('es-MX').format(Math.round(displayValue));
-  };
+  }, [currency]);
 
-  // Función para "limpiar" el string formateado y obtener solo números
-  const cleanNumberString = (str: string): number => {
+  const cleanNumberString = useCallback((str: string): number => {
     if (!str) return 0;
     const numericValue = Number(str.replace(/[^0-9]/g, ''));
     return currency === 'USD' ? numericValue * USD_TO_MXN_RATE : numericValue;
-  };
+  }, [currency]);
 
   // Initialize input fields with formatted values when filters change
   useEffect(() => {
@@ -68,13 +161,12 @@ const FilterExplorador = () => {
       setMinPriceInput('');
     }
     
-    // Use MAX_PRICE constant instead of hardcoded 50000
     if (filters.priceRange[1] < MAX_PRICE) {
       setMaxPriceInput(formatPrice(filters.priceRange[1]));
     } else {
       setMaxPriceInput('');
     }
-  }, [currency, filters.priceRange]);
+  }, [currency, filters.priceRange, formatPrice]);
 
   // Efecto para convertir los precios cuando cambia la moneda
   useEffect(() => {
@@ -84,15 +176,23 @@ const FilterExplorador = () => {
         Math.round(filters.priceRange[1] / USD_TO_MXN_RATE) * USD_TO_MXN_RATE
       ]);
     }
-  }, [currency]);
+  }, [currency, updateFilter, filters.priceRange]);
 
-  // Actualizar el tipo de transacción
-  const handleTransactionTypeChange = (type: 'renta' | 'compra') => {
+  // Force compra as default on first render
+  useEffect(() => {
+    // Only run once on mount
+    if (filters.transactionType === 'renta') {
+      updateFilter('transactionType', 'compra');
+    }
+  }, []); // Empty dependency array means it only runs once
+
+  // Actualizar el tipo de transacción - memoized for better performance
+  const handleTransactionTypeChange = useCallback((type: 'compra' | 'renta') => {
     updateFilter('transactionType', type);
-  };
+  }, [updateFilter]);
 
-  // Función helper actualizada para manejar la selección/deselección
-  const handleNumericFilter = (
+  // Función helper actualizada para manejar la selección/deselección - memoized
+  const handleNumericFilter = useCallback((
     value: NumericValue,
     currentValue: number | null,
     filterKey: 'bedrooms' | 'bathrooms' | 'parkingSpots'
@@ -103,10 +203,10 @@ const FilterExplorador = () => {
     } else {
       updateFilter(filterKey, numValue);
     }
-  };
+  }, [updateFilter]);
 
-  // Handle min price input change with debounce
-  const handleMinPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle min price input change - memoized
+  const handleMinPriceChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
     setMinPriceInput(inputValue);
     
@@ -119,10 +219,10 @@ const FilterExplorador = () => {
     // Only extract numbers and update the filter
     const value = cleanNumberString(inputValue);
     updateFilter('priceRange', [value, filters.priceRange[1]]);
-  };
+  }, [cleanNumberString, updateFilter, filters.priceRange]);
   
-  // Handle max price input change with debounce
-  const handleMaxPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle max price input change - memoized
+  const handleMaxPriceChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
     setMaxPriceInput(inputValue);
     
@@ -135,9 +235,19 @@ const FilterExplorador = () => {
     // Only extract numbers and update the filter
     const value = cleanNumberString(inputValue);
     updateFilter('priceRange', [filters.priceRange[0], value]);
-  };
+  }, [cleanNumberString, updateFilter, filters.priceRange]);
 
-  // Estilos base compartidos para todos los botones y controles
+  // Memoized handler for zone selection
+  const handleZoneChange = useCallback((zone: string) => {
+    updateFilter('selectedZone', zone);
+  }, [updateFilter]);
+
+  // Memoized handler for toggling boolean filters
+  const handleToggle = useCallback((key: 'isFurnished' | 'petsAllowed') => {
+    updateFilter(key, !filters[key]);
+  }, [updateFilter, filters]);
+
+  // Move static styles outside component to avoid recreating them on each render
   const baseButtonStyles = `
     px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
     hover:bg-violet-50 hover:ring-2 hover:ring-violet-200
@@ -171,10 +281,10 @@ const FilterExplorador = () => {
             <div className="flex items-center gap-4 flex-nowrap md:flex-wrap min-w-max md:min-w-0">
               {/* Toggle Renta/Compra */}
               <div className="flex bg-gray-50/80 rounded-full p-0.5 shadow-inner">
-                {['renta', 'compra'].map((type) => (
+                {['compra','renta' ].map((type) => (
                 <button
                   key={type}
-                  onClick={() => handleTransactionTypeChange(type as 'renta' | 'compra')}
+                  onClick={() => handleTransactionTypeChange(type as 'compra' | 'renta' )}
                   className={`
                   px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
                   cursor-pointer
@@ -188,38 +298,13 @@ const FilterExplorador = () => {
                 ))}
               </div>
 
-              {/* Zona - más compacta */}
-              {isClient && (
-                <div className="relative w-28 sm:w-32">
-                  <select
-                    value={filters.selectedZone}
-                    onChange={(e) => updateFilter('selectedZone', e.target.value)}
-                    className={`
-                      w-full appearance-none rounded-full
-                      px-2.5 py-1.5 text-xs font-medium
-                      transition-all cursor-pointer
-                      ${filters.selectedZone 
-                      ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200' 
-                      : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
-                    `}
-                  >
-                    <option value="">Zonas</option>
-                    {zones.map((zone) => (
-                      <option 
-                        key={zone.id} 
-                        value={zone.id}
-                        className={filters.selectedZone === zone.id ? '!text-violet-600' : ''}
-                      >
-                        {zone.name}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
+              {/* Zona with memoized component */}
+              {isClient && zones.length > 0 && (
+                <ZoneSelect
+                  selectedZone={filters.selectedZone}
+                  zones={zones}
+                  onChange={handleZoneChange}
+                />
               )}
 
               {/* Precio - ajustes de tamaño */}
@@ -299,56 +384,32 @@ const FilterExplorador = () => {
                 </div>
               )}
 
-              {/* Recámaras */}
+              {/* Recámaras with memoized buttons */}
               <div className="flex items-center gap-2">
                 <FaBed className="text-gray-400" />
                 <div className="flex gap-2">
                   {bedroomOptions.map((num) => (
-                    <button
+                    <NumericFilterButton
                       key={num}
+                      value={num}
+                      currentValue={filters.bedrooms}
                       onClick={() => handleNumericFilter(num, filters.bedrooms, 'bedrooms')}
-                      className={`
-                        w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium
-                        transition-all duration-200 cursor-pointer relative group
-                        ${filters.bedrooms === (num === '3+' ? 3 : Number(num))
-                          ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
-                          : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
-                      `}
-                    >
-                      <span className={filters.bedrooms === (num === '3+' ? 3 : Number(num)) ? 'group-hover:opacity-0' : ''}>
-                        {num}
-                      </span>
-                      {filters.bedrooms === (num === '3+' ? 3 : Number(num)) && (
-                        <FaTimes className="w-3 h-3 absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                      )}
-                    </button>
+                    />
                   ))}
                 </div>
               </div>
 
-              {/* Baños */}
+              {/* Baños with memoized buttons */}
               <div className="flex items-center gap-2">
                 <FaBath className="text-gray-400" />
                 <div className="flex gap-2">
                   {bathroomOptions.map((num) => (
-                    <button
+                    <NumericFilterButton
                       key={num}
+                      value={num}
+                      currentValue={filters.bathrooms}
                       onClick={() => handleNumericFilter(num, filters.bathrooms, 'bathrooms')}
-                      className={`
-                        w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium
-                        transition-all duration-200 cursor-pointer relative group
-                        ${filters.bathrooms === (num === '2+' ? 2 : Number(num))
-                          ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
-                          : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
-                      `}
-                    >
-                      <span className={filters.bathrooms === (num === '2+' ? 2 : Number(num)) ? 'group-hover:opacity-0' : ''}>
-                        {num}
-                      </span>
-                      {filters.bathrooms === (num === '2+' ? 2 : Number(num)) && (
-                        <FaTimes className="w-3 h-3 absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                      )}
-                    </button>
+                    />
                   ))}
                 </div>
               </div>
@@ -356,7 +417,7 @@ const FilterExplorador = () => {
               {/* Amueblado - Solo en /explorar */}
               {isExplorarPage && (
                 <button
-                onClick={() => updateFilter('isFurnished', !filters.isFurnished)}
+                onClick={() => handleToggle('isFurnished')}
                 className={`
                   ${baseButtonStyles}
                   ${filters.isFurnished ? selectedButtonStyles : unselectedButtonStyles}
@@ -371,7 +432,7 @@ const FilterExplorador = () => {
               {/* Mascotas - Solo en /explorar */}
               {isExplorarPage && (
                 <button
-                onClick={() => updateFilter('petsAllowed', !filters.petsAllowed)}
+                onClick={() => handleToggle('petsAllowed')}
                 className={`
                   ${baseButtonStyles}
                   ${filters.petsAllowed ? selectedButtonStyles : unselectedButtonStyles}
@@ -383,30 +444,18 @@ const FilterExplorador = () => {
                 </button>
               )}
 
-              {/* Estacionamientos */}
+              {/* Estacionamientos with memoized buttons */}
               {isExplorarPage && (
                 <div className="flex items-center gap-2">
                   <FaCar className="text-gray-400" />
                   <div className="flex gap-2">
                     {parkingOptions.map((num) => (
-                      <button
+                      <NumericFilterButton
                         key={num}
+                        value={num}
+                        currentValue={filters.parkingSpots}
                         onClick={() => handleNumericFilter(num, filters.parkingSpots, 'parkingSpots')}
-                        className={`
-                          w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium
-                          transition-all duration-200 cursor-pointer relative group
-                          ${filters.parkingSpots === (num === '3+' ? 3 : Number(num))
-                            ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
-                            : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
-                        `}
-                      >
-                        <span className={filters.parkingSpots === (num === '3+' ? 3 : Number(num)) ? 'group-hover:opacity-0' : ''}>
-                          {num}
-                        </span>
-                        {filters.parkingSpots === (num === '3+' ? 3 : Number(num)) && (
-                          <FaTimes className="w-3 h-3 absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                        )}
-                      </button>
+                      />
                     ))}
                   </div>
                 </div>

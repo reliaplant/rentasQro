@@ -7,7 +7,11 @@
       "**/node_modules/**"
     ],
     "frameworksBackend": {
-      "region": "us-central1"
+      "region": "us-central1",
+      "memory": "1GiB",
+      "cpu": 2,
+      "minInstances": 0,
+      "maxInstances": 3
     },
     "site": "rentasqro-bc53f"
   }

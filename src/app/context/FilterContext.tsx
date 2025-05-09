@@ -31,7 +31,7 @@ const FilterContext = createContext<FilterContextType | undefined>(undefined);
 
 // Default filter values
 const defaultFilters: FilterState = {
-  transactionType: 'renta',
+  transactionType: 'compra',
   selectedZone: '',
   priceRange: [0, MAX_PRICE],
   bedrooms: null,

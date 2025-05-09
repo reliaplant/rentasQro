@@ -1,0 +1,777 @@
+[debug] [2025-05-08T18:15:46.317Z] ----------------------------------------------------------------------
+[debug] [2025-05-08T18:15:46.324Z] Command:       /Users/guillermomoran/.nvm/versions/node/v20.10.0/bin/node /Users/guillermomoran/.nvm/versions/node/v20.10.0/bin/firebase deploy --only hosting
+[debug] [2025-05-08T18:15:46.324Z] CLI Version:   13.35.1
+[debug] [2025-05-08T18:15:46.324Z] Platform:      darwin
+[debug] [2025-05-08T18:15:46.324Z] Node Version:  v20.10.0
+[debug] [2025-05-08T18:15:46.324Z] Time:          Thu May 08 2025 12:15:46 GMT-0600 (Central Standard Time)
+[debug] [2025-05-08T18:15:46.324Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-05-08T18:15:46.326Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2025-05-08T18:15:46.442Z] Object "/hosting/rewrites/0" in "firebase.json" is missing required property: {"missingProperty":"destination"}
+[debug] [2025-05-08T18:15:46.442Z] Object "/hosting/rewrites/0" in "firebase.json" is missing required property: {"missingProperty":"function"}
+[debug] [2025-05-08T18:15:46.442Z] Object "/hosting/rewrites/0" in "firebase.json" is missing required property: {"missingProperty":"function"}
+[debug] [2025-05-08T18:15:46.442Z] Object "/hosting/rewrites/0" in "firebase.json" is missing required property: {"missingProperty":"glob"}
+[debug] [2025-05-08T18:15:46.442Z] Object "/hosting/rewrites/0" in "firebase.json" is missing required property: {"missingProperty":"dynamicLinks"}
+[debug] [2025-05-08T18:15:46.442Z] Object "/hosting/rewrites/0" in "firebase.json" is missing required property: {"missingProperty":"destination"}
+[debug] [2025-05-08T18:15:46.442Z] Object "/hosting/rewrites/0" in "firebase.json" is missing required property: {"missingProperty":"function"}
+[debug] [2025-05-08T18:15:46.442Z] Object "/hosting/rewrites/0" in "firebase.json" is missing required property: {"missingProperty":"function"}
+[debug] [2025-05-08T18:15:46.442Z] Object "/hosting/rewrites/0/run" in "firebase.json" has unknown property: {"additionalProperty":"memory"}
+[debug] [2025-05-08T18:15:46.442Z] Object "/hosting/rewrites/0" in "firebase.json" is missing required property: {"missingProperty":"dynamicLinks"}
+[debug] [2025-05-08T18:15:46.442Z] Object "/hosting/rewrites/0" in "firebase.json" is missing required property: {"missingProperty":"destination"}
+[debug] [2025-05-08T18:15:46.442Z] Object "/hosting/rewrites/0" in "firebase.json" is missing required property: {"missingProperty":"function"}
+[debug] [2025-05-08T18:15:46.442Z] Object "/hosting/rewrites/0" in "firebase.json" is missing required property: {"missingProperty":"function"}
+[debug] [2025-05-08T18:15:46.442Z] Object "/hosting/rewrites/0" in "firebase.json" is missing required property: {"missingProperty":"regex"}
+[debug] [2025-05-08T18:15:46.442Z] Object "/hosting/rewrites/0" in "firebase.json" is missing required property: {"missingProperty":"dynamicLinks"}
+[debug] [2025-05-08T18:15:46.442Z] Field "/hosting/rewrites/0" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[debug] [2025-05-08T18:15:46.442Z] Field "/hosting" in "firebase.json" is possibly invalid: must be array
+[debug] [2025-05-08T18:15:46.442Z] Field "/hosting" in "firebase.json" is possibly invalid: must match a schema in anyOf
+[debug] [2025-05-08T18:15:46.446Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-05-08T18:15:46.446Z] > authorizing via signed-in user (reliaplant@gmail.com)
+[debug] [2025-05-08T18:15:46.446Z] [iam] checking project rentasqro-bc53f for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2025-05-08T18:15:46.446Z] Checked if tokens are valid: false, expires at: 1746495471667
+[debug] [2025-05-08T18:15:46.446Z] Checked if tokens are valid: false, expires at: 1746495471667
+[debug] [2025-05-08T18:15:46.446Z] > refreshing access token with scopes: []
+[debug] [2025-05-08T18:15:46.446Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-05-08T18:15:46.447Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-05-08T18:15:46.558Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2025-05-08T18:15:46.558Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2025-05-08T18:15:46.573Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-05-08T18:15:46.574Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-05-08T18:15:46.587Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f:testIamPermissions [none]
+[debug] [2025-05-08T18:15:46.587Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f:testIamPermissions x-goog-quota-user=projects/rentasqro-bc53f
+[debug] [2025-05-08T18:15:46.587Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-05-08T18:15:46.896Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f:testIamPermissions 200
+[debug] [2025-05-08T18:15:46.897Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-05-08T18:15:46.898Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:15:46.898Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:15:46.899Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/rentasqro-bc53f [none]
+[debug] [2025-05-08T18:15:47.106Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/rentasqro-bc53f 200
+[debug] [2025-05-08T18:15:47.106Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/rentasqro-bc53f {"projectId":"rentasqro-bc53f","projectNumber":"706566534125","displayName":"RentasQRO","name":"projects/rentasqro-bc53f","resources":{"hostingSite":"rentasqro-bc53f"},"state":"ACTIVE","etag":"1_e6399bb0-5b39-4cdb-b74d-863009e097d9"}
+[debug] [2025-05-08T18:15:48.229Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:15:48.229Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:15:48.230Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/rentasqro-bc53f/sites pageToken=&pageSize=10
+[debug] [2025-05-08T18:15:48.979Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/rentasqro-bc53f/sites 200
+[debug] [2025-05-08T18:15:48.979Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/rentasqro-bc53f/sites {"sites":[{"name":"projects/rentasqro-bc53f/sites/rentasqro-bc53f","defaultUrl":"https://rentasqro-bc53f.web.app","type":"DEFAULT_SITE"}]}
+[debug] [2025-05-08T18:15:48.981Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:15:48.981Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:15:48.981Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/rentasqro-bc53f/sites 
+[debug] [2025-05-08T18:15:49.504Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/rentasqro-bc53f/sites 200
+[debug] [2025-05-08T18:15:49.504Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/rentasqro-bc53f/sites {"sites":[{"name":"projects/rentasqro-bc53f/sites/rentasqro-bc53f","defaultUrl":"https://rentasqro-bc53f.web.app","type":"DEFAULT_SITE"}]}
+[debug] [2025-05-08T18:15:49.505Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:15:49.505Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:15:49.506Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/rentasqro-bc53f/webApps/-/config [none]
+[debug] [2025-05-08T18:15:49.772Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/rentasqro-bc53f/webApps/-/config 200
+[debug] [2025-05-08T18:15:49.772Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/rentasqro-bc53f/webApps/-/config {"projectId":"rentasqro-bc53f","appId":"1:706566534125:web:f4f298f0247c6bae28ede4","storageBucket":"rentasqro-bc53f.firebasestorage.app","apiKey":"AIzaSyArhNxt2pZdMCGJwmoqV1PNWOIX7jN3oVQ","authDomain":"rentasqro-bc53f.firebaseapp.com","messagingSenderId":"706566534125"}
+[info] 
+   Thank you for trying our early preview of Next.js support on Firebase Hosting.
+   During the preview, support is best-effort and breaking changes can be expected. Proceed with caution.
+   The integration is known to work with Next.js version 12 - 15.0. You may encounter errors.
+
+   Documentation: https://firebase.google.com/docs/hosting/frameworks/nextjs
+   File a bug: https://github.com/firebase/firebase-tools/issues/new?template=bug_report.md
+   Submit a feature request: https://github.com/firebase/firebase-tools/issues/new?template=feature_request.md
+
+   We'd love to learn from you. Express your interest in helping us shape the future of Firebase Hosting: https://goo.gle/41enW5X
+
+[debug] [2025-05-08T18:15:51.822Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:15:51.822Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:15:51.822Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/rentasqro-bc53f/sites/rentasqro-bc53f [none]
+[debug] [2025-05-08T18:15:52.130Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/rentasqro-bc53f/sites/rentasqro-bc53f 200
+[debug] [2025-05-08T18:15:52.130Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/rentasqro-bc53f/sites/rentasqro-bc53f {"name":"projects/rentasqro-bc53f/sites/rentasqro-bc53f","defaultUrl":"https://rentasqro-bc53f.web.app","type":"DEFAULT_SITE"}
+[info]    ▲ Next.js 15.2.2
+
+[info]    - Environments: .env.local
+   - Experiments (use with caution):
+     ✓ optimizeCss
+
+
+[info]    Creating an optimized production build ...
+
+[info]  ✓ Compiled successfully
+
+[info]    Skipping validation of types
+
+[info]    Linting ...
+
+[info]    Collecting page data ...
+
+[info]    Generating static pages (0/28) ...
+
+[info]    Generating static pages (7/28) 
+
+[info]    Generating static pages (14/28) 
+
+[info]    Generating static pages (21/28) 
+
+[info]  ✓ Generating static pages (28/28)
+
+[info]    Finalizing page optimization ...
+
+[info]    Collecting build traces ...
+
+[info] 
+
+[info] Route (app)                                 Size  First Load JS
+┌ ○ /                                    6.45 kB         539 kB
+├ ○ /_not-found                            167 B         101 kB
+├ ○ /admin                               12.2 kB         312 kB
+├ ○ /admin/blog-editor                    5.3 kB         281 kB
+├ ○ /admin/blog-editor/contributor       3.22 kB         282 kB
+├ ○ /admin/desarrolladoras               1.82 kB         253 kB
+├ ○ /admin/editarPropiedad               5.42 kB         293 kB
+├ ƒ /admin/editCondo/[id]                12.7 kB         325 kB
+├ ○ /admin/mapa                          3.08 kB         115 kB
+├ ƒ /api/google-reviews                    167 B         101 kB
+├ ○ /asesor                               5.5 kB         265 kB
+├ ○ /asesor/crearPropiedad                4.6 kB         250 kB
+├ ○ /asesor/perfilAsesor                 2.58 kB         259 kB
+├ ○ /blog                                  511 B         105 kB
+├ ƒ /blog/[slug]                         1.95 kB         256 kB
+├ ○ /contacto                              167 B         101 kB
+├ ○ /explorar                            8.52 kB         694 kB
+├ ○ /favoritos                           2.85 kB         262 kB
+├ ○ /legal/privacidad                      167 B         101 kB
+├ ○ /legal/tyc                             167 B         101 kB
+├ ○ /login                                2.4 kB         256 kB
+├ ○ /preventa                            3.23 kB         538 kB
+├ ○ /preventa/zibata/ziqua               7.82 kB         552 kB
+├ ƒ /propiedad/[id]                      20.6 kB         770 kB
+├ ○ /qro                                 1.17 kB         255 kB
+├ ○ /qro/zibata                          8.74 kB         698 kB
+├ ƒ /qro/zibata/[condoid]                9.19 kB         589 kB
+├ ○ /robots.txt                            167 B         101 kB
+└ ○ /sitemap.xml                           167 B         101 kB
++ First Load JS shared by all             101 kB
+  ├ chunks/1684-c84e2add83aab937.js      45.3 kB
+  ├ chunks/4bd1b696-9c54660f6b5d9cbb.js  53.2 kB
+  └ other shared chunks (total)          2.56 kB
+
+
+[info] 
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+[info] Building a Cloud Function to run this application. This is needed due to:
+[info]  • Image Optimization
+[info]  • non-static component /api/google-reviews/route
+[info]  • non-static component /admin/editCondo/[id]/page
+[info]  • non-static component /propiedad/[id]/page
+[info]  • non-static component /blog/[slug]/page
+[debug] [2025-05-08T18:16:16.632Z]  • non-static component /qro/zibata/[condoid]/page
+[info]  • and 1 other reasons, use --debug to see more
+[info] 
+[debug] [2025-05-08T18:16:23.277Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:16:23.277Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:16:23.277Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/rentasqro-bc53f/sites/rentasqro-bc53f [none]
+[debug] [2025-05-08T18:16:23.679Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/rentasqro-bc53f/sites/rentasqro-bc53f 200
+[debug] [2025-05-08T18:16:23.680Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/rentasqro-bc53f/sites/rentasqro-bc53f {"name":"projects/rentasqro-bc53f/sites/rentasqro-bc53f","defaultUrl":"https://rentasqro-bc53f.web.app","type":"DEFAULT_SITE"}
+[debug] [2025-05-08T18:19:10.714Z] [web frameworks] effective firebase.json:  {
+  "hosting": [
+    {
+      "source": ".",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "frameworksBackend": {
+        "region": "us-central1"
+      },
+      "site": "rentasqro-bc53f",
+      "rewrites": [
+        {
+          "source": "**",
+          "run": {
+            "serviceId": "next-app",
+            "region": "us-central1",
+            "memory": "1GiB",
+            "cpu": 1,
+            "minInstances": 0,
+            "maxInstances": 3
+          }
+        },
+        {
+          "source": "**",
+          "function": {
+            "functionId": "ssrrentasqrobc53f",
+            "region": "us-central1",
+            "pinTag": true
+          }
+        }
+      ],
+      "redirects": [],
+      "headers": [
+        {
+          "source": "/sitemap.xml",
+          "headers": [
+            {
+              "key": "cache-control",
+              "value": "public, max-age=0, must-revalidate"
+            },
+            {
+              "key": "content-type",
+              "value": "application/xml"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/sitemap.xml/layout,_N_T_/sitemap.xml/route,_N_T_/sitemap.xml"
+            }
+          ]
+        },
+        {
+          "source": "/favicon.ico",
+          "headers": [
+            {
+              "key": "cache-control",
+              "value": "public, max-age=0, must-revalidate"
+            },
+            {
+              "key": "content-type",
+              "value": "image/x-icon"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/favicon.ico/layout,_N_T_/favicon.ico/route,_N_T_/favicon.ico"
+            }
+          ]
+        },
+        {
+          "source": "/robots.txt",
+          "headers": [
+            {
+              "key": "cache-control",
+              "value": "public, max-age=0, must-revalidate"
+            },
+            {
+              "key": "content-type",
+              "value": "text/plain"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/robots.txt/layout,_N_T_/robots.txt/route,_N_T_/robots.txt"
+            }
+          ]
+        },
+        {
+          "source": "/_not-found",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/_not-found/layout,_N_T_/_not-found/page,_N_T_/_not-found"
+            }
+          ]
+        },
+        {
+          "source": "/admin/editarPropiedad",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/admin/layout,_N_T_/admin/editarPropiedad/layout,_N_T_/admin/editarPropiedad/page,_N_T_/admin/editarPropiedad"
+            }
+          ]
+        },
+        {
+          "source": "/asesor",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/asesor/layout,_N_T_/asesor/page,_N_T_/asesor"
+            }
+          ]
+        },
+        {
+          "source": "/admin/mapa",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/admin/layout,_N_T_/admin/mapa/layout,_N_T_/admin/mapa/page,_N_T_/admin/mapa"
+            }
+          ]
+        },
+        {
+          "source": "/asesor/perfilAsesor",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/asesor/layout,_N_T_/asesor/perfilAsesor/layout,_N_T_/asesor/perfilAsesor/page,_N_T_/asesor/perfilAsesor"
+            }
+          ]
+        },
+        {
+          "source": "/admin",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/admin/layout,_N_T_/admin/page,_N_T_/admin"
+            }
+          ]
+        },
+        {
+          "source": "/contacto",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/contacto/layout,_N_T_/contacto/page,_N_T_/contacto"
+            }
+          ]
+        },
+        {
+          "source": "/explorar",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/explorar/layout,_N_T_/explorar/page,_N_T_/explorar"
+            }
+          ]
+        },
+        {
+          "source": "/admin/desarrolladoras",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/admin/layout,_N_T_/admin/desarrolladoras/layout,_N_T_/admin/desarrolladoras/page,_N_T_/admin/desarrolladoras"
+            }
+          ]
+        },
+        {
+          "source": "/favoritos",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/favoritos/layout,_N_T_/favoritos/page,_N_T_/favoritos"
+            }
+          ]
+        },
+        {
+          "source": "/login",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/login/layout,_N_T_/login/page,_N_T_/login"
+            }
+          ]
+        },
+        {
+          "source": "/legal/tyc",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/legal/layout,_N_T_/legal/tyc/layout,_N_T_/legal/tyc/page,_N_T_/legal/tyc"
+            }
+          ]
+        },
+        {
+          "source": "/legal/privacidad",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/legal/layout,_N_T_/legal/privacidad/layout,_N_T_/legal/privacidad/page,_N_T_/legal/privacidad"
+            }
+          ]
+        },
+        {
+          "source": "/admin/blog-editor/contributor",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/admin/layout,_N_T_/admin/blog-editor/layout,_N_T_/admin/blog-editor/contributor/layout,_N_T_/admin/blog-editor/contributor/page,_N_T_/admin/blog-editor/contributor"
+            }
+          ]
+        },
+        {
+          "source": "/admin/blog-editor",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/admin/layout,_N_T_/admin/blog-editor/layout,_N_T_/admin/blog-editor/page,_N_T_/admin/blog-editor"
+            }
+          ]
+        },
+        {
+          "source": "/blog",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/blog/layout,_N_T_/blog/page,_N_T_/blog"
+            }
+          ]
+        },
+        {
+          "source": "/qro",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/qro/layout,_N_T_/qro/page,_N_T_/qro"
+            }
+          ]
+        },
+        {
+          "source": "/asesor/crearPropiedad",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/asesor/layout,_N_T_/asesor/crearPropiedad/layout,_N_T_/asesor/crearPropiedad/page,_N_T_/asesor/crearPropiedad"
+            }
+          ]
+        },
+        {
+          "source": "/preventa",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/preventa/layout,_N_T_/preventa/page,_N_T_/preventa"
+            }
+          ]
+        },
+        {
+          "source": "/preventa/zibata/ziqua",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/preventa/layout,_N_T_/preventa/zibata/layout,_N_T_/preventa/zibata/ziqua/layout,_N_T_/preventa/zibata/ziqua/page,_N_T_/preventa/zibata/ziqua"
+            }
+          ]
+        },
+        {
+          "source": "/qro/zibata",
+          "headers": [
+            {
+              "key": "x-nextjs-stale-time",
+              "value": "4294967294"
+            },
+            {
+              "key": "x-nextjs-prerender",
+              "value": "1"
+            },
+            {
+              "key": "x-next-cache-tags",
+              "value": "_N_T_/layout,_N_T_/qro/layout,_N_T_/qro/zibata/layout,_N_T_/qro/zibata/page,_N_T_/qro/zibata"
+            }
+          ]
+        },
+        {
+          "source": "**/*.[jt]s",
+          "headers": [
+            {
+              "key": "Set-Cookie",
+              "value": "__FIREBASE_DEFAULTS__=eyJjb25maWciOnsicHJvamVjdElkIjoicmVudGFzcXJvLWJjNTNmIiwiYXBwSWQiOiIxOjcwNjU2NjUzNDEyNTp3ZWI6ZjRmMjk4ZjAyNDdjNmJhZTI4ZWRlNCIsInN0b3JhZ2VCdWNrZXQiOiJyZW50YXNxcm8tYmM1M2YuZmlyZWJhc2VzdG9yYWdlLmFwcCIsImFwaUtleSI6IkFJemFTeUFyaE54dDJwWmRNQ0dKd21vcVYxUE5XT0lYN2pOM29WUSIsImF1dGhEb21haW4iOiJyZW50YXNxcm8tYmM1M2YuZmlyZWJhc2VhcHAuY29tIiwibWVzc2FnaW5nU2VuZGVySWQiOiI3MDY1NjY1MzQxMjUifSwiX2F1dGhUb2tlblN5bmNVUkwiOiIvX19zZXNzaW9uIn0; SameSite=Strict; Expires=2027-04-03T04:59:10.713Z; Path=/;"
+            }
+          ]
+        }
+      ],
+      "cleanUrls": true,
+      "trailingSlash": false,
+      "public": ".firebase/rentasqro-bc53f/hosting",
+      "webFramework": "next_ssr"
+    }
+  ],
+  "functions": [
+    {
+      "source": ".firebase/rentasqro-bc53f/functions",
+      "codebase": "firebase-frameworks-rentasqro-bc53f"
+    }
+  ]
+}
+[debug] [2025-05-08T18:19:10.715Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-05-08T18:19:10.715Z] > authorizing via signed-in user (reliaplant@gmail.com)
+[debug] [2025-05-08T18:19:10.715Z] [iam] checking project rentasqro-bc53f for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2025-05-08T18:19:10.715Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:10.715Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:10.716Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f:testIamPermissions [none]
+[debug] [2025-05-08T18:19:10.716Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f:testIamPermissions x-goog-quota-user=projects/rentasqro-bc53f
+[debug] [2025-05-08T18:19:10.716Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2025-05-08T18:19:11.169Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f:testIamPermissions 200
+[debug] [2025-05-08T18:19:11.169Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2025-05-08T18:19:11.170Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:11.170Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:11.171Z] >>> [apiv2][query] GET https://cloudfunctions.googleapis.com/v1/projects/rentasqro-bc53f/locations/-/functions [none]
+[debug] [2025-05-08T18:19:11.949Z] <<< [apiv2][status] GET https://cloudfunctions.googleapis.com/v1/projects/rentasqro-bc53f/locations/-/functions 200
+[debug] [2025-05-08T18:19:11.949Z] <<< [apiv2][body] GET https://cloudfunctions.googleapis.com/v1/projects/rentasqro-bc53f/locations/-/functions {}
+[debug] [2025-05-08T18:19:11.950Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:11.950Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:11.952Z] >>> [apiv2][query] GET https://cloudfunctions.googleapis.com/v2/projects/rentasqro-bc53f/locations/-/functions filter=environment%3D%22GEN_2%22
+[debug] [2025-05-08T18:19:12.385Z] <<< [apiv2][status] GET https://cloudfunctions.googleapis.com/v2/projects/rentasqro-bc53f/locations/-/functions 200
+[debug] [2025-05-08T18:19:12.386Z] <<< [apiv2][body] GET https://cloudfunctions.googleapis.com/v2/projects/rentasqro-bc53f/locations/-/functions {"functions":[{"name":"projects/rentasqro-bc53f/locations/us-central1/functions/ssrrentasqrobc53f","buildConfig":{"build":"projects/706566534125/locations/us-central1/builds/4be29310-28aa-4ca6-8ef4-2366d2b2dad5","runtime":"nodejs20","entryPoint":"ssrrentasqrobc53f","source":{"storageSource":{"bucket":"gcf-v2-sources-706566534125-us-central1","object":"ssrrentasqrobc53f/function-source.zip","generation":"1746493144091396"}},"environmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"dockerRepository":"projects/rentasqro-bc53f/locations/us-central1/repositories/gcf-artifacts","sourceProvenance":{"resolvedStorageSource":{"bucket":"gcf-v2-sources-706566534125-us-central1","object":"ssrrentasqrobc53f/function-source.zip","generation":"1746493144091396"}},"dockerRegistry":"ARTIFACT_REGISTRY","serviceAccount":"projects/rentasqro-bc53f/serviceAccounts/706566534125-compute@developer.gserviceaccount.com","automaticUpdatePolicy":{}},"serviceConfig":{"service":"projects/rentasqro-bc53f/locations/us-central1/services/ssrrentasqrobc53f","timeoutSeconds":60,"environmentVariables":{"VERCEL_URL":"rentasqro-bc53f.web.app","__FIREBASE_FRAMEWORKS_ENTRY__":"next.js","__FIREBASE_DEFAULTS__":"{\"config\":{\"projectId\":\"rentasqro-bc53f\",\"appId\":\"1:706566534125:web:f4f298f0247c6bae28ede4\",\"storageBucket\":\"rentasqro-bc53f.firebasestorage.app\",\"apiKey\":\"AIzaSyArhNxt2pZdMCGJwmoqV1PNWOIX7jN3oVQ\",\"authDomain\":\"rentasqro-bc53f.firebaseapp.com\",\"messagingSenderId\":\"706566534125\"},\"_authTokenSyncURL\":\"/__session\"}","FIREBASE_CONFIG":"{\"projectId\":\"rentasqro-bc53f\",\"storageBucket\":\"rentasqro-bc53f.firebasestorage.app\"}","GCLOUD_PROJECT":"rentasqro-bc53f","EVENTARC_CLOUD_EVENT_SOURCE":"projects/rentasqro-bc53f/locations/us-central1/services/ssrrentasqrobc53f","FUNCTION_TARGET":"ssrrentasqrobc53f","LOG_EXECUTION_ID":"true"},"maxInstanceCount":3,"ingressSettings":"ALLOW_ALL","uri":"https://ssrrentasqrobc53f-xizpsg43ha-uc.a.run.app","serviceAccountEmail":"706566534125-compute@developer.gserviceaccount.com","availableMemory":"1Gi","allTrafficOnLatestRevision":true,"maxInstanceRequestConcurrency":80,"availableCpu":"2000m"},"state":"ACTIVE","updateTime":"2025-05-06T01:04:22.921368634Z","labels":{"deployment-tool":"cli-firebase","firebase-functions-codebase":"firebase-frameworks-rentasqro-bc53f","firebase-functions-hash":"e5a478f499e1caeee8f1ce97864cd7278d55bee0"},"environment":"GEN_2","url":"https://us-central1-rentasqro-bc53f.cloudfunctions.net/ssrrentasqrobc53f","createTime":"2025-03-13T18:56:42.262687641Z","satisfiesPzi":true}]}
+[info] i  hosting: The following function(s) are pinned to site rentasqro-bc53f and will be deployed as well: ssrrentasqrobc53f 
+[info] 
+[info] === Deploying to 'rentasqro-bc53f'...
+[info] 
+[info] i  deploying functions, hosting 
+[debug] [2025-05-08T18:19:12.387Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:12.387Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:12.387Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f [none]
+[debug] [2025-05-08T18:19:12.511Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f 200
+[debug] [2025-05-08T18:19:12.511Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f {"projectNumber":"706566534125","projectId":"rentasqro-bc53f","lifecycleState":"ACTIVE","name":"RentasQRO","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2025-03-13T18:49:24.687563Z"}
+[info] i  functions: preparing codebase firebase-frameworks-rentasqro-bc53f for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[debug] [2025-05-08T18:19:12.513Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:12.513Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:12.513Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:12.513Z] Checked if tokens are valid: true, expires at: 1746731745574
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[debug] [2025-05-08T18:19:12.513Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:12.513Z] Checked if tokens are valid: true, expires at: 1746731745574
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2025-05-08T18:19:12.513Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:12.513Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:12.514Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/rentasqro-bc53f/services/cloudfunctions.googleapis.com [none]
+[debug] [2025-05-08T18:19:12.514Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/rentasqro-bc53f/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/rentasqro-bc53f
+[debug] [2025-05-08T18:19:12.515Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/rentasqro-bc53f/services/runtimeconfig.googleapis.com [none]
+[debug] [2025-05-08T18:19:12.515Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/rentasqro-bc53f/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/rentasqro-bc53f
+[debug] [2025-05-08T18:19:12.516Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/rentasqro-bc53f/services/cloudbuild.googleapis.com [none]
+[debug] [2025-05-08T18:19:12.516Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/rentasqro-bc53f/services/cloudbuild.googleapis.com x-goog-quota-user=projects/rentasqro-bc53f
+[debug] [2025-05-08T18:19:12.517Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/rentasqro-bc53f/services/artifactregistry.googleapis.com [none]
+[debug] [2025-05-08T18:19:12.517Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/rentasqro-bc53f/services/artifactregistry.googleapis.com x-goog-quota-user=projects/rentasqro-bc53f
+[debug] [2025-05-08T18:19:13.312Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/rentasqro-bc53f/services/cloudfunctions.googleapis.com 200
+[debug] [2025-05-08T18:19:13.312Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/rentasqro-bc53f/services/cloudfunctions.googleapis.com [omitted]
+[info] ✔  functions: required API cloudfunctions.googleapis.com is enabled 
+[debug] [2025-05-08T18:19:13.378Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/rentasqro-bc53f/services/runtimeconfig.googleapis.com 200
+[debug] [2025-05-08T18:19:13.379Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/rentasqro-bc53f/services/runtimeconfig.googleapis.com [omitted]
+[debug] [2025-05-08T18:19:13.409Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/rentasqro-bc53f/services/cloudbuild.googleapis.com 200
+[debug] [2025-05-08T18:19:13.409Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/rentasqro-bc53f/services/cloudbuild.googleapis.com [omitted]
+[info] ✔  functions: required API cloudbuild.googleapis.com is enabled 
+[debug] [2025-05-08T18:19:13.411Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/rentasqro-bc53f/services/artifactregistry.googleapis.com 200
+[debug] [2025-05-08T18:19:13.411Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/rentasqro-bc53f/services/artifactregistry.googleapis.com [omitted]
+[info] ✔  artifactregistry: required API artifactregistry.googleapis.com is enabled 
+[debug] [2025-05-08T18:19:13.412Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:13.412Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:13.412Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/rentasqro-bc53f/adminSdkConfig [none]
+[debug] [2025-05-08T18:19:13.867Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/rentasqro-bc53f/adminSdkConfig 200
+[debug] [2025-05-08T18:19:13.867Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/rentasqro-bc53f/adminSdkConfig {"projectId":"rentasqro-bc53f","storageBucket":"rentasqro-bc53f.firebasestorage.app"}
+[debug] [2025-05-08T18:19:13.868Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:13.868Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:13.868Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/rentasqro-bc53f/configs [none]
+[debug] [2025-05-08T18:19:14.353Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/rentasqro-bc53f/configs 200
+[debug] [2025-05-08T18:19:14.353Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/rentasqro-bc53f/configs {}
+[debug] [2025-05-08T18:19:14.354Z] Validating nodejs source
+[debug] [2025-05-08T18:19:15.101Z] > [functions] package.json contents: {
+  "name": "rentasqro",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@carbon/icons-react": "^11.57.0",
+    "@heroicons/react": "^2.2.0",
+    "@tiptap/extension-image": "^2.2.4",
+    "@tiptap/extension-link": "^2.2.4",
+    "@tiptap/extension-placeholder": "^2.2.4",
+    "@tiptap/extension-underline": "^2.2.4",
+    "@tiptap/pm": "^2.2.4",
+    "@tiptap/react": "^2.2.4",
+    "@tiptap/starter-kit": "^2.2.4",
+    "@types/react-beautiful-dnd": "^13.1.8",
+    "browser-image-compression": "^2.0.2",
+    "critters": "^0.0.25",
+    "firebase": "^11.4.0",
+    "framer-motion": "^12.9.2",
+    "lucide-react": "^0.482.0",
+    "mapbox-gl": "^3.10.0",
+    "next": "15.2.2",
+    "react": "^18.2.0",
+    "react-beautiful-dnd": "^13.1.1",
+    "react-dom": "^18.2.0",
+    "react-hot-toast": "^2.5.2",
+    "react-icons": "^5.5.0",
+    "react-intersection-observer": "^9.16.0",
+    "sharp": "^0.32 || ^0.33",
+    "firebase-frameworks": "^0.11.0",
+    "firebase-functions": "^6.0.1",
+    "firebase-admin": "^11.11.1"
+  },
+  "main": "server.js",
+  "engines": {
+    "node": "20"
+  }
+}
+[debug] [2025-05-08T18:19:15.101Z] Building nodejs source
+[info] i  functions: Loading and analyzing source code for codebase firebase-frameworks-rentasqro-bc53f to determine what to deploy 
+[debug] [2025-05-08T18:19:15.102Z] Could not find functions.yaml. Must use http discovery
+[debug] [2025-05-08T18:19:15.107Z] Found firebase-functions binary at '/Users/guillermomoran/Desktop/codigo/reliaplant/rentasqro/.firebase/rentasqro-bc53f/functions/node_modules/.bin/firebase-functions'
+[info] Serving at port 8985
+
+[debug] [2025-05-08T18:19:15.754Z] Got response from /__/functions.yaml {"endpoints":{"ssrrentasqrobc53f":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["us-central1"],"labels":{},"httpsTrigger":{},"entryPoint":"ssrrentasqrobc53f"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{}}
+[info] i  extensions: ensuring required API firebaseextensions.googleapis.com is enabled... 
+[debug] [2025-05-08T18:19:20.775Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:20.775Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:20.775Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/rentasqro-bc53f/services/firebaseextensions.googleapis.com [none]
+[debug] [2025-05-08T18:19:20.775Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/rentasqro-bc53f/services/firebaseextensions.googleapis.com x-goog-quota-user=projects/rentasqro-bc53f
+[debug] [2025-05-08T18:19:21.286Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/rentasqro-bc53f/services/firebaseextensions.googleapis.com 200
+[debug] [2025-05-08T18:19:21.287Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/rentasqro-bc53f/services/firebaseextensions.googleapis.com [omitted]
+[info] ✔  extensions: required API firebaseextensions.googleapis.com is enabled 
+[debug] [2025-05-08T18:19:21.287Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-05-08T18:19:21.287Z] > authorizing via signed-in user (reliaplant@gmail.com)
+[debug] [2025-05-08T18:19:21.287Z] [iam] checking project rentasqro-bc53f for permissions ["firebase.projects.get","firebaseextensions.instances.list"]
+[debug] [2025-05-08T18:19:21.288Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:21.288Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:21.288Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f:testIamPermissions [none]
+[debug] [2025-05-08T18:19:21.288Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f:testIamPermissions x-goog-quota-user=projects/rentasqro-bc53f
+[debug] [2025-05-08T18:19:21.288Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f:testIamPermissions {"permissions":["firebase.projects.get","firebaseextensions.instances.list"]}
+[debug] [2025-05-08T18:19:21.697Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f:testIamPermissions 200
+[debug] [2025-05-08T18:19:21.697Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/rentasqro-bc53f:testIamPermissions {"permissions":["firebase.projects.get","firebaseextensions.instances.list"]}
+[debug] [2025-05-08T18:19:21.698Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:21.698Z] Checked if tokens are valid: true, expires at: 1746731745574
+[debug] [2025-05-08T18:19:21.699Z] >>> [apiv2][query] GET https://firebaseextensions.googleapis.com/v1beta/projects/rentasqro-bc53f/instances pageSize=100&pageToken=
+[debug] [2025-05-08T18:19:22.293Z] <<< [apiv2][status] GET https://firebaseextensions.googleapis.com/v1beta/projects/rentasqro-bc53f/instances 200
+[debug] [2025-05-08T18:19:22.294Z] <<< [apiv2][body] GET https://firebaseextensions.googleapis.com/v1beta/projects/rentasqro-bc53f/instances {}
+[info] i  functions: Loaded environment variables from .env. 
+[info] i  functions: preparing .firebase/rentasqro-bc53f/functions directory for uploading... 

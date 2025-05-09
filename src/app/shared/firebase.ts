@@ -4,8 +4,8 @@
  * Do not create duplicate Firebase service files.
  */
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, Timestamp, getDocs, doc, getDoc, updateDoc, deleteDoc, query, where, increment, setDoc, limit, Query, DocumentData, orderBy } from "firebase/firestore";
-import { getStorage, ref, uploadBytes, getDownloadURL, uploadBytesResumable } from "firebase/storage";
+import { getFirestore, collection, addDoc, Timestamp, getDocs, doc, getDoc, updateDoc, deleteDoc, query, where, increment, setDoc, limit, Query, DocumentData, orderBy, startAfter, QueryDocumentSnapshot } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL, uploadBytesResumable, listAll } from "firebase/storage";
 import { getAuth, signInWithEmailAndPassword, signOut as firebaseSignOut, onAuthStateChanged, User, fetchSignInMethodsForEmail } from "firebase/auth";
 import { ZoneData, CondoData } from '@/app/shared/interfaces';
 import { PropertyData, Desarrolladora } from '@/app/shared/interfaces';
@@ -1459,6 +1459,74 @@ export const updateCondoQualityLevel = async (
   } catch (error) {
     console.error('Error updating condo quality level:', error);
     throw error;
+  }
+};
+
+// Función para obtener propiedades con paginación
+export const getPropertiesWithPagination = async (
+  startAfterDoc: QueryDocumentSnapshot<DocumentData> | null = null,
+  pageSize: number = 10
+): Promise<{
+  properties: PropertyData[];
+  lastVisible: QueryDocumentSnapshot<DocumentData> | null;
+  hasMoreDocs: boolean;
+}> => {
+  try {
+    let propertiesQuery;
+    
+    if (startAfterDoc) {
+      // Consulta con paginación a partir de un documento
+      propertiesQuery = query(
+        collection(db, 'properties'),
+        orderBy('createdAt', 'desc'),
+        startAfter(startAfterDoc),
+        limit(pageSize + 1) // Pedimos uno extra para saber si hay más
+      );
+    } else {
+      // Consulta inicial
+      propertiesQuery = query(
+        collection(db, 'properties'),
+        orderBy('createdAt', 'desc'),
+        limit(pageSize + 1)
+      );
+    }
+
+    const querySnapshot = await getDocs(propertiesQuery);
+    
+    // Verificar si hay más documentos
+    const docs = querySnapshot.docs;
+    const hasMoreDocs = docs.length > pageSize;
+    
+    // Si hay más documentos, eliminamos el extra que pedimos
+    const propertyDocs = hasMoreDocs ? docs.slice(0, pageSize) : docs;
+    
+    // Último documento visible para la siguiente consulta
+    const lastVisible = propertyDocs.length > 0 ? propertyDocs[propertyDocs.length - 1] : null;
+    
+    // Convertir documentos a objetos PropertyData
+    const properties = propertyDocs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        // Convertir fechas si existen
+        createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : data.createdAt,
+        updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate() : data.updatedAt
+      } as unknown as PropertyData; // Uso de casting seguro para evitar el error de TypeScript
+    });
+
+    return {
+      properties,
+      lastVisible,
+      hasMoreDocs
+    };
+  } catch (error) {
+    console.error('Error fetching properties with pagination:', error);
+    return {
+      properties: [],
+      lastVisible: null,
+      hasMoreDocs: false
+    };
   }
 };
 

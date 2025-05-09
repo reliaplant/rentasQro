@@ -20,6 +20,7 @@
     "@tiptap/starter-kit": "^2.2.4",
     "@types/react-beautiful-dnd": "^13.1.8",
     "browser-image-compression": "^2.0.2",
+    "critters": "^0.0.25",
     "firebase": "^11.4.0",
     "framer-motion": "^12.9.2",
     "lucide-react": "^0.482.0",
@@ -29,7 +30,8 @@
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.5.2",
-    "react-icons": "^5.5.0"
+    "react-icons": "^5.5.0",
+    "react-intersection-observer": "^9.16.0"
   },
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",

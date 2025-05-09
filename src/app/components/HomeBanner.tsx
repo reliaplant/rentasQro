@@ -93,6 +93,14 @@ export default function HomeBanner() {
           fill
           className="object-cover"
           priority
+          quality={75}
+          placeholder="blur"
+          blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mM0M/d5DwAChQGFAyGkvgAAAABJRU5ErkJggg=="
+          sizes="(max-width: 1024px) 0px, 50vw"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = '/placeholder.jpg';
+          }}
         />
       </div>
     </div>

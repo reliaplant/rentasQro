@@ -30,19 +30,20 @@ function MenuModals({
 }
 
 export default function Menu() {
+  // Get the current pathname using Next.js router
   const pathname = usePathname();
 
   // Stop rendering early if on admin or advisor pages
   if (pathname?.startsWith('/admin') || pathname?.startsWith('/asesor')) {
     return null;
   }
-
+  
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isPropertyListingModalOpen, setIsPropertyListingModalOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const { favorites } = useFavorites();
   const { filters, updateFilter } = useFilters();
-  
+
   const router = useRouter();
   const currentTransactionType = filters.transactionType;
 
@@ -56,11 +57,11 @@ export default function Menu() {
 
   const isActive = (path: string) => {
     if (path === '/' && pathname === '/') return true;
-    
+
     // Special handling for rentar/comprar links using filter context
     if (path === '/rentar') return pathname === '/explorar' && currentTransactionType === 'renta';
     if (path === '/comprar') return pathname === '/explorar' && currentTransactionType === 'compra';
-    
+
     // Normal path checking for other links
     if (path !== '/' && pathname?.startsWith(path)) return true;
     return false;
@@ -112,26 +113,25 @@ export default function Menu() {
           <nav className="hidden md:flex -mb-px space-x-8">
             <Link
               href="/explorar"
-              onClick={handleRentClick}
-              className={`${
-                isActive('/rentar')
-                  ? 'border-violet-800 text-violet-800'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
-            >
-              Rentar
-            </Link>
-            <Link
-              href="/explorar"
               onClick={handleBuyClick}
-              className={`${
-                isActive('/comprar')
+              className={`${isActive('/comprar')
                   ? 'border-violet-800 text-violet-800'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+                } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
             >
               Comprar
             </Link>
+            <Link
+              href="/explorar"
+              onClick={handleRentClick}
+              className={`${isActive('/rentar')
+                  ? 'border-violet-800 text-violet-800'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+            >
+              Rentar
+            </Link>
+
             {/* <Link
               href="/preventa"
               onClick={() => setIsMobileMenuOpen(false)}
@@ -145,21 +145,19 @@ export default function Menu() {
             </Link> */}
             <Link
               href="/qro/zibata"
-              className={`${
-              pathname?.startsWith('/qro/zibata')
-                ? 'border-violet-800 text-violet-800'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+              className={`${pathname?.startsWith('/qro/zibata')
+                  ? 'border-violet-800 text-violet-800'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
             >
               Zibatá
             </Link>
             <Link
               href="/blog"
-              className={`${
-              pathname?.startsWith('/blog')
-                ? 'border-violet-800 text-violet-800'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+              className={`${pathname?.startsWith('/blog')
+                  ? 'border-violet-800 text-violet-800'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
             >
               Blog
             </Link>
@@ -167,7 +165,7 @@ export default function Menu() {
         </div>
 
         {/* Mobile menu toggle button */}
-        <button 
+        <button
           className="md:hidden p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 mobile-menu-button"
           onClick={toggleMobileMenu}
           aria-label="Toggle menu"
@@ -183,15 +181,13 @@ export default function Menu() {
         <div className="hidden md:flex items-center space-x-4">
           <Link
             href="/favoritos"
-            className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-full transition-colors relative ${
-              favorites.length > 0 
-              ? 'text-violet-800 bg-violet-50 hover:bg-violet-100'
-              : 'text-gray-500 bg-gray-50 hover:bg-gray-100'
-            }`}
+            className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-full transition-colors relative ${favorites.length > 0
+                ? 'text-violet-800 bg-violet-50 hover:bg-violet-100'
+                : 'text-gray-500 bg-gray-50 hover:bg-gray-100'
+              }`}
           >
-            <FaHeart className={`w-3.5 h-3.5 mr-2 ${
-              favorites.length > 0 ? 'text-red-500' : 'text-gray-400'
-            }`} />
+            <FaHeart className={`w-3.5 h-3.5 mr-2 ${favorites.length > 0 ? 'text-red-500' : 'text-gray-400'
+              }`} />
             Favoritos
             {favorites.length > 0 && (
               <span className="ml-1 bg-violet-200 text-violet-900 px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">
@@ -211,7 +207,7 @@ export default function Menu() {
 
       {/* Mobile menu */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           ref={mobileMenuRef}
           className="md:hidden bg-white border-t border-gray-100 shadow-lg fixed inset-0 top-16 z-30 overflow-y-auto"
         >
@@ -225,45 +221,42 @@ export default function Menu() {
             </Link>
             <Link
               href="/explorar"
-              onClick={handleRentClick}
-              className={`flex items-center px-4 py-3 rounded-lg text-base font-medium ${
-                currentTransactionType === 'renta' 
-                  ? 'bg-violet-50 text-violet-700'
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Rentar
-            </Link>
-            <Link
-              href="/explorar"
               onClick={handleBuyClick}
-              className={`flex items-center px-4 py-3 rounded-lg text-base font-medium ${
-                currentTransactionType === 'compra'
+              className={`flex items-center px-4 py-3 rounded-lg text-base font-medium ${currentTransactionType === 'compra'
                   ? 'bg-violet-50 text-violet-700'
                   : 'text-gray-700 hover:bg-gray-50'
-              }`}
+                }`}
             >
               Comprar
             </Link>
             <Link
-              href="/preventa"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={`flex items-center px-4 py-3 rounded-lg text-base font-medium ${
-                pathname?.startsWith('/preventa') 
+              href="/explorar"
+              onClick={handleRentClick}
+              className={`flex items-center px-4 py-3 rounded-lg text-base font-medium ${currentTransactionType === 'renta'
                   ? 'bg-violet-50 text-violet-700'
                   : 'text-gray-700 hover:bg-gray-50'
-              }`}
+                }`}
+            >
+              Rentar
+            </Link>
+
+            <Link
+              href="/preventa"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`flex items-center px-4 py-3 rounded-lg text-base font-medium ${pathname?.startsWith('/preventa')
+                  ? 'bg-violet-50 text-violet-700'
+                  : 'text-gray-700 hover:bg-gray-50'
+                }`}
             >
               Preventa
             </Link>
             <Link
               href="/qro/zibata"
               onClick={() => setIsMobileMenuOpen(false)}
-              className={`flex items-center px-4 py-3 rounded-lg text-base font-medium ${
-                pathname?.startsWith('/qro/zibata') 
+              className={`flex items-center px-4 py-3 rounded-lg text-base font-medium ${pathname?.startsWith('/qro/zibata')
                   ? 'bg-violet-50 text-violet-700'
                   : 'text-gray-700 hover:bg-gray-50'
-              }`}
+                }`}
             >
               Zibatá
             </Link>
@@ -273,13 +266,12 @@ export default function Menu() {
               onClick={() => setIsMobileMenuOpen(false)}
               className="flex items-center px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-50"
             >
-              <FaHeart className={`w-4 h-4 mr-3 ${
-                favorites.length > 0 ? 'text-red-500' : 'text-gray-400'
-              }`} />
+              <FaHeart className={`w-4 h-4 mr-3 ${favorites.length > 0 ? 'text-red-500' : 'text-gray-400'
+                }`} />
               Favoritos
               {favorites.length > 0 && (
                 <span className="ml-2 bg-violet-200 text-violet-900 px-2 py-0.5 rounded-full text-xs min-w-[20px] text-center">
-                {favorites.length}
+                  {favorites.length}
                 </span>
               )}
             </Link>
@@ -292,15 +284,15 @@ export default function Menu() {
             >
               Publica tu propiedad
             </button>
-            
+
             <AdvisorModal />
 
           </div>
         </div>
       )}
-      
+
       {/* Use the extracted modal component */}
-      <MenuModals 
+      <MenuModals
         isPropertyListingModalOpen={isPropertyListingModalOpen}
         closePropertyListingModal={closePropertyListingModal}
       />
