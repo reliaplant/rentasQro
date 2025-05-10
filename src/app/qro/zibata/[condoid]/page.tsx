@@ -166,6 +166,7 @@ export default async function CondoDetailPage(props: any) {
           name={condo.name}
           imageUrls={condo.imageUrls}
           amenities={condo.amenities}
+          imageAmenityTags={condo.imageAmenityTags}
         />
 
         <div className='mt-24 px-4 md:px-0'></div>
