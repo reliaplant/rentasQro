@@ -16,6 +16,7 @@ export interface FilterState {
   isFurnished: boolean;
   petsAllowed: boolean;
   parkingSpots: number | null;
+  currency: 'MXN' | 'USD'; // New currency property
 }
 
 // Create context interface
@@ -39,6 +40,7 @@ const defaultFilters: FilterState = {
   isFurnished: false,
   petsAllowed: false,
   parkingSpots: null,
+  currency: 'MXN', // Default to MXN
 };
 
 // Provider component

@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { FaHeart, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { useFavorites } from '../hooks/useFavorites';
 import { useFilters } from '../context/FilterContext';
+import { useExchangeRate } from '../hooks/useExchangeRate';
 import { useInView } from 'react-intersection-observer';
 
 // Número de propiedades a cargar por lote
@@ -35,6 +36,9 @@ const Explorador = () => {
   
   // Get filters from context
   const { filters } = useFilters();
+  
+  // Get exchange rate for currency conversion
+  const { exchangeRate, convertMXNtoUSD } = useExchangeRate();
 
   // Configurar el observador para detección de scroll (infinite loading)
   const { ref, inView } = useInView({
@@ -227,6 +231,14 @@ const Explorador = () => {
       return type.charAt(0).toUpperCase() + type.slice(1);
     };
 
+    // Get property price in the selected currency
+    const getDisplayPrice = () => {
+      if (filters.currency === 'USD') {
+        return convertMXNtoUSD(property.price);
+      }
+      return property.price;
+    };
+
     return (
       <div className="group block">
         <div className="relative rounded-lg sm:rounded-xl overflow-hidden">
@@ -350,9 +362,15 @@ const Explorador = () => {
             </div>
 
             <div className="flex items-baseline gap-0.5 sm:gap-1 pt-1 sm:pt-2">
-              <span className="font-semibold text-sm sm:text-base text-black">${property.price.toLocaleString()}</span>
+              <span className="font-semibold text-sm sm:text-base text-black">
+                {filters.currency === 'USD' ? '$' : '$'}
+                {getDisplayPrice().toLocaleString(undefined, {
+                  minimumFractionDigits: filters.currency === 'USD' ? 0 : 0,
+                  maximumFractionDigits: filters.currency === 'USD' ? 0 : 0
+                })}
+              </span>
               <span className="text-xs sm:text-sm text-gray-500">
-                {property.transactionType === 'renta' ? '/mes' : ''}
+                {filters.currency} {property.transactionType === 'renta' ? '/mes' : ''}
               </span>
             </div>
           </div>

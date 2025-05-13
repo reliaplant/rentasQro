@@ -6,10 +6,11 @@ import { getZones } from '../shared/firebase';
 import type { ZoneData } from '../shared/interfaces';
 import { usePathname } from 'next/navigation';
 import { useFilters } from '../context/FilterContext';
+import { useExchangeRate } from '../hooks/useExchangeRate';
 
 // Define MAX_PRICE constant locally
 const MAX_PRICE = 50000;
-const USD_TO_MXN_RATE = 20;
+const USD_TO_MXN_RATE = 20; // Default exchange rate
 
 // Memoized select component for better performance
 const ZoneSelect = memo(({ 
@@ -99,12 +100,12 @@ const FilterExplorador = () => {
   // Use the filter context
   const { filters, updateFilter } = useFilters();
   const [zones, setZones] = useState<ZoneData[]>([]);
-  const [currency, setCurrency] = useState<'MXN' | 'USD'>('MXN');
-
-  // Add local state for input values with lazy initialization
+  // Replace local currency state with the one from context
   const [minPriceInput, setMinPriceInput] = useState('');
   const [maxPriceInput, setMaxPriceInput] = useState('');
   const [isClient, setIsClient] = useState(false);
+  // Replace fixed exchange rate with dynamic one from hook
+  const { exchangeRate, convertMXNtoUSD, convertUSDtoMXN } = useExchangeRate();
 
   // Define types for numeric values
   type NumericValue = number | '2+' | '3+';
@@ -140,18 +141,18 @@ const FilterExplorador = () => {
     };
   }, []);
 
-  // Memoize format functions to prevent unnecessary re-creations
+  // Memoize format functions for price conversion
   const formatPrice = useCallback((value: number): string => {
     if (!value) return '';
-    const displayValue = currency === 'USD' ? value / USD_TO_MXN_RATE : value;
+    const displayValue = filters.currency === 'USD' ? convertMXNtoUSD(value) : value;
     return new Intl.NumberFormat('es-MX').format(Math.round(displayValue));
-  }, [currency]);
+  }, [filters.currency, convertMXNtoUSD]);
 
   const cleanNumberString = useCallback((str: string): number => {
     if (!str) return 0;
     const numericValue = Number(str.replace(/[^0-9]/g, ''));
-    return currency === 'USD' ? numericValue * USD_TO_MXN_RATE : numericValue;
-  }, [currency]);
+    return filters.currency === 'USD' ? convertUSDtoMXN(numericValue) : numericValue;
+  }, [filters.currency, convertUSDtoMXN]);
 
   // Initialize input fields with formatted values when filters change
   useEffect(() => {
@@ -166,17 +167,13 @@ const FilterExplorador = () => {
     } else {
       setMaxPriceInput('');
     }
-  }, [currency, filters.priceRange, formatPrice]);
+  }, [filters.currency, filters.priceRange, formatPrice]);
 
-  // Efecto para convertir los precios cuando cambia la moneda
+  // Remove old exchange rate effect and use the new functions instead
   useEffect(() => {
-    if (currency === 'USD') {
-      updateFilter('priceRange', [
-        Math.round(filters.priceRange[0] / USD_TO_MXN_RATE) * USD_TO_MXN_RATE,
-        Math.round(filters.priceRange[1] / USD_TO_MXN_RATE) * USD_TO_MXN_RATE
-      ]);
-    }
-  }, [currency, updateFilter, filters.priceRange]);
+    setMinPriceInput(filters.priceRange[0] > 0 ? formatPrice(filters.priceRange[0]) : '');
+    setMaxPriceInput(filters.priceRange[1] < MAX_PRICE ? formatPrice(filters.priceRange[1]) : '');
+  }, [filters.currency, filters.priceRange, formatPrice]);
 
   // Force compra as default on first render
   useEffect(() => {
@@ -247,6 +244,11 @@ const FilterExplorador = () => {
     updateFilter(key, !filters[key]);
   }, [updateFilter, filters]);
 
+  // Update the handler for currency toggle to use the context
+  const handleCurrencyChange = useCallback((currency: 'MXN' | 'USD') => {
+    updateFilter('currency', currency);
+  }, [updateFilter]);
+
   // Move static styles outside component to avoid recreating them on each render
   const baseButtonStyles = `
     px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
@@ -315,11 +317,11 @@ const FilterExplorador = () => {
                   {['MXN', 'USD'].map((curr) => (
                   <button
                     key={curr}
-                    onClick={() => setCurrency(curr as 'MXN' | 'USD')}
+                    onClick={() => handleCurrencyChange(curr as 'MXN' | 'USD')}
                     className={`
                     px-2 py-1 rounded-full text-xs font-medium transition-all duration-200
                     cursor-pointer
-                    ${currency === curr
+                    ${filters.currency === curr
                       ? 'bg-violet-100 text-violet-700 shadow-sm ring-1 ring-violet-200'
                       : 'text-gray-500 hover:text-violet-600 hover:bg-violet-50'}
                     `}
@@ -355,7 +357,7 @@ const FilterExplorador = () => {
                           e.target.value = val;
                         }}
                       />
-                      <span className="text-xs text-gray-500 ml-0.5" suppressHydrationWarning>{currency}</span>
+                      <span className="text-xs text-gray-500 ml-0.5" suppressHydrationWarning>{filters.currency}</span>
                     </div>
                     
                     <div className="h-3.5 w-px bg-gray-200"></div>
@@ -378,7 +380,7 @@ const FilterExplorador = () => {
                           e.target.value = val;
                         }}
                       />
-                      <span className="text-xs text-gray-500 ml-0.5" suppressHydrationWarning>{currency}</span>
+                      <span className="text-xs text-gray-500 ml-0.5" suppressHydrationWarning>{filters.currency}</span>
                     </div>
                   </div>
                 </div>
