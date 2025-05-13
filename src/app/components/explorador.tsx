@@ -38,7 +38,7 @@ const Explorador = () => {
   const { filters } = useFilters();
   
   // Get exchange rate for currency conversion
-  const { exchangeRate, convertMXNtoUSD } = useExchangeRate();
+  const { convertMXNtoUSD } = useExchangeRate();
 
   // Configurar el observador para detección de scroll (infinite loading)
   const { ref, inView } = useInView({
@@ -127,12 +127,15 @@ const Explorador = () => {
         });
       }
 
-      // Filtrar por precio
-      if (filters.priceRange[0] > 0) {
-        filtered = filtered.filter(property => property.price >= filters.priceRange[0]);
-      }
-      if (filters.priceRange[1] < 50000) {
-        filtered = filtered.filter(property => property.price <= filters.priceRange[1]);
+      // Filtrar por precio - take currency into account
+      if (filters.priceRange[0] > 0 || filters.priceRange[1] < 50000) {
+        filtered = filtered.filter(property => {
+          // Get min/max price in MXN (the database currency)
+          const minPrice = filters.priceRange[0];
+          const maxPrice = filters.priceRange[1];
+          
+          return property.price >= minPrice && property.price <= maxPrice;
+        });
       }
 
       // Filtrar por amueblado
@@ -159,7 +162,7 @@ const Explorador = () => {
     };
 
     filterProperties();
-  }, [filters, properties]);
+  }, [filters, properties, convertMXNtoUSD]);
 
   // Manejar navegación de imágenes con loop
   const navigateImage = (e: React.MouseEvent, propertyId: string, direction: 'prev' | 'next', maxImages: number) => {

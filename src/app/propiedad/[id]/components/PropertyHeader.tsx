@@ -9,6 +9,8 @@ import {
   BiKey,
   BiMap
 } from 'react-icons/bi';
+import { useEffect, useState } from 'react';
+import { useExchangeRate } from '@/app/hooks/useExchangeRate';
 
 interface PropertyHeaderProps {
   property: PropertyData;
@@ -17,6 +19,44 @@ interface PropertyHeaderProps {
 }
 
 export default function PropertyHeader({ property, zoneData, condoData }: PropertyHeaderProps) {
+  // Currency state and conversion hook
+  const [selectedCurrency, setSelectedCurrency] = useState<'MXN' | 'USD'>('MXN');
+  const { exchangeRate, convertMXNtoUSD } = useExchangeRate();
+  
+  // Load currency preference from localStorage - add a refresh interval to catch changes from other components
+  useEffect(() => {
+    // Initial load
+    loadCurrencyFromLocalStorage();
+    
+    // Set up a lightweight polling to detect changes from other components
+    const intervalId = setInterval(loadCurrencyFromLocalStorage, 500);
+    
+    // Cleanup
+    return () => clearInterval(intervalId);
+    
+    function loadCurrencyFromLocalStorage() {
+      try {
+        if (typeof window !== 'undefined') {
+          const filtersJson = localStorage.getItem('propertyFilters');
+          if (filtersJson) {
+            const filters = JSON.parse(filtersJson);
+            if (filters && (filters.currency === 'USD' || filters.currency === 'MXN')) {
+              setSelectedCurrency(prev => {
+                // Only update if different to avoid unnecessary re-renders
+                if (prev !== filters.currency) {
+                  return filters.currency;
+                }
+                return prev;
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error reading currency from localStorage:', error);
+      }
+    }
+  }, []);
+  
   // Format property details
   const isRental = ['renta', 'ventaRenta'].includes(property.transactionType);
   const propertyTypeFormatted = 
@@ -24,13 +64,20 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
     property.propertyType === 'depa' ? 'Depa' : 
     property.propertyType;
     
-  // Format price as currency but more minimal
-  const formatter = new Intl.NumberFormat('es-MX', {
+  // Get the price in the selected currency
+  const getDisplayPrice = () => {
+    if (selectedCurrency === 'USD') {
+      return convertMXNtoUSD(property.price);
+    }
+    return property.price;
+  };
+  
+  // Format price as currency based on selected currency
+  const formattedPrice = new Intl.NumberFormat('es-MX', {
     style: 'currency',
-    currency: 'MXN',
+    currency: selectedCurrency,
     maximumFractionDigits: 0,
-  });
-  const formattedPrice = formatter.format(property.price).replace('MXN', '').trim();
+  }).format(getDisplayPrice()).replace(selectedCurrency, '').trim();
   
   // Get property type icon
   const PropertyTypeIcon = property.propertyType === 'casa' ? BiHome : BiBuildings;
@@ -78,13 +125,48 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
         <div className="bg-gray-100 rounded-xl p-6 mb-4">
           {/* Price display */}
           <div className="mb-6 border-b border-gray-200 pb-6">
-            <span className="block text-sm text-gray-500 mb-1">
-              Precio {isRental ? 'mensual' : 'de venta'}
-            </span>
+            <div className="flex justify-between items-baseline">
+              <span className="block text-sm text-gray-500 mb-1">
+                Precio {isRental ? 'mensual' : 'de venta'}
+              </span>
+              
+              {/* Currency toggle - Only visible on mobile */}
+              <div className="md:hidden flex bg-white rounded-full p-0.5 border border-gray-200">
+                {['MXN', 'USD'].map((curr) => (
+                  <button
+                    key={curr}
+                    onClick={() => {
+                      setSelectedCurrency(curr as 'MXN' | 'USD');
+                      // Update localStorage
+                      try {
+                        const filtersJson = localStorage.getItem('propertyFilters');
+                        let filters = filtersJson ? JSON.parse(filtersJson) : {};
+                        filters.currency = curr;
+                        localStorage.setItem('propertyFilters', JSON.stringify(filters));
+                      } catch (error) {
+                        console.error('Error updating currency in localStorage:', error);
+                      }
+                    }}
+                    className={`
+                      px-2 py-1 rounded-full text-xs font-medium transition-all duration-200
+                      ${selectedCurrency === curr
+                        ? 'bg-violet-100 text-violet-700 shadow-sm'
+                        : 'text-gray-500 hover:text-violet-600'}
+                    `}
+                  >
+                    {curr}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
             <div className="flex items-baseline">
               <span className="text-3xl font-medium text-gray-900">{formattedPrice}</span>
-              {isRental && <span className="text-gray-500 ml-1">/ mes</span>}
+              <span className="text-gray-500 ml-1">
+                {selectedCurrency} {isRental && '/ mes'}
+              </span>
             </div>
+
           </div>
 
           {/* Features grid */}
@@ -120,8 +202,8 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
                   </div>
                   <div>
                     <span className="block text-xl font-light">{property.parkingSpots || 0}</span>
-                    <span className="text-sm text-gray-500 hidden sm:block">Estacionamiento</span>
-                    <span className="text-sm text-gray-500 sm:hidden">Est.</span>
+                    <span className="text-sm text-gray-500 hidden sm.block">Estacionamiento</span>
+                    <span className="text-sm text-gray-500 sm.hidden">Est.</span>
                   </div>
                 </div>
               </>
@@ -134,8 +216,8 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
                   </div>
                   <div>
                     <span className="block text-xl font-light">{property.bedrooms}</span>
-                    <span className="text-sm text-gray-500 hidden sm:block">Habitaciones</span>
-                    <span className="text-sm text-gray-500 sm:hidden">Hab.</span>
+                    <span className="text-sm text-gray-500 hidden sm.block">Habitaciones</span>
+                    <span className="text-sm text-gray-500 sm.hidden">Hab.</span>
                   </div>
                 </div>
 
@@ -145,7 +227,7 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
                   </div>
                   <div>
                     <span className="block text-xl font-light">{property.bathrooms}</span>
-                    <span className="text-sm text-gray-500 hidden sm:block">Baños</span>
+                    <span className="text-sm text-gray-500 hidden sm.block">Baños</span>
                     <span className="text-sm text-gray-500 sm.hidden">Bañ.</span>
                   </div>
                 </div>

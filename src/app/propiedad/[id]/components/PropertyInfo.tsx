@@ -130,59 +130,7 @@ export default function PropertyInfo({
         </section>
       )}
 
-      {/* For land properties, show a simpler info section */}
-      {isLand && (
-        <section>
-          <h3 className="text-lg font-semibold mb-4">Información del terreno</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {/* Only show terrain area if positive */}
-            {property.terrenoM2 !== undefined && property.terrenoM2 > 0 && (
-              <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
-                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                  <Flower className="w-5 h-5 text-gray-500" />
-                </div>
-                <div>
-                  <p className="text-xs sm:text-sm text-gray-500">Superficie</p>
-                  <p className="text-sm sm:text-base font-medium">{property.terrenoM2}m²</p>
-                </div>
-              </div>
-            )}
-
-            {/* Only show construction area if positive */}
-            {property.construccionM2 !== undefined && property.construccionM2 > 0 && (
-              <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
-                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                  <Home className="w-5 h-5 text-gray-500" />
-                </div>
-                <div>
-                  <p className="text-xs sm:text-sm text-gray-500">Construcción</p>
-                  <p className="text-sm sm:text-base font-medium">{property.construccionM2}m²</p>
-                </div>
-              </div>
-            )}
-            
-            {property.estadoConservacion && (
-              <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
-                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                  <Building2 className="w-5 h-5 text-gray-500" />
-                </div>
-                <div>
-                  <p className="text-xs sm:text-sm text-gray-500">Estado</p>
-                  <p className="text-sm sm:text-base font-medium capitalize">{property.estadoConservacion.replace('_', ' ')}</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Show a message when no size information is available */}
-          {(property.terrenoM2 === undefined || property.terrenoM2 <= 0) && 
-           (property.construccionM2 === undefined || property.construccionM2 <= 0) && (
-            <p className="text-sm text-gray-500 mt-4">
-              No hay información detallada sobre las dimensiones del terreno.
-            </p>
-          )}
-        </section>
-      )}
+ 
 
       {/* Only show amenities and equipment sections for non-land properties */}
       {!isLand && (

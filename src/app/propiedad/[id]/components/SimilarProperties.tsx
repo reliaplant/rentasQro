@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Bed, Bath, MapPin } from 'lucide-react';
 import { PropertyData } from '@/app/shared/interfaces';
 import { getSimilarProperties, getZoneById } from '@/app/shared/firebase';
+import { useExchangeRate } from '@/app/hooks/useExchangeRate';
 
 interface SimilarPropertiesProps {
   currentPropertyId: string;
@@ -27,6 +28,37 @@ export default function SimilarProperties({
   const [properties, setProperties] = useState<PropertyData[]>([]);
   const [loading, setLoading] = useState(true);
   const [zoneNames, setZoneNames] = useState<Record<string, string>>({});
+  const [selectedCurrency, setSelectedCurrency] = useState<'MXN' | 'USD'>('MXN');
+  const { convertMXNtoUSD } = useExchangeRate();
+
+  // Load currency preference from localStorage
+  useEffect(() => {
+    // Function to load currency from localStorage
+    const loadCurrency = () => {
+      try {
+        if (typeof window !== 'undefined') {
+          const filtersJson = localStorage.getItem('propertyFilters');
+          if (filtersJson) {
+            const filters = JSON.parse(filtersJson);
+            if (filters && (filters.currency === 'USD' || filters.currency === 'MXN')) {
+              setSelectedCurrency(filters.currency);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error reading currency from localStorage:', error);
+      }
+    };
+
+    // Initial load
+    loadCurrency();
+
+    // Set up polling to detect changes from other components
+    const intervalId = setInterval(loadCurrency, 500);
+    
+    // Cleanup
+    return () => clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -121,6 +153,30 @@ export default function SimilarProperties({
     return null;
   }
 
+  // Format price based on currency and value
+  const formatPrice = (priceValue: number) => {
+    if (selectedCurrency === 'USD') {
+      // Convert MXN to USD
+      const usdPrice = convertMXNtoUSD(priceValue);
+      
+      // Format based on value range
+      if (usdPrice < 1000) {
+        return `USD ${usdPrice.toFixed(0)}`;
+      } else if (usdPrice < 1000000) {
+        return `USD ${(usdPrice / 1000).toFixed(usdPrice % 1000 === 0 ? 0 : 1)}K`;
+      } else {
+        return `USD ${(usdPrice / 1000000).toFixed(1)}M`;
+      }
+    } else {
+      // MXN formatting
+      if (priceValue < 1000000) {
+        return `${(priceValue / 1000).toFixed(priceValue % 1000 === 0 ? 0 : 1)}K`;
+      } else {
+        return `${(priceValue / 1000000).toFixed(1)}MDP`;
+      }
+    }
+  };
+
   return (
     <div className="">
       <h3 className="text-xl font-semibold text-gray-800 mb-4">Propiedades similares</h3>
@@ -132,6 +188,8 @@ export default function SimilarProperties({
             key={property.id} 
             property={property} 
             zoneName={property.zone ? zoneNames[property.zone] : undefined}
+            selectedCurrency={selectedCurrency}
+            formatPrice={formatPrice}
           />
         ))}
       </div>
@@ -140,7 +198,17 @@ export default function SimilarProperties({
 }
 
 // Separate component for property card to improve readability
-function PropertyCard({ property, zoneName }: { property: PropertyData, zoneName?: string }) {
+function PropertyCard({ 
+  property, 
+  zoneName, 
+  selectedCurrency, 
+  formatPrice 
+}: { 
+  property: PropertyData, 
+  zoneName?: string,
+  selectedCurrency: 'MXN' | 'USD',
+  formatPrice: (price: number) => string
+}) {
   // Handle dummy properties
   if (property.isDummy) {
     return (
@@ -188,7 +256,7 @@ function PropertyCard({ property, zoneName }: { property: PropertyData, zoneName
           )}
           {property.price && property.price > 0 && (
             <div className="absolute bottom-1 right-1 bg-white/80 rounded border border-white px-1 text-xs font-medium">
-              ${(property.price/1000).toFixed(0)}k
+              {formatPrice(property.price)}
             </div>
           )}
         </div>
@@ -201,25 +269,25 @@ function PropertyCard({ property, zoneName }: { property: PropertyData, zoneName
           <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
             {property.bedrooms && (
               <div className="flex items-center gap-1">
-            <Bed size={12} />
-            <span>{property.bedrooms}</span>
+                <Bed size={12} />
+                <span>{property.bedrooms}</span>
               </div>
             )}
             {property.bathrooms && (
               <div className="flex items-center gap-1">
-            <Bath size={12} />
-            <span>{property.bathrooms}</span>
+                <Bath size={12} />
+                <span>{property.bathrooms}</span>
               </div>
             )}
             {zoneName && (
               <div className="flex items-center gap-1 truncate">
-            <MapPin size={12} />
-            <span className="truncate text-[11px]">{zoneName}</span>
+                <MapPin size={12} />
+                <span className="truncate text-[11px]">{zoneName}</span>
               </div>
             )}
           </div>
         </div>
-        </div>
+      </div>
     </Link>
   );
 }
