@@ -28,15 +28,15 @@ const Footer = () => {
             </p>
             <div className="flex items-center space-x-4">
               {/* Social icons */}
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-violet-600">
+                <a href="https://www.facebook.com/profile.php?id=61574693231863" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-violet-600">
                 <FaFacebook size={16} className="w-4 h-4 md:w-5 md:h-5" />
-              </a>
+                </a>
               <a href="https://www.instagram.com/pizomx/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-violet-600">
                 <FaInstagram size={16} className="w-4 h-4 md:w-5 md:h-5" />
               </a>
-              <a href="https://wa.me/1234567890" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-violet-600">
+                <a href="https://wa.me/524428549775" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-violet-600">
                 <FaWhatsapp size={16} className="w-4 h-4 md:w-5 md:h-5" />
-              </a>
+                </a>
             </div>
           </div>
 
@@ -68,8 +68,8 @@ const Footer = () => {
             <ul className="space-y-1.5 md:space-y-3">
               <li className="flex items-start">
                 <FaPhone className="mt-0.5 mr-2 text-gray-400 w-3 h-3 md:w-4 md:h-4"/>
-                <a href="tel:4421234567" className="text-xs md:text-sm text-gray-500 hover:text-violet-600">
-                  (442) 123-4567
+                <a href="tel:+524428549775" className="text-xs md:text-sm text-gray-500 hover:text-violet-600">
+                  +52 442 854 9775
                 </a>
               </li>
               <li className="flex items-start">

@@ -31,7 +31,7 @@ const translations = {
     emailError: 'El correo es requerido',
     emailInvalidError: 'Ingresa un correo electrónico válido',
     startChat: 'Iniciar chat por WhatsApp',
-    whatsappMessage: 'Hola, mi nombre es {name} y me gustaría recibir información.',
+    whatsappMessage: 'Hola, necesito ayuda para encontrar una propiedad.',
     needAdvisor: '¿Necesitas un asesor?',
   },
   en: {
@@ -41,7 +41,7 @@ const translations = {
     emailError: 'Email is required',
     emailInvalidError: 'Please enter a valid email',
     startChat: 'Start WhatsApp Chat',
-    whatsappMessage: 'Hi, my name is {name} and I would like to receive information.',
+    whatsappMessage: 'Hello, I need help finding a property.',
     needAdvisor: 'Need an advisor?',
   },
   pt: {
@@ -51,10 +51,13 @@ const translations = {
     emailError: 'Email é obrigatório',
     emailInvalidError: 'Digite um email válido',
     startChat: 'Iniciar Chat no WhatsApp',
-    whatsappMessage: 'Olá, meu nome é {name} e gostaria de receber informações.',
+    whatsappMessage: 'Olá, preciso de ajuda para encontrar uma propriedade.',
     needAdvisor: 'Precisa de um consultor?',
   },
 };
+
+// Update WhatsApp number
+const WHATSAPP_NUMBER = '+524428549775';
 
 const AdvisorModal: FC<AdvisorModalProps> = ({ 
   isOpen: externalIsOpen, 
@@ -139,6 +142,18 @@ const AdvisorModal: FC<AdvisorModalProps> = ({
 
   const handleLanguageSelect = (lang: string) => {
     setSelectedLanguage(lang);
+    
+    // Get translated message for selected language
+    const langTranslations = translations[lang as keyof typeof translations];
+    
+    // Use the direct message without name replacement
+    const message = langTranslations.whatsappMessage;
+    
+    // Immediately redirect to WhatsApp
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`);
+    
+    // Close the modal
+    handleClose();
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -195,93 +210,36 @@ const AdvisorModal: FC<AdvisorModalProps> = ({
                 <FaTimes className="w-4 h-4" />
               </button>
 
-              {!selectedLanguage ? (
-                <>
-                  <h3 className="text-lg font-medium mb-2 text-center">
-                    Selecciona tu idioma
-                  </h3>
-                  <p className="text-xs text-gray-500 text-center mb-4">
-                    Select your language
-                  </p>
-                  <div className="flex justify-around gap-4">
-                    <button
-                      onClick={() => handleLanguageSelect('es')}
-                      className="w-[120px] flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg cursor-pointer hover:outline hover:outline-2 hover:outline-violet-500 transition-all border-2 border-gray-100"
-                    >
-                      <span className="text-2xl">🇲🇽</span>
-                      <span className="mt-2 text-sm">Español</span>
-                    </button>
-                    <button
-                      onClick={() => handleLanguageSelect('en')}
-                      className="w-[120px] flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg cursor-pointer hover:outline hover:outline-2 hover:outline-violet-500 transition-all border-2 border-gray-100"
-                    >
-                      <span className="text-2xl">🇺🇸</span>
-                      <span className="mt-2 text-sm">English</span>
-                    </button>
-                    <button
-                      onClick={() => handleLanguageSelect('pt')}
-                      className="w-[120px] flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg cursor-pointer hover:outline hover:outline-2 hover:outline-violet-500 transition-all border-2 border-gray-100"
-                    >
-                      <span className="text-2xl">🇧🇷</span>
-                      <span className="mt-2 text-sm">Português</span>
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <div className="space-y-4">
-                  <h2 className="text-lg font-medium text-gray-900 mb-5 text-center">
-                    {t.contactInfo}
-                  </h2>
-
-                  <div>
-                    <input
-                      type="text"
-                      name="name"
-                      placeholder={t.fullName}
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      onBlur={(e) => validateName(e.target.value)}
-                      className={`w-full px-4 py-2 rounded-lg border ${
-                        nameError ? 'border-red-300' : 'border-gray-200'
-                      } focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all`}
-                    />
-                    {nameError && (
-                      <p className="mt-1 text-xs text-red-500">{nameError}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <input
-                      type="email"
-                      name="email"
-                      placeholder="Email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      onBlur={(e) => validateEmail(e.target.value)}
-                      className={`w-full px-4 py-2 rounded-lg border ${
-                        emailError ? 'border-red-300' : 'border-gray-200'
-                      } focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all`}
-                    />
-                    {emailError && (
-                      <p className="mt-1 text-xs text-red-500">{emailError}</p>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={handleWhatsAppClick}
-                    disabled={!isFormValid}
-                    className={`
-                      w-full inline-flex items-center justify-center px-6 py-2.5 rounded-full transition-all
-                      ${isFormValid 
-                        ? 'bg-gray-900 hover:bg-gray-800 text-white cursor-pointer' 
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'}
-                    `}
-                  >
-                    <FaWhatsapp className="w-4 h-4 mr-2" />
-                    {t.startChat}
-                  </button>
-                </div>
-              )}
+              {/* Only showing language selection, form step will be skipped */}
+              <h3 className="text-lg font-medium mb-2 text-center">
+                Selecciona tu idioma
+              </h3>
+              <p className="text-xs text-gray-500 text-center mb-4">
+                Select your language
+              </p>
+              <div className="flex justify-around gap-4">
+                <button
+                  onClick={() => handleLanguageSelect('es')}
+                  className="w-[120px] flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg cursor-pointer hover:outline hover:outline-2 hover:outline-violet-500 transition-all border-2 border-gray-100"
+                >
+                  <span className="text-2xl">🇲🇽</span>
+                  <span className="mt-2 text-sm">Español</span>
+                </button>
+                <button
+                  onClick={() => handleLanguageSelect('en')}
+                  className="w-[120px] flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg cursor-pointer hover:outline hover:outline-2 hover:outline-violet-500 transition-all border-2 border-gray-100"
+                >
+                  <span className="text-2xl">🇺🇸</span>
+                  <span className="mt-2 text-sm">English</span>
+                </button>
+                <button
+                  onClick={() => handleLanguageSelect('pt')}
+                  className="w-[120px] flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg cursor-pointer hover:outline hover:outline-2 hover:outline-violet-500 transition-all border-2 border-gray-100"
+                >
+                  <span className="text-2xl">🇧🇷</span>
+                  <span className="mt-2 text-sm">Português</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
