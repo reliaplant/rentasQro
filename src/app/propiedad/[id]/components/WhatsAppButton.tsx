@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
+import { useSearchParams } from 'next/navigation';
 import { MessageCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface WhatsAppButtonProps {
   propertyType: string;
@@ -22,6 +24,20 @@ export default function WhatsAppButton({
   price,
   contactRef
 }: WhatsAppButtonProps) {
+  const searchParams = useSearchParams();
+  const [promoCode, setPromoCode] = useState<string | null>(null);
+  
+  // Extract UTM campaign code on component mount - only use utm_campaign
+  useEffect(() => {
+    const campaign = searchParams?.get('utm_campaign');
+    // Only set the code if campaign exists and is not null or empty
+    if (campaign && campaign.trim() !== '') {
+      setPromoCode(campaign);
+    } else {
+      setPromoCode(null);
+    }
+  }, [searchParams]);
+
   const handleWhatsAppClick = () => {
     // Handle different property types in the message
     let propertyTypeText = 'la propiedad';
@@ -31,7 +47,30 @@ export default function WhatsAppButton({
     else if (propertyType === 'terreno') propertyTypeText = 'el terreno';
     else if (propertyType === 'local') propertyTypeText = 'el local comercial';
     
-    const message = `Hola, me interesa ${propertyTypeText} ${transactionType === 'renta' ? 'en renta' : 'en venta'} ${condoName ? `en ${condoName}` : ''} ${zoneName ? `en ${zoneName}` : ''}`;
+    // Create a clean URL without UTM parameters
+    const cleanPropertyUrl = `https://pizo.mx/propiedad/${propertyId}`;
+    
+    // Construct the message with the clean URL
+    let message = `Hola, me interesa ${propertyTypeText} ${transactionType === 'renta' ? 'en renta' : 'en venta'}`;
+    
+    // Add condo or zone if available
+    if (condoName) {
+      message += ` en ${condoName}`;
+    }
+    
+    if (zoneName && !condoName) {
+      message += ` en ${zoneName}`;
+    }
+    
+    // Add the clean property URL
+    message += `\n\n${cleanPropertyUrl}`;
+    
+    // Add the promo code as a hashtag if it exists
+    if (promoCode) {
+      message += `\n\n#${promoCode}`;
+    }
+    
+    // Open WhatsApp with the new message
     const url = `https://wa.me/${advisorPhone}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
@@ -53,7 +92,7 @@ export default function WhatsAppButton({
             {transactionType === 'renta' ? 'Renta' : 'Venta'}
           </p>
           <p className="text-xl font-semibold">
-            {transactionType === 'renta' ? (
+            {transactionType === 'renta' ? (  
               <>
                 ${price.toLocaleString('es-MX')} / <span className="text-sm">mes</span>
               </>

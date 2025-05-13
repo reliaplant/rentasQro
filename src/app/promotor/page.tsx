@@ -124,21 +124,7 @@ function AsesorContent() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className='flex flex-row gap-5 items-center border-b border-gray-200 h-16'>
-        <div className='ml-[4vw] cursor-pointer'>
-          <a href="/">
-            <img
-              src="/assets/logos/logoPizo.svg"
-              alt="Rentas Queretaro Logo"
-              className="h-16 w-auto hover:opacity-80 p-4 bg-indigo-50"
-            />
-          </a>
-        </div>
-        <div>
-          <h1 className="text-lg font-semibold text-gray-900">Portal de Promotores</h1>
-          <p className="text-sm text-gray-600">Propiedades disponibles</p>
-        </div>
-      </div>
+      
 
       {/* Promotor Selection Section */}
       <div className="bg-indigo-50 p-8 border-b border-indigo-100">

@@ -47,7 +47,7 @@ export default function ContactPage() {
                 {/* Líneas directas group */}
                 <div className="space-y-4">
                   <a 
-                    href="tel:+524421234567" 
+                    href="tel:+524428549775" 
                     className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-violet-100 hover:bg-violet-50/50 transition-colors group"
                   >
                     <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center group-hover:bg-violet-200">
@@ -55,12 +55,12 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">Teléfono</p>
-                      <p className="text-gray-600">(442) 123-4567</p>
+                      <p className="text-gray-600">(442) 854 9775</p>
                     </div>
                   </a>
 
                   <a 
-                    href="https://wa.me/524421234567" 
+                    href="https://wa.me/524428549775" 
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-violet-100 hover:bg-violet-50/50 transition-colors group"
@@ -70,12 +70,12 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">WhatsApp</p>
-                      <p className="text-gray-600">+52 (442) 123-4567</p>
+                      <p className="text-gray-600">+52 (442) 854 9775</p>
                     </div>
                   </a>
 
                   <a 
-                    href="mailto:info@rentasqro.com"
+                    href="mailto:info@pizo.mx"
                     className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-violet-100 hover:bg-violet-50/50 transition-colors group"
                   >
                     <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center group-hover:bg-violet-200">
@@ -83,7 +83,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">Email</p>
-                      <p className="text-gray-600">info@rentasqro.com</p>
+                      <p className="text-gray-600">info@pizo.mx</p>
                     </div>
                   </a>
                 </div>
