@@ -215,8 +215,21 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
 
         <div className="grid grid-cols-2 gap-3 rounded-lg overflow-hidden">
           {(condoData.imageUrls || []).slice(0, 4).map((img, index) => {
-            const amenityId = condoData.amenities?.[index];
-            const amenity = amenityId ? condoAmenities.find(a => a.id === amenityId) : null;
+            // Look for matching amenity by checking imageAmenityTags if available
+            let amenity = null;
+            
+            // Get matching amenity from imageAmenityTags if available
+            if (condoData.imageAmenityTags && img in condoData.imageAmenityTags) {
+              const amenityId = condoData.imageAmenityTags[img];
+              // Handle both string and string[] types for amenityId
+              const amenityIdString = Array.isArray(amenityId) ? amenityId[0] : amenityId;
+              amenity = condoAmenities.find(a => a.id === amenityIdString);
+            } 
+            // Fallback to array index matching if imageAmenityTags not available
+            else if (condoData.amenities && condoData.amenities[index]) {
+              const amenityId = condoData.amenities[index];
+              amenity = condoAmenities.find(a => a.id === amenityId);
+            }
 
             return (
               <div 
@@ -227,26 +240,28 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
                   setIsGalleryOpen(true);
                 }}
               >
-                <div className="aspect-[16/10.5] relative group"> {/* Added relative and group */}
+                <div className="aspect-[16/10.5] relative group">
                   <Image
-                  src={img || '/placeholder-image.png'}
-                  alt={`${condoData.name} vista ${index + 1}`}
-                  fill
-                  className="object-cover rounded-xl transition-all duration-200 group-hover:brightness-75" /* Added transition and hover effect */
+                    src={img || '/placeholder-image.png'}
+                    alt={`${condoData.name} vista ${index + 1}`}
+                    fill
+                    className="object-cover rounded-xl transition-all duration-200 group-hover:brightness-75"
                   />
+                  {/* Improved amenity label with better positioning and styling */}
                   {amenity && (
-                  <div className="absolute bottom-1 left-1 md:bottom-4 md:left-4">
-                  <span className="bg-black/90 text-white px-2 py-0.5 md:px-3 md:py-1 rounded-full text-[10px] md:text-xs font-medium border border-gray-700 shadow-[0_2px_3px_rgba(0,0,0,0.2)]">
-                  {amenity.label}
-                  </span>
-                  </div>
+                    <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3 z-10">
+                      <span className="bg-black/80 text-white px-2.5 py-1 md:px-3 md:py-1 rounded-full text-[10px] md:text-xs font-medium border border-white/10 shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
+                        {amenity.label}
+                      </span>
+                    </div>
                   )}
-                  {/* Added arrow icon on hover */}
-                  <div className="absolute inset-0 bg-black/0 hover:bg-black/30 transition-all" />
+                  {/* Add gradient overlay for better label visibility */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  {/* Arrow icon on hover */}
                   <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all transform translate-y-1 group-hover:translate-y-0">
-                  <div className="bg-white rounded-full p-1.5 shadow-lg">
-                    <ArrowUpRight className="h-4 w-4 text-gray-700" />
-                  </div>
+                    <div className="bg-white rounded-full p-1.5 shadow-lg">
+                      <ArrowUpRight className="h-4 w-4 text-gray-700" />
+                    </div>
                   </div>
                 </div>
               </div>

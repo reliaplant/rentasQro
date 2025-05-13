@@ -47,8 +47,8 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
   const propertyTypes = [
     { id: 'casa', label: 'Casa', icon: '🏠' },
     { id: 'departamento', label: 'Departamento', icon: '🏢' },
-    // { id: 'terreno', label: 'Terreno', icon: '🏞️' },
-    // { id: 'local', label: 'Local Comercial', icon: '🏪' },
+    { id: 'terreno', label: 'Terreno', icon: '🏞️' },
+    { id: 'local', label: 'Local Comercial', icon: '🏪' },
     // { id: 'oficina', label: 'Oficina', icon: '🏢' },
     // { id: 'bodega', label: 'Bodega', icon: '🏭' },
   ];
@@ -90,7 +90,11 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
       try {
         setLoading(prev => ({ ...prev, condos: true }));
         const fetchedCondos = await getCondosByZone(data.zone);
-        setCondos(fetchedCondos);
+        // Sort condos alphabetically by name
+        const sortedCondos = [...fetchedCondos].sort((a, b) => 
+          a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+        );
+        setCondos(sortedCondos);
         setError(null);
       } catch (err) {
         console.error('Error fetching condominiums:', err);

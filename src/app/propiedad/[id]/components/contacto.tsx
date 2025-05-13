@@ -57,9 +57,12 @@ export default function Contacto({
     setIsFav(isFavorite(propertyId));
   }, [propertyId, isFavorite]);
   
-  // Calculate policy costs using the service
-  const legalPolicyPrice = calculatePolicyCost(price, 'elemental');
-  const discountedPolicyPrice = calculateDiscountedPolicyCost(price, 'elemental', 35);
+  // Determine if it's a rental property based on price (simple heuristic)
+  const isRental = price > 0 && price < 20000;
+  
+  // Calculate policy costs using the service (only for rentals)
+  const legalPolicyPrice = isRental ? calculatePolicyCost(price, 'elemental') : 0;
+  const discountedPolicyPrice = isRental ? calculateDiscountedPolicyCost(price, 'elemental', 35) : 0;
 
   const handleWhatsAppClick = async () => {
     try {
@@ -68,7 +71,20 @@ export default function Contacto({
       console.error('Error al registrar clic:', error);
     }
   };
-  
+
+  // Create a better structured WhatsApp message
+  const constructWhatsAppMessage = () => {
+    const propertyTypeText = propertyType === 'casa' ? 'la casa' : 
+                            propertyType === 'departamento' ? 'el departamento' : 
+                            'la propiedad';
+    
+    const transactionTypeText = price > 0 && price < 20000 ? 'en renta' : 'en venta';
+    
+    const locationText = location ? ` en ${location}` : '';
+    
+    return `Hola ${advisorName}, me interesa ${propertyTypeText} ${transactionTypeText}${locationText} que vi en PIZO (ID: ${propertyId}). ¿Podrías darme más información? Gracias.`;
+  };
+
   const handleFavoriteClick = () => {
     toggleFavorite(propertyId);
     setIsFav(!isFav);
@@ -183,28 +199,46 @@ export default function Contacto({
         {/* Prices */}
         <div className="space-y-4 mb-6">
           <div>
-            <p className="text-sm text-gray-500">Renta mensual</p>
-            <p className="text-2xl font-semibold">${price.toLocaleString()}</p>
+            <p className="text-sm text-gray-500">
+              {isRental ? 'Renta mensual' : 'Precio de venta'}
+            </p>
+            <p className="text-2xl font-semibold">
+              ${price.toLocaleString()}
+              {isRental && <span className="text-base font-normal text-gray-500"> /mes</span>}
+            </p>
           </div>
-          <div className='border-t border-gray-200 pt-3'>
-          <p className='mb-2'>Requisitos</p>
-          <p className="text-xs text-gray-500">- Contrato anual</p>
-          <p className="text-xs text-gray-500">- 1 més de deposito</p>
+          
+          {/* Only show rental requirements for rental properties */}
+          {isRental && (
+            <div className='border-t border-gray-200 pt-3'>
+              <p className='mb-2'>Requisitos</p>
+              <p className="text-xs text-gray-500">- Contrato anual</p>
+              <p className="text-xs text-gray-500">- 1 més de deposito</p>
               <div className="flex items-center gap-2">
-              <p className="text-xs text-gray-500">- Póliza jurídica</p>
-              <div className="flex items-center gap-1">
-                <p className="text-xs font-semibold text-gray-500">
-                ${discountedPolicyPrice.toLocaleString()}
-                </p>
-                <p className="text-xs text-gray-400 line-through">
-                ${legalPolicyPrice.toLocaleString()}
-                </p>
-                <span className="text-xs font-medium text-violet-800 bg-violet-50 px-1 py-0.5 rounded">
-                -35%
-                </span>
+                <p className="text-xs text-gray-500">- Póliza jurídica</p>
+                <div className="flex items-center gap-1">
+                  <p className="text-xs font-semibold text-gray-500">
+                    ${discountedPolicyPrice.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-gray-400 line-through">
+                    ${legalPolicyPrice.toLocaleString()}
+                  </p>
+                  <span className="text-xs font-medium text-violet-800 bg-violet-50 px-1 py-0.5 rounded">
+                    -35%
+                  </span>
+                </div>
               </div>
-              </div>
-          </div>
+            </div>
+          )}
+          
+          {/* Show financing info for sale properties */}
+          {!isRental && (
+            <div className='border-t border-gray-200 pt-3'>
+              <p className='mb-2 text-sm font-medium'>Financiamiento disponible</p>
+              {/* <p className="text-xs text-gray-600">Trabajamos con todas las instituciones bancarias para créditos hipotecarios.</p> */}
+              <p className="text-xs text-gray-600 mt-2">Contáctanos para más información sobre opciones de financiamiento.</p>
+            </div>
+          )}
         </div>
 
         {/* Advisor Info */}
@@ -247,9 +281,9 @@ export default function Contacto({
           </div>
         </div>
 
-        {/* WhatsApp button */}
+        {/* WhatsApp button - Updated with better message */}
         <a
-          href={`https://wa.me/${advisorPhone?.replace(/\D/g, '')}?text=Hola, me interesa esta propiedad`}
+          href={`https://wa.me/${advisorPhone?.replace(/\D/g, '')}?text=${encodeURIComponent(constructWhatsAppMessage())}`}
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleWhatsAppClick}

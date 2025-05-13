@@ -58,7 +58,7 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
             <span className="hover:text-gray-700 cursor-pointer">{condoData.name}</span>
           </>
         )}
-        <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+        <span className={`inline-block ml-2 px-3 py-1 rounded-full text-xs font-medium ${
             isRental ? 'ml-4 bg-violet-50 border border-violet-500 text-violet-600' : 'border border-green-600 bg-green-50 text-green-600'
           }`}>
             {isRental ? 'En renta' : 'En venta'}
@@ -88,40 +88,81 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
           </div>
 
           {/* Features grid */}
-            <div className="grid grid-cols-3 gap-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-white rounded-lg shadow-sm">
-              <BiDoorOpen className="text-gray-600 text-xl" />
-              </div>
-              <div>
-              <span className="block text-xl font-light">{property.bedrooms}</span>
-              <span className="text-sm text-gray-500 hidden sm:block">Habitaciones</span>
-              <span className="text-sm text-gray-500 sm:hidden">Hab.</span>
-              </div>
-            </div>
+          <div className="grid grid-cols-3 gap-6">
+            {property.propertyType === 'terreno' ? (
+              // Display for land/terreno property type
+              <>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white rounded-lg shadow-sm">
+                    <BiMap className="text-gray-600 text-xl" />
+                  </div>
+                  <div>
+                    <span className="block text-xl font-light">{property.terrenoM2 || 0}</span>
+                    <span className="text-sm text-gray-500 hidden sm:block">m² de terreno</span>
+                    <span className="text-sm text-gray-500 sm:hidden">m² terreno</span>
+                  </div>
+                </div>
 
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-white rounded-lg shadow-sm">
-              <BiBath className="text-gray-600 text-xl" />
-              </div>
-              <div>
-              <span className="block text-xl font-light">{property.bathrooms}</span>
-              <span className="text-sm text-gray-500 hidden sm:block">Baños</span>
-              <span className="text-sm text-gray-500 sm:hidden">Bañ.</span>
-              </div>
-            </div>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white rounded-lg shadow-sm">
+                    <BiHome className="text-gray-600 text-xl" />
+                  </div>
+                  <div>
+                    <span className="block text-xl font-light">{property.construccionM2 || 0}</span>
+                    <span className="text-sm text-gray-500 hidden sm:block">m² de construcción</span>
+                    <span className="text-sm text-gray-500 sm:hidden">m² constr.</span>
+                  </div>
+                </div>
 
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-white rounded-lg shadow-sm">
-              <BiCar className="text-gray-600 text-xl" />
-              </div>
-              <div>
-              <span className="block text-xl font-light">{property.parkingSpots}</span>
-              <span className="text-sm text-gray-500 hidden sm:block">Estacionamiento</span>
-              <span className="text-sm text-gray-500 sm:hidden">Est.</span>
-              </div>
-            </div>
-            </div>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white rounded-lg shadow-sm">
+                    <BiCar className="text-gray-600 text-xl" />
+                  </div>
+                  <div>
+                    <span className="block text-xl font-light">{property.parkingSpots || 0}</span>
+                    <span className="text-sm text-gray-500 hidden sm:block">Estacionamiento</span>
+                    <span className="text-sm text-gray-500 sm:hidden">Est.</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              // Display for other property types (casa, departamento, etc.)
+              <>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white rounded-lg shadow-sm">
+                    <BiDoorOpen className="text-gray-600 text-xl" />
+                  </div>
+                  <div>
+                    <span className="block text-xl font-light">{property.bedrooms}</span>
+                    <span className="text-sm text-gray-500 hidden sm:block">Habitaciones</span>
+                    <span className="text-sm text-gray-500 sm:hidden">Hab.</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white rounded-lg shadow-sm">
+                    <BiBath className="text-gray-600 text-xl" />
+                  </div>
+                  <div>
+                    <span className="block text-xl font-light">{property.bathrooms}</span>
+                    <span className="text-sm text-gray-500 hidden sm:block">Baños</span>
+                    <span className="text-sm text-gray-500 sm.hidden">Bañ.</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white rounded-lg shadow-sm">
+                    <BiCar className="text-gray-600 text-xl" />
+                  </div>
+                  <div>
+                    <span className="block text-xl font-light">{property.parkingSpots}</span>
+                    <span className="text-sm text-gray-500 hidden sm.block">Estacionamiento</span>
+                    <span className="text-sm text-gray-500 sm.hidden">Est.</span>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

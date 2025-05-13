@@ -18,178 +18,242 @@ export default function PropertyInfo({
   property,
   zoneData,
   condoData,
-
 }: PropertyInfoProps) {
+  // Check if property is land type
+  const isLand = property.propertyType === 'terreno';
+
   return (
     <div className="space-y-12 py-3">
+      {/* Only show basic characteristics if not a land property */}
+      {!isLand && (
+        <section>
+          <h3 className="text-lg font-semibold mb-4">Características básicas</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {property.furnished !== undefined && (
+              <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
+                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                  <Sofa className="w-5 h-5 text-gray-500" />
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-500">Amueblado</p>
+                  <p className="text-sm sm:text-base font-medium">{property.furnished ? "Si" : "No"}</p>
+                </div>
+              </div>
+            )}
 
+            {property.petsAllowed !== undefined && (
+              <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
+                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                  <PawPrint className="w-5 h-5 text-gray-500" />
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-500">Acepta mascotas</p>
+                  <p className="text-sm sm:text-base font-medium">{property.petsAllowed ? "Si" : "No"}</p>
+                </div>
+              </div>
+            )}
+            
+            {/* Show construction area only if it's greater than 0 */}
+            {property.construccionM2 !== undefined && property.construccionM2 > 0 && (
+              <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
+                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                  <Home className="w-5 h-5 text-gray-500" />
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-500">Construcción</p>
+                  <p className="text-sm sm:text-base font-medium">{property.construccionM2}m²</p>
+                </div>
+              </div>
+            )}
 
-      <section >
-        <h3 className="text-lg font-semibold mb-4">Características básicas</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {property.furnished !== undefined && (
-            <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-          <Sofa className="w-5 h-5 text-gray-500" />
+            {/* Show terrain area only if it's greater than 0 */}
+            {property.terrenoM2 !== undefined && property.terrenoM2 > 0 && (
+              <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
+                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                  <Flower className="w-5 h-5 text-gray-500" />
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-500">Terreno</p>
+                  <p className="text-sm sm:text-base font-medium">{property.terrenoM2}m²</p>
+                </div>
               </div>
-              <div>
-          <p className="text-xs sm:text-sm text-gray-500">Amueblado</p>
-          <p className="text-sm sm:text-base font-medium">{property.furnished ? "Si" : "No"}</p>
-              </div>
-            </div>
-          )}
+            )}
 
-          {property.petsAllowed !== undefined && (
-            <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-          <PawPrint className="w-5 h-5 text-gray-500" />
+            {property.estadoConservacion && (
+              <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
+                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                  <Building2 className="w-5 h-5 text-gray-500" />
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-500">Estado</p>
+                  <p className="text-sm sm:text-base font-medium capitalize">{property.estadoConservacion.replace('_', ' ')}</p>
+                </div>
               </div>
-              <div>
-          <p className="text-xs sm:text-sm text-gray-500">Acepta mascotas</p>
-          <p className="text-sm sm:text-base font-medium">{property.petsAllowed ? "Si" : "No"}</p>
-              </div>
-            </div>
-          )}
+            )}
 
-          {property.construccionM2 && (
-            <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-          <Home className="w-5 h-5 text-gray-500" />
+            {property.constructionYear && (
+              <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
+                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                  <CalendarIcon className="w-5 h-5 text-gray-500" />
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-500">Año construcción</p>
+                  <p className="text-sm sm:text-base font-medium">{property.constructionYear}</p>
+                </div>
               </div>
-              <div>
-          <p className="text-xs sm:text-sm text-gray-500">Construcción</p>
-          <p className="text-sm sm:text-base font-medium">{property.construccionM2}m²</p>
-              </div>
-            </div>
-          )}
+            )}
 
-          {property.terrenoM2 && (
-            <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                <Flower className="w-5 h-5 text-gray-500" />
+            {property.nivelesCasa && (
+              <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
+                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                  <Building className="w-5 h-5 text-gray-500" />
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-500">Niveles</p>
+                  <p className="text-sm sm:text-base font-medium">{property.nivelesCasa}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs sm:text-sm text-gray-500">Terreno</p>
-                <p className="text-sm sm:text-base font-medium">{property.terrenoM2}m²</p>
-              </div>
-            </div>
-          )}
+            )}
 
-          {property.estadoConservacion && (
-            <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-          <Building2 className="w-5 h-5 text-gray-500" />
+            {property.pisoDepto && (
+              <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
+                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                  <Building className="w-5 h-5 text-gray-500" />
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-500">Piso</p>
+                  <p className="text-sm sm:text-base font-medium">{property.pisoDepto}</p>
+                </div>
               </div>
-              <div>
-          <p className="text-xs sm:text-sm text-gray-500">Estado</p>
-          <p className="text-sm sm:text-base font-medium capitalize">{property.estadoConservacion.replace('_', ' ')}</p>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
+        </section>
+      )}
 
-          {property.constructionYear && (
-            <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-          <CalendarIcon className="w-5 h-5 text-gray-500" />
+      {/* For land properties, show a simpler info section */}
+      {isLand && (
+        <section>
+          <h3 className="text-lg font-semibold mb-4">Información del terreno</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {/* Only show terrain area if positive */}
+            {property.terrenoM2 !== undefined && property.terrenoM2 > 0 && (
+              <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
+                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                  <Flower className="w-5 h-5 text-gray-500" />
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-500">Superficie</p>
+                  <p className="text-sm sm:text-base font-medium">{property.terrenoM2}m²</p>
+                </div>
               </div>
-              <div>
-          <p className="text-xs sm:text-sm text-gray-500">Año construcción</p>
-          <p className="text-sm sm:text-base font-medium">{property.constructionYear}</p>
-              </div>
-            </div>
-          )}
+            )}
 
-          {property.nivelesCasa && (
-            <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-          <Building className="w-5 h-5 text-gray-500" />
+            {/* Only show construction area if positive */}
+            {property.construccionM2 !== undefined && property.construccionM2 > 0 && (
+              <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
+                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                  <Home className="w-5 h-5 text-gray-500" />
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-500">Construcción</p>
+                  <p className="text-sm sm:text-base font-medium">{property.construccionM2}m²</p>
+                </div>
               </div>
-              <div>
-          <p className="text-xs sm:text-sm text-gray-500">Niveles</p>
-          <p className="text-sm sm:text-base font-medium">{property.nivelesCasa}</p>
+            )}
+            
+            {property.estadoConservacion && (
+              <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
+                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                  <Building2 className="w-5 h-5 text-gray-500" />
+                </div>
+                <div>
+                  <p className="text-xs sm:text-sm text-gray-500">Estado</p>
+                  <p className="text-sm sm:text-base font-medium capitalize">{property.estadoConservacion.replace('_', ' ')}</p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
-          {property.pisoDepto && (
-            <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-          <Building className="w-5 h-5 text-gray-500" />
-              </div>
-              <div>
-          <p className="text-xs sm:text-sm text-gray-500">Piso</p>
-          <p className="text-sm sm:text-base font-medium">{property.pisoDepto}</p>
-              </div>
-            </div>
+          {/* Show a message when no size information is available */}
+          {(property.terrenoM2 === undefined || property.terrenoM2 <= 0) && 
+           (property.construccionM2 === undefined || property.construccionM2 <= 0) && (
+            <p className="text-sm text-gray-500 mt-4">
+              No hay información detallada sobre las dimensiones del terreno.
+            </p>
           )}
-        </div>
-      </section>
+        </section>
+      )}
 
-      <section className=''>
-        <h3 className="text-lg font-semibold mb-4">Comodidades</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {property.cuartoEstudio && (
-            <div className="flex items-center gap-2">
-              <Tv className="w-5 h-5 text-gray-500" />
-              <span className="text-sm">Cuarto de estudio/TV</span>
+      {/* Only show amenities and equipment sections for non-land properties */}
+      {!isLand && (
+        <>
+          <section className=''>
+            <h3 className="text-lg font-semibold mb-4">Comodidades</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {property.cuartoEstudio && (
+                <div className="flex items-center gap-2">
+                  <Tv className="w-5 h-5 text-gray-500" />
+                  <span className="text-sm">Cuarto de estudio/TV</span>
+                </div>
+              )}
+              {property.cuartoLavado && (
+                <div className="flex items-center gap-2">
+                  <WashingMachine className="w-5 h-5 text-gray-500" />
+                  <span className="text-sm">Cuarto de lavado</span>
+                </div>
+              )}
+              {property.balcon && (
+                <div className="flex items-center gap-2">
+                  <MdBalcony className="w-5 h-5 text-gray-500" />
+                  <span className="text-sm">Balcón/Terraza</span>
+                </div>
+              )}
+              {property.jardin && (
+                <div className="flex items-center gap-2">
+                  <Flower className="w-5 h-5 text-gray-500" />
+                  <span className="text-sm">Jardín</span>
+                </div>
+              )}
+              {property.bodega && (
+                <div className="flex items-center gap-2">
+                  <DoorOpen className="w-5 h-5 text-gray-500" />
+                  <span className="text-sm">Bodega</span>
+                </div>
+              )}
+              {property.roofGarden && (
+                <div className="flex items-center gap-2">
+                  <MdRoofing className="w-5 h-5 text-gray-500" />
+                  <span className="text-sm">Roof Garden</span>
+                </div>
+              )}
             </div>
-          )}
-          {property.cuartoLavado && (
-            <div className="flex items-center gap-2">
-              <WashingMachine className="w-5 h-5 text-gray-500" />
-              <span className="text-sm">Cuarto de lavado</span>
-            </div>
-          )}
-          {property.balcon && (
-            <div className="flex items-center gap-2">
-              <MdBalcony className="w-5 h-5 text-gray-500" />
-              <span className="text-sm">Balcón/Terraza</span>
-            </div>
-          )}
-          {property.jardin && (
-            <div className="flex items-center gap-2">
-              <Flower className="w-5 h-5 text-gray-500" />
-              <span className="text-sm">Jardín</span>
-            </div>
-          )}
-          {property.bodega && (
-            <div className="flex items-center gap-2">
-              <DoorOpen className="w-5 h-5 text-gray-500" />
-              <span className="text-sm">Bodega</span>
-            </div>
-          )}
-          {property.roofGarden && (
-            <div className="flex items-center gap-2">
-              <MdRoofing className="w-5 h-5 text-gray-500" />
-              <span className="text-sm">Roof Garden</span>
-            </div>
-          )}
-        </div>
-      </section>
+          </section>
 
-      <section >
-        <h3 className="text-lg font-semibold mb-4">Equipamiento</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {property.cocinaEquipada && (
-            <div className="flex items-center gap-2">
-              <ChefHat className="w-5 h-5 text-gray-500" />
-              <span className="text-sm">Cocina equipada</span>
+          <section>
+            <h3 className="text-lg font-semibold mb-4">Equipamiento</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {property.cocinaEquipada && (
+                <div className="flex items-center gap-2">
+                  <ChefHat className="w-5 h-5 text-gray-500" />
+                  <span className="text-sm">Cocina equipada</span>
+                </div>
+              )}
+              {property.calentadorAgua && (
+                <div className="flex items-center gap-2">
+                  <Flame className="w-5 h-5 text-gray-500" />
+                  <span className="text-sm">Calentador de agua {property.calentadorAgua}</span>
+                </div>
+              )}
+              {property.tipoGas && (
+                <div className="flex items-center gap-2">
+                  <Droplets className="w-5 h-5 text-gray-500" />
+                  <span className="text-sm">Gas {property.tipoGas}</span>
+                </div>
+              )}
             </div>
-          )}
-          {property.calentadorAgua && (
-            <div className="flex items-center gap-2">
-              <Flame className="w-5 h-5 text-gray-500" />
-              <span className="text-sm">Calentador de agua {property.calentadorAgua}</span>
-            </div>
-          )}
-          {property.tipoGas && (
-            <div className="flex items-center gap-2">
-              <Droplets className="w-5 h-5 text-gray-500" />
-              <span className="text-sm">Gas {property.tipoGas}</span>
-            </div>
-          )}
-        </div>
-      </section>
+          </section>
+        </>
+      )}
     </div>
   );
 }

@@ -325,13 +325,27 @@ const Explorador = () => {
                 <p className="text-xs sm:text-sm text-gray-500 truncate">
                     {property.zone === 'X5oWujYupjRKx0tF8Hlj' ? 'Zibatá' : property.zone || 'Zona no especificada'}
                 </p>
-                <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">
-                  <span>{property.bedrooms} rec</span>
-                  <span>•</span>
-                  <span>{property.bathrooms} baños</span>
-                  <span>•</span>
-                  <span>{property.construccionM2}m²</span>
-                </div>
+                
+                {/* Show different metrics based on property type */}
+                {property.propertyType === 'terreno' ? (
+                  <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">
+                    <span>{property.terrenoM2 || 0}m² terreno</span>
+                    {(property.construccionM2 ?? 0) > 0 && (
+                      <>
+                        <span>•</span>
+                        <span>{property.construccionM2}m² construcción</span>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">
+                    <span>{property.bedrooms} rec</span>
+                    <span>•</span>
+                    <span>{property.bathrooms} baños</span>
+                    <span>•</span>
+                    <span>{property.construccionM2}m²</span>
+                  </div>
+                )}
               </div>
             </div>
 

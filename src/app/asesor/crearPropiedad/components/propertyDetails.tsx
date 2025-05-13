@@ -35,14 +35,21 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
     return value ?? defaultValue;
   };
 
-  // Add validation for construccionM2
+  // Add validation for construccionM2 - only required for properties other than "terreno"
   useEffect(() => {
+    // Skip validation if property type is land/terreno
+    if (data.propertyType === 'terreno') {
+      onError?.(null);
+      return;
+    }
+    
+    // For other property types, construction size is required
     if (!data.construccionM2 || data.construccionM2 <= 0) {
       onError?.('Los metros de construcción son requeridos');
     } else {
       onError?.(null);
     }
-  }, [data.construccionM2, onError]);
+  }, [data.construccionM2, data.propertyType, onError]);
 
   return (
     <div className="space-y-8">
@@ -84,16 +91,16 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
           <div className="flex items-center">
             <button
               type="button"
-              onClick={() => handleChange('bedrooms', Math.max(1, data.bedrooms - 1))}
+              onClick={() => handleChange('bedrooms', Math.max(0, data.bedrooms - 1))}
               className="border border-gray-300 rounded-l-lg px-3 py-2 text-lg"
             >
               -
             </button>
             <input
               type="number"
-              min="1"
+              min="0"
               value={data.bedrooms}
-              onChange={(e) => handleChange('bedrooms', parseInt(e.target.value) || 1)}
+              onChange={(e) => handleChange('bedrooms', parseInt(e.target.value) || 0)}
               className="border-y border-gray-300 py-2 px-3 text-center w-16 focus:ring-violet-500 focus:border-violet-500"
             />
             <button
@@ -112,17 +119,17 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
           <div className="flex items-center">
             <button
               type="button"
-              onClick={() => handleChange('bathrooms', Math.max(1, data.bathrooms - 0.5))}
+              onClick={() => handleChange('bathrooms', Math.max(0, data.bathrooms - 0.5))}
               className="border border-gray-300 rounded-l-lg px-3 py-2 text-lg"
             >
               -
             </button>
             <input
               type="number"
-              min="1"
+              min="0"
               step="0.5"
               value={data.bathrooms}
-              onChange={(e) => handleChange('bathrooms', parseFloat(e.target.value) || 1)}
+              onChange={(e) => handleChange('bathrooms', parseFloat(e.target.value) || 0)}
               className="border-y border-gray-300 py-2 px-3 text-center w-16 focus:ring-violet-500 focus:border-violet-500"
             />
             <button
@@ -252,18 +259,20 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
         {/* Square meters and Levels */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Metros de construcción</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Metros de construcción{data.propertyType === 'terreno' ? ' (opcional)' : ''}
+            </label>
             <input
               type="number"
-              min="1"
+              min="0"
               value={data.construccionM2 || ''}
               onChange={(e) => handleChange('construccionM2', parseInt(e.target.value) || 0)}
               className={`border rounded-lg px-3 py-2 w-full focus:ring-violet-500 focus:border-violet-500 ${
-                !data.construccionM2 ? 'border-red-500' : 'border-gray-300'
+                !data.construccionM2 && data.propertyType !== 'terreno' ? 'border-red-500' : 'border-gray-300'
               }`}
-              required
+              required={data.propertyType !== 'terreno'}
             />
-            {!data.construccionM2 && (
+            {!data.construccionM2 && data.propertyType !== 'terreno' && (
               <p className="text-sm text-red-600 mt-1">
                 Este campo es requerido
               </p>
@@ -451,20 +460,23 @@ export default function PropertyDetails({ data, onChange, error, onError }: Prop
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Metros cuadrados de construcción
+              Metros cuadrados de construcción{data.propertyType === 'terreno' ? ' (opcional)' : ''}
             </label>
             <div className="relative rounded-md shadow-sm">
               <input
                 type="number"
                 name="construccionM2"
                 id="construccionM2"
-                className="block w-full rounded-md border-gray-300 pl-3 pr-12 focus:border-violet-500 focus:ring-violet-500 sm:text-sm"
+                className={`block w-full rounded-md ${
+                  !data.construccionM2 && data.propertyType !== 'terreno' ? 'border-red-500' : 'border-gray-300'
+                } pl-3 pr-12 focus:border-violet-500 focus:ring-violet-500 sm:text-sm`}
                 placeholder="0"
                 value={data.construccionM2 || ''}
                 onChange={(e) => onChange({
                   ...data,
                   construccionM2: parseInt(e.target.value) || 0
                 })}
+                required={data.propertyType !== 'terreno'}
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                 <span className="text-gray-500 sm:text-sm">m²</span>

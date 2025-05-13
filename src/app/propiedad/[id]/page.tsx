@@ -1,334 +1,279 @@
-"use client";
-
-import { useState, useEffect, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
-import { Plus, HomeIcon, CalendarIcon, PawPrint, Sofa, Banknote, MapPinIcon, BuildingIcon, Star, MapPin, Building, Home, Shield, CheckCircle, CheckCircle2, Map, Tv, WashingMachine, Flower, DoorOpen, AirVent, Car, Bed, BedDouble } from 'lucide-react';
-import { getProperty, getAdvisorProfile, getAdvisorById, AdvisorData, getZoneById, getCondoById } from '@/app/shared/firebase';
+import { Metadata } from 'next';
+import { getProperty, getAdvisorProfile, getAdvisorById, getZoneById, getCondoById } from '@/app/shared/firebase';
 import { ZoneData, CondoData, PropertyData } from '@/app/shared/interfaces';
-import FotosPropiedad from './components/fotosPropiedad';
-import Contacto from './components/contacto';
-import { Utensils, Dumbbell, TreePine, Users, Building2, ShieldCheck, Bath, Gamepad2 } from 'lucide-react';
-import { Fire, GasStation, ObjectStorage, RainDrop, Restaurant, Swim } from '@carbon/icons-react';
-// import Reviews from './components/reviews';
-import CondoSection from './components/CondoSection';
-import { MdBalcony, MdRoofing } from 'react-icons/md';
-import { TbGardenCart } from 'react-icons/tb';
-import { GrStorage } from 'react-icons/gr';
-import { GiWaterDrop } from 'react-icons/gi';
-import ZibataInfo from './components/zibata';
-import MenuPropiedad from './components/menuPropiedad';
-import PropertyInfo from './components/PropertyInfo';
-import WhatsAppButton from './components/WhatsAppButton';
-import PropertyHeader from './components/PropertyHeader';
-import SimilarProperties from './components/SimilarProperties';
+import PropertyClient from './PropertyClient';
 
-const amenityIcons = {
-  'pool': { icon: Swim, label: 'Alberca' },
-  'gym': { icon: Dumbbell, label: 'Gimnasio' },
-  'eventRoom': { icon: Users, label: 'Salón de eventos' },
-  'grill': { icon: Utensils, label: 'Área de asadores' },
-  'sauna': { icon: Bath, label: 'Sauna' },
-  'businessCenter': { icon: Building2, label: 'Business Center' },
-  'playground': { icon: TreePine, label: 'Parque infantil' },
-  'playRoom': { icon: Gamepad2, label: 'Ludoteca' },
-  'securityDoor': { icon: ShieldCheck, label: 'Vigilancia' }
-};
 
-export default function PropertyPage() {
-  const router = useRouter();
-  const params = useParams();
-  const id = params?.id as string;
+// Define AdvisorData type here since it's not exported from the interfaces
+interface AdvisorData {
+  id?: string;
+  name: string;
+  phone: string;
+  email: string;
+  bio: string;
+  userId: string;
+  verified: boolean;
+  photo?: string;
+}
 
-  const [property, setProperty] = useState<PropertyData | null>(null);
-  const [advisor, setAdvisor] = useState<AdvisorData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [activeSection, setActiveSection] = useState('info');
-  const [zoneData, setZoneData] = useState<ZoneData | null>(null);
-  const [condoData, setCondoData] = useState<CondoData | null>(null);
-  const [showSimilar, setShowSimilar] = useState(true);
-
-  const infoRef = useRef<HTMLDivElement>(null);
-  const characteristicsRef = useRef<HTMLDivElement>(null);
-  const amenitiesRef = useRef<HTMLDivElement>(null);
-  const equipmentRef = useRef<HTMLDivElement>(null);
-  const condoRef = useRef<HTMLDivElement>(null);
-  const zibataRef = useRef<HTMLDivElement>(null);
-  const contactRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const fetchPropertyData = async () => {
-      try {
-        setLoading(true);
-        if (!id) return;
-
-        const propertyData = await getProperty(id);
-        setProperty(propertyData);
-
-        if (propertyData?.advisor) {
-          console.log("Property has advisor ID:", propertyData.advisor);
-          // Try getting advisor by direct document ID first
-          const advisorData = await getAdvisorById(propertyData.advisor);
-          
-          if (advisorData) {
-            console.log("Found advisor by document ID:", advisorData);
-            setAdvisor(advisorData);
-          } else {
-            console.log("Advisor not found by ID, trying profile lookup");
-            // Fall back to profile lookup
-            const profileData = await getAdvisorProfile(propertyData.advisor);
-            if (profileData) {
-              console.log("Found advisor by profile lookup:", profileData);
-              setAdvisor(profileData);
-            } else {
-              console.log("No advisor found with any method, using default");
-              // Use default
-              setAdvisor({
-                id: 'default',
-                name: 'Asesor Pizo',
-                phone: '4421234567',
-                email: 'contacto@pizomx.com',
-                bio: 'Asesor inmobiliario de Pizo MX',
-                userId: 'default',
-                verified: true
-              });
-            }
-          }
-        } else {
-          console.log("No advisor ID found in property data");
-          // Set a default advisor when none is assigned
-          setAdvisor({
-            id: 'default',
-            name: 'Asesor Pizo',
-            phone: '4421234567',
-            email: 'contacto@pizomx.com',
-            bio: 'Asesor inmobiliario de Pizo MX',
-            userId: 'default',
-            verified: true
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching property:", error);
-        // Set default advisor on error
-        setAdvisor({
-          id: 'default',
-          name: 'Asesor Pizo',
-          phone: '4421234567',
-          email: 'contacto@pizomx.com',
-          bio: 'Asesor inmobiliario de Pizo MX',
-          userId: 'default',
-          verified: true
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPropertyData();
-  }, [id]);
-
-  useEffect(() => {
-    const fetchLocationData = async () => {
-      if (property?.zone) { // zone is zoneId in current data
-        try {
-          const zoneInfo = await getZoneById(property.zone);
-          setZoneData(zoneInfo);
-
-          if (property.condo) { // privateComplex is condoId
-            const condoInfo = await getCondoById(property.condo);
-            setCondoData(condoInfo);
-          }
-        } catch (error) {
-          console.error("Error fetching location data:", error);
-        }
-      }
-    };
-
-    if (property) {
-      fetchLocationData();
+// Generate dynamic metadata for SEO
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  try {
+    const propertyData = await getProperty(params.id);
+    
+    if (!propertyData) {
+      return {
+        title: 'Propiedad no encontrada | PIZO MX',
+        description: 'Lo sentimos, esta propiedad ya no está disponible.',
+      };
     }
-  }, [property]);
+    
+    // Get zone and condo information if available
+    let zoneData = null;
+    let condoData = null;
+    
+    if (propertyData.zone) {
+      zoneData = await getZoneById(propertyData.zone);
+    }
+    
+    if (propertyData.condo) {
+      condoData = await getCondoById(propertyData.condo);
+    }
+    
+    // Create a descriptive title and description
+    const propertyType = propertyData.propertyType || 'Propiedad';
+    const transactionType = propertyData.transactionType === 'renta' ? 'en renta' : 'en venta';
+    const location = zoneData?.name || 'Querétaro';
+    const condoName = condoData?.name ? ` en ${condoData.name}` : '';
+    
+    return {
+      title: `${propertyType.charAt(0).toUpperCase() + propertyType.slice(1)} ${transactionType}${condoName} | ${location} | PIZO MX`,
+      description: propertyData.descripcion || 
+        `${propertyType.charAt(0).toUpperCase() + propertyType.slice(1)} ${transactionType} con ${propertyData.bedrooms || 0} recámaras, 
+        ${propertyData.bathrooms || 0} baños, ${propertyData.construccionM2 || 0}m² de construcción. 
+        Ubicado en ${location}${condoName}.`,
+      keywords: `${propertyType}, ${transactionType}, ${location}, bienes raíces, 
+        inmobiliaria, ${propertyData.bedrooms || 0} recámaras, ${propertyData.bathrooms || 0} baños`,
+      openGraph: {
+        title: `${propertyType.charAt(0).toUpperCase() + propertyType.slice(1)} ${transactionType}${condoName} | ${location}`,
+        description: propertyData.descripcion || 
+          `${propertyType.charAt(0).toUpperCase() + propertyType.slice(1)} ${transactionType} con ${propertyData.bedrooms || 0} recámaras, 
+          ${propertyData.bathrooms || 0} baños, ${propertyData.construccionM2 || 0}m² de construcción. 
+          Ubicado en ${location}${condoName}.`,
+        url: `https://www.pizo.mx/propiedad/${params.id}`,
+        type: 'website',
+        images: [
+          {
+            url: propertyData.imageUrls && propertyData.imageUrls.length > 0 
+              ? propertyData.imageUrls[0] 
+              : 'https://www.pizo.mx/og-image.jpg',
+            width: 1200,
+            height: 630,
+            alt: `${propertyType} ${transactionType} en ${location}`,
+          }
+        ],
+      },
+      alternates: {
+        canonical: `https://www.pizo.mx/propiedad/${params.id}`,
+      }
+    };
+  } catch (error) {
+    console.error('Error generating metadata:', error);
+    return {
+      title: 'Propiedad | PIZO MX',
+      description: 'Encuentra tu propiedad ideal en Querétaro con PIZO MX.',
+    };
+  }
+}
 
-  // Update loading skeleton to be more visually appealing
-  const LoadingSkeleton = () => (
-    <div className="min-h-screen bg-white">
-      <div className="animate-pulse">
-        {/* Image placeholder */}
-        <div className="w-full aspect-[16/9] bg-gray-200" />
+// Generate schema.org structured data for SEO
+function generateStructuredData(property: PropertyData, advisor: AdvisorData | null, zoneData: ZoneData | null, condoData: CondoData | null) {
+  const images = property.imageUrls?.map(url => url) || [];
+  const locationName = [
+    condoData?.name,
+    zoneData?.name,
+    'Querétaro, México'
+  ].filter(Boolean).join(', ');
+  
+  return {
+    "@context": "https://schema.org",
+    "@type": "RealEstateListing",
+    "name": `${property.propertyType?.charAt(0).toUpperCase() + property.propertyType?.slice(1) || 'Propiedad'} en ${condoData?.name || zoneData?.name || 'Querétaro'}`,
+    "description": property.descripcion || `${property.propertyType} ${property.transactionType === 'renta' ? 'en renta' : 'en venta'} en ${locationName}`,
+    "url": `https://www.pizo.mx/propiedad/${property.id}`,
+    "datePosted": property.publicationDate ? new Date(property.publicationDate.seconds * 1000).toISOString() : new Date().toISOString(),
+    "image": images,
+    "offers": {
+      "@type": "Offer",
+      "price": property.price,
+      "priceCurrency": "MXN",
+      "availability": property.status === 'publicada' ? "https://schema.org/InStock" : "https://schema.org/SoldOut"
+    },
+    "amenityFeature": [
+      property.bedrooms ? {
+        "@type": "LocationFeatureSpecification",
+        "name": "Recámaras",
+        "value": property.bedrooms
+      } : null,
+      property.bathrooms ? {
+        "@type": "LocationFeatureSpecification",
+        "name": "Baños",
+        "value": property.bathrooms
+      } : null,
+      property.construccionM2 ? {
+        "@type": "LocationFeatureSpecification",
+        "name": "Construcción",
+        "value": `${property.construccionM2}m²`
+      } : null
+    ].filter(Boolean),
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": zoneData?.name || "Querétaro",
+      "addressRegion": "Querétaro",
+      "addressCountry": "MX"
+    },
+    "agent": advisor ? {
+      "@type": "RealEstateAgent",
+      "name": advisor.name,
+      "telephone": advisor.phone,
+      "email": advisor.email
+    } : null
+  };
+}
 
-        {/* Content placeholder */}
-        <div className="max-w-6xl mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            <div className="lg:col-span-2 space-y-8">
-              {/* Title placeholder */}
-              <div className="space-y-4">
-                <div className="h-8 bg-gray-200 rounded w-3/4" />
-                <div className="h-6 bg-gray-200 rounded w-1/2" />
-              </div>
+// Helper function to serialize Firestore timestamps or Date objects to ISO strings
+function serializeTimestamps(obj: any): any {
+  if (!obj) return obj;
+  
+  // Handle array case
+  if (Array.isArray(obj)) {
+    return obj.map(item => serializeTimestamps(item));
+  }
+  
+  // Handle objects
+  if (typeof obj === 'object') {
+    // Check if it's a Firestore Timestamp or Date object
+    if (obj.seconds !== undefined && obj.nanoseconds !== undefined) {
+      return new Date(obj.seconds * 1000).toISOString();
+    }
+    
+    if (obj instanceof Date) {
+      return obj.toISOString();
+    }
+    
+    // Process regular objects recursively
+    const result: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      result[key] = serializeTimestamps(value);
+    }
+    return result;
+  }
+  
+  // Return primitives as is
+  return obj;
+}
 
-              {/* Features placeholder */}
-              <div className="grid grid-cols-2 gap-4">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="h-20 bg-gray-200 rounded" />
-                ))}
-              </div>
-            </div>
-
-            {/* Sidebar placeholder */}
-            <div className="lg:col-span-1">
-              <div className="h-64 bg-gray-200 rounded" />
-            </div>
+// Server component - fetches data server-side
+export default async function PropertyPage({ params }: { params: { id: string } }) {
+  try {
+    const propertyData = await getProperty(params.id);
+    
+    if (!propertyData) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-white">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold text-gray-900">Propiedad no encontrada</h2>
+            <p className="mt-2 text-gray-600">La propiedad que buscas no existe o no está disponible.</p>
           </div>
         </div>
-      </div>
-    </div>
-  );
-
-  // Update loading condition check
-  if (loading) {
-    return <LoadingSkeleton />;
-  }
-
-  if (!property) {
+      );
+    }
+    
+    // Get advisor data
+    let advisorData = null;
+    if (propertyData.advisor) {
+      // Try getting advisor by direct document ID first
+      advisorData = await getAdvisorById(propertyData.advisor);
+      
+      if (!advisorData) {
+        // Fall back to profile lookup
+        advisorData = await getAdvisorProfile(propertyData.advisor);
+      }
+    }
+    
+    // Use default advisor if none found
+    if (!advisorData) {
+      advisorData = {
+        id: 'default',
+        name: 'Asesor Pizo',
+        phone: '4421234567',
+        email: 'contacto@pizomx.com',
+        bio: 'Asesor inmobiliario de Pizo MX',
+        userId: 'default',
+        verified: true
+      };
+    }
+    
+    // Get location data
+    let zoneData = null;
+    let condoData = null;
+    
+    if (propertyData.zone) {
+      zoneData = await getZoneById(propertyData.zone);
+    }
+    
+    if (propertyData.condo) {
+      condoData = await getCondoById(propertyData.condo);
+    }
+    
+    // Serialize all data to ensure it's safe to pass to client components
+    const serializedPropertyData = serializeTimestamps(propertyData);
+    const serializedAdvisorData = serializeTimestamps(advisorData);
+    const serializedZoneData = serializeTimestamps(zoneData);
+    const serializedCondoData = serializeTimestamps(condoData);
+    
+    // Generate structured data (using original data before serialization)
+    const structuredData = generateStructuredData(propertyData, advisorData, zoneData, condoData);
+    
+    // Create property title
+    const propertyTitle = `${propertyData.propertyType?.charAt(0).toUpperCase() + propertyData.propertyType?.slice(1) || 'Propiedad'} 
+      ${propertyData.transactionType === 'renta' ? 'en renta' : 'en venta'} 
+      ${condoData?.name ? `en ${condoData.name}` : ''} 
+      ${zoneData?.name ? `| ${zoneData.name}` : ''}`;
+    
+    return (
+      <>
+        {/* Add structured data for SEO */}
+        <script 
+          type="application/ld+json" 
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+        
+        <div className="bg-white min-h-screen">
+          {/* Hidden title for SEO */}
+          <h1 className="sr-only">{propertyTitle}</h1>
+          
+          {/* Client component with all the interactive functionality */}
+          <PropertyClient
+            property={serializedPropertyData}
+            advisor={serializedAdvisorData}
+            zoneData={serializedZoneData}
+            condoData={serializedCondoData}
+            propertyTitle={propertyTitle}
+          />
+        </div>
+      </>
+    );
+  } catch (error) {
+    console.error("Error fetching property data:", error);
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <h2 className="text-2xl font-semibold text-gray-900">Propiedad no encontrada</h2>
-          <p className="mt-2 text-gray-600">La propiedad que buscas no existe o no está disponible.</p>
+          <h2 className="text-2xl font-semibold text-gray-900">Ocurrió un error</h2>
+          <p className="mt-2 text-gray-600">No pudimos cargar la información de esta propiedad.</p>
         </div>
       </div>
     );
   }
-
-  return (
-    <div className="bg-white min-h-screen md:px-0 pb-36">
-
-      {/* Menu after photos */}
-      <MenuPropiedad
-        property={property}
-        zoneData={zoneData}
-        condoData={condoData}
-      />
-
-      {/* Rest of property detail content */}
-      <div className="max-w-7xl mx-auto px-0 md:px-4 mt-0 md:mt-24">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-16">
-          {/* Main Content */}
-          <div className="lg:col-span-2 md:space-y-12 space-y-0">
-
-            <div className="block md:hidden">
-              <FotosPropiedad
-                images={property.imageUrls}
-                propertyType={property.propertyType}
-              />
-            </div>
-
-            {/* Property Header */}
-            <div className='px-4 md:px-0'>
-              <PropertyHeader
-                property={property}
-                zoneData={zoneData}
-                condoData={condoData}
-              />
-              <div className="hidden md:block">
-                <FotosPropiedad
-                  images={property.imageUrls}
-                  propertyType={property.propertyType}
-                />
-              </div>
-            </div>
-
-            {/* Property Info */}
-            <div className='px-4 md:px-0'>
-              <PropertyInfo
-                property={property}
-                zoneData={zoneData}
-                condoData={condoData}
-              />
-            </div>
-
-            {/* Condo Section */}
-            {condoData && (
-              <section ref={condoRef}>
-                <div className="px-4 md:px-0 mt-8 md:mt-0">
-                  <CondoSection condoData={condoData} />
-                </div>
-              </section>
-            )}
-
-{property.id && (
-                <div className="mt-6 w-full px-4 md:px-0 block md:hidden">
-                  <SimilarProperties
-                  currentPropertyId={property.id}
-                  propertyType={property.propertyType || "casa"}
-                  transactionType={property.transactionType || "venta"}
-                  zone={property.zone}
-                  condo={property.condo}
-                  price={property.price}
-                  />
-                </div>
-              )}
-
-            <div ref={zibataRef} className="mt-24">
-              <ZibataInfo />
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-1" ref={contactRef}>
-            {/* 
-              Adding margin-top to position it lower initially,
-              but top-1 will make it stick near the top when scrolling
-            */}
-            <div className="sticky top-24 mt-25 space-y-6">
-              <div className='hidden md:block '>
-              <Contacto
-                price={property.price}
-                advisor={{
-                  name: advisor?.name || '',
-                  photo: advisor?.photo || '',
-                  phone: advisor?.phone || '',
-                  bio: advisor?.bio || '',
-                  verified: advisor?.verified || false
-                }}
-                propertyId={property.id!}
-                publicationDate={property.publicationDate}
-                views={property.views}
-                whatsappClicks={property.whatsappClicks}
-              />
-
-</div>
-              {/* Simple implementation of similar properties that won't error */}
-              {property.id && (
-                <div className="mt-6 w-full px-4 md:px-0 hidden md:block ">
-                  <SimilarProperties
-                    currentPropertyId={property.id}
-                    propertyType={property.propertyType || "casa"}
-                    transactionType={property.transactionType || "venta"}
-                    zone={property.zone}
-                    condo={property.condo}
-                    price={property.price}
-                  />
-                </div>
-              )}
-            </div>
-            
-          </div>
-        </div>
-
-        <WhatsAppButton
-          propertyType={property.propertyType}
-          transactionType={property.transactionType}
-          condoName={condoData?.name}
-          zoneName={zoneData?.name}
-          advisorPhone={advisor?.phone || ''}
-          propertyId={property.id!}
-          price={property.price}
-          contactRef={contactRef as React.RefObject<HTMLDivElement>}
-        />
-      </div>
-    </div>
-  );
 }
 

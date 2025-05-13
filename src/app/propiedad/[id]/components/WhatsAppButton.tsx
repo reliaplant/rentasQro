@@ -23,7 +23,15 @@ export default function WhatsAppButton({
   contactRef
 }: WhatsAppButtonProps) {
   const handleWhatsAppClick = () => {
-    const message = `Hola, me interesa ${propertyType === 'casa' ? 'la casa' : 'el departamento'} ${transactionType === 'renta' ? 'en renta' : 'en venta'} ${condoName ? `en ${condoName}` : ''} ${zoneName ? `en ${zoneName}` : ''}`;
+    // Handle different property types in the message
+    let propertyTypeText = 'la propiedad';
+    
+    if (propertyType === 'casa') propertyTypeText = 'la casa';
+    else if (propertyType === 'departamento' || propertyType === 'depa') propertyTypeText = 'el departamento';
+    else if (propertyType === 'terreno') propertyTypeText = 'el terreno';
+    else if (propertyType === 'local') propertyTypeText = 'el local comercial';
+    
+    const message = `Hola, me interesa ${propertyTypeText} ${transactionType === 'renta' ? 'en renta' : 'en venta'} ${condoName ? `en ${condoName}` : ''} ${zoneName ? `en ${zoneName}` : ''}`;
     const url = `https://wa.me/${advisorPhone}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
