@@ -1530,4 +1530,93 @@ export const getPropertiesWithPagination = async (
   }
 };
 
+// Promotor interface
+export interface Promotor {
+  id: string;
+  name: string;
+  code: string;
+  createdAt?: any;
+}
+
+/**
+ * Gets all promoters from Firestore
+ */
+export const getPromotores = async (): Promise<Promotor[]> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "promotores"));
+    const promotoresList: Promotor[] = [];
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      promotoresList.push({
+        id: doc.id,
+        name: data.name || '',
+        code: data.code || '',
+        createdAt: data.createdAt
+      });
+    });
+    
+    // Sort alphabetically by name
+    promotoresList.sort((a, b) => a.name.localeCompare(b.name));
+    
+    return promotoresList;
+  } catch (error) {
+    console.error("Error fetching promotores:", error);
+    return [];
+  }
+};
+
+/**
+ * Gets a promotor by ID
+ */
+export const getPromotorById = async (id: string): Promise<Promotor | null> => {
+  try {
+    const docRef = doc(db, "promotores", id);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      return {
+        id: docSnap.id,
+        name: data.name || '',
+        code: data.code || '',
+        createdAt: data.createdAt
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching promotor:", error);
+    return null;
+  }
+};
+
+/**
+ * Gets a promotor by code
+ */
+export const getPromotorByCode = async (code: string): Promise<Promotor | null> => {
+  try {
+    const q = query(
+      collection(db, "promotores"),
+      where("code", "==", code)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0];
+      const data = doc.data();
+      return {
+        id: doc.id,
+        name: data.name || '',
+        code: data.code || '',
+        createdAt: data.createdAt
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching promotor by code:", error);
+    return null;
+  }
+};
+
 export { db, auth, storage };
