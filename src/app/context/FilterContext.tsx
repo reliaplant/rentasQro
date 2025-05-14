@@ -3,8 +3,8 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import type { ZoneData } from '../shared/interfaces';
 
-// Add this line somewhere near the top of the file
-export const MAX_PRICE = 50000;
+// Update this line to use a much higher value
+export const MAX_PRICE = 1000000000; // 1 billion
 
 // Define types for filters
 export interface FilterState {
@@ -17,6 +17,7 @@ export interface FilterState {
   petsAllowed: boolean;
   parkingSpots: number | null;
   currency: 'MXN' | 'USD'; // New currency property
+  propertyType: string; // Add propertyType filter
 }
 
 // Define filter action interface
@@ -48,6 +49,7 @@ const defaultFilters: FilterState = {
   petsAllowed: false,
   parkingSpots: null,
   currency: 'MXN', // Default to MXN
+  propertyType: '', // Empty string means all property types
 };
 
 // Create the context

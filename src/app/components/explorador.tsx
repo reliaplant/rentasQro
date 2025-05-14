@@ -88,23 +88,41 @@ const Explorador = () => {
   // Efecto para filtrar propiedades basado en los filtros del contexto
   useEffect(() => {
     const filterProperties = () => {
+      // Add debug logging
+      console.log("Total properties before filtering:", properties.length);
+      console.log("Current filters:", filters);
+
       let filtered = [...properties];
+      
+      // Debug each filter step
+      const logFilterStep = (step: string, count: number) => {
+        console.log(`After ${step} filter: ${count} properties remaining`);
+      };
 
       // Filtrar por tipo de transacción
       if (filters.transactionType) {
-        filtered = filtered.filter(property => {
-          if (filters.transactionType === 'renta') {
-            return ['renta', 'ventaRenta'].includes(property.transactionType);
-          } else if (filters.transactionType === 'compra') {
-            return ['venta', 'ventaRenta'].includes(property.transactionType);
-          }
-          return true;
-        });
+        if (filters.transactionType === 'renta') {
+          filtered = filtered.filter(property => 
+            ['renta', 'ventaRenta'].includes(property.transactionType)
+          );
+        } else if (filters.transactionType === 'compra') {
+          filtered = filtered.filter(property => 
+            ['venta', 'ventaRenta'].includes(property.transactionType)
+          );
+        }
+        logFilterStep('transaction type', filtered.length);
       }
 
       // Filtrar por zona
       if (filters.selectedZone) {
         filtered = filtered.filter(property => property.zone === filters.selectedZone);
+        logFilterStep('zone', filtered.length);
+      }
+      
+      // Filtrar por tipo de propiedad
+      if (filters.propertyType) {
+        filtered = filtered.filter(property => property.propertyType === filters.propertyType);
+        logFilterStep('property type', filtered.length);
       }
 
       // Filtrar por recámaras
@@ -115,6 +133,7 @@ const Explorador = () => {
           }
           return property.bedrooms === filters.bedrooms;
         });
+        logFilterStep('bedrooms', filtered.length);
       }
 
       // Filtrar por baños
@@ -125,27 +144,43 @@ const Explorador = () => {
           }
           return property.bathrooms === filters.bathrooms;
         });
+        logFilterStep('bathrooms', filtered.length);
       }
 
-      // Filtrar por precio - take currency into account
-      if (filters.priceRange[0] > 0 || filters.priceRange[1] < 50000) {
-        filtered = filtered.filter(property => {
-          // Get min/max price in MXN (the database currency)
-          const minPrice = filters.priceRange[0];
-          const maxPrice = filters.priceRange[1];
-          
-          return property.price >= minPrice && property.price <= maxPrice;
-        });
+      // Improved price filtering with better handling of max value
+      // Min price filter - only apply if greater than 0
+      if (filters.priceRange[0] > 0) {
+        filtered = filtered.filter(property => property.price >= filters.priceRange[0]);
+        logFilterStep('min price', filtered.length);
+      }
+      
+      // Max price filter - only apply if less than MAX_PRICE
+      // Check both MAX_PRICE and a reasonable threshold like 999999999 to handle rounding
+      const MAX_THRESHOLD = 999999999;
+      if (filters.priceRange[1] < MAX_THRESHOLD) {
+        filtered = filtered.filter(property => property.price <= filters.priceRange[1]);
+        
+        // Log excluded properties for debugging
+        if (filtered.length === 0) {
+          console.log("All properties excluded by max price filter:", {
+            maxPrice: filters.priceRange[1],
+            propertiesWithPrices: properties.map(p => ({ id: p.id, price: p.price }))
+          });
+        }
+        
+        logFilterStep('max price', filtered.length);
       }
 
       // Filtrar por amueblado
       if (filters.isFurnished) {
         filtered = filtered.filter(property => property.furnished);
+        logFilterStep('furnished', filtered.length);
       }
 
       // Filtrar por mascotas
       if (filters.petsAllowed) {
         filtered = filtered.filter(property => property.petsAllowed);
+        logFilterStep('pets allowed', filtered.length);
       }
 
       // Filtrar por estacionamientos
@@ -156,9 +191,11 @@ const Explorador = () => {
           }
           return property.parkingSpots === filters.parkingSpots;
         });
+        logFilterStep('parking spots', filtered.length);
       }
 
       setFilteredProperties(filtered);
+      console.log("Final filtered count:", filtered.length);
     };
 
     filterProperties();

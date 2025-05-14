@@ -36,7 +36,7 @@ export default function WhatsAppButton({
   useEffect(() => {
     const loadCurrency = () => {
       try {
-        if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined') {
           const filtersJson = localStorage.getItem('propertyFilters');
           if (filtersJson) {
             const filters = JSON.parse(filtersJson);

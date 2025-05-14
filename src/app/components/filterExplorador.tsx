@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, memo } from 'react';
+import { useState, useEffect, useCallback, memo, useRef } from 'react';
 import { FaBed, FaBath, FaCheck, FaCar, FaTimes } from 'react-icons/fa';
 import { getZones } from '../shared/firebase';
 import type { ZoneData } from '../shared/interfaces';
@@ -8,8 +8,8 @@ import { usePathname } from 'next/navigation';
 import { useFilters } from '../context/FilterContext';
 import { useExchangeRate } from '../hooks/useExchangeRate';
 
-// Define MAX_PRICE constant locally
-const MAX_PRICE = 50000;
+// Define MAX_PRICE constant with a much higher value
+const MAX_PRICE = 1000000000; // 1 billion - effectively "no limit"
 const USD_TO_MXN_RATE = 20; // Default exchange rate
 
 // Memoized select component for better performance
@@ -22,43 +22,128 @@ const ZoneSelect = memo(({
   zones: ZoneData[], 
   onChange: (zone: string) => void 
 }) => {
+  // Find the current zone name for display
+  const selectedZoneName = selectedZone 
+    ? zones.find(z => z.id === selectedZone)?.name || 'Zona'
+    : 'Zonas';
+
   return (
-    <div className="relative w-28 sm:w-32">
-      <select
-        value={selectedZone}
-        onChange={(e) => onChange(e.target.value)}
-        className={`
-          w-full appearance-none rounded-full
-          px-2.5 py-1.5 text-xs font-medium
-          transition-all cursor-pointer
-          ${selectedZone 
-          ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200' 
-          : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
-        `}
-      >
-        <option value="">Zonas</option>
-        {zones.map((zone) => (
-          <option 
-            key={zone.id} 
-            value={zone.id}
-            className={selectedZone === zone.id ? '!text-violet-600' : ''}
+    <div className="relative">
+      {!selectedZone ? (
+        // Standard dropdown when no zone is selected
+        <div className="relative w-28 sm:w-32">
+          <select
+            value={selectedZone}
+            onChange={(e) => onChange(e.target.value)}
+            className={`
+              w-full appearance-none rounded-full
+              px-2.5 py-1.5 text-xs font-medium
+              transition-all cursor-pointer
+              bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200
+            `}
           >
-            {zone.name}
-          </option>
-        ))}
-      </select>
-      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-        <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </div>
+            <option value="">Zonas</option>
+            {zones.map((zone) => (
+              <option 
+                key={zone.id} 
+                value={zone.id}
+                className={selectedZone === zone.id ? '!text-violet-600' : ''}
+              >
+                {zone.name}
+              </option>
+            ))}
+          </select>
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+      ) : (
+        // Active filter with reset button
+        <button
+          onClick={() => onChange('')}
+          className="flex items-center justify-between bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm rounded-full px-3 py-1.5 text-xs font-medium transition-all"
+        >
+          <span>{selectedZoneName}</span>
+          <FaTimes className="w-3 h-3 ml-2 text-violet-500 hover:scale-125 hover:text-violet-700 transition-all duration-200 cursor-pointer" />
+        </button>
+      )}
     </div>
   );
 });
 
 ZoneSelect.displayName = 'ZoneSelect';
 
+// Add PropertyTypeSelect component
+const PropertyTypeSelect = memo(({ 
+  selectedType, 
+  onChange 
+}: { 
+  selectedType: string, 
+  onChange: (type: string) => void 
+}) => {
+  const propertyTypes = [
+    { id: 'casa', name: 'Casa' },
+    { id: 'departamento', name: 'Depa' },
+    { id: 'terreno', name: 'Terreno' }
+  ];
+  
+  // Find the current property type name for display
+  const selectedTypeName = selectedType
+    ? propertyTypes.find(t => t.id === selectedType)?.name || 'Tipo'
+    : 'Tipo';
+
+  return (
+    <div className="relative">
+      {!selectedType ? (
+        // Standard dropdown when no property type is selected
+        <div className="relative w-28 sm:w-32">
+          <select
+            value={selectedType}
+            onChange={(e) => onChange(e.target.value)}
+            className={`
+              w-full appearance-none rounded-full
+              px-2.5 py-1.5 text-xs font-medium
+              transition-all cursor-pointer
+              bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200
+            `}
+          >
+            <option value="">Tipo</option>
+            {propertyTypes.map((type) => (
+              <option 
+                key={type.id} 
+                value={type.id}
+                className={selectedType === type.id ? '!text-violet-600' : ''}
+              >
+                {type.name}
+              </option>
+            ))}
+          </select>
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+      ) : (
+        // Active filter with reset button
+        <button
+          onClick={() => onChange('')}
+          className="flex items-center justify-between bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm rounded-full px-3 py-1.5 text-xs font-medium transition-all"
+        >
+          <span>{selectedTypeName}</span>
+          <FaTimes className="w-3 h-3 ml-2 text-violet-500 hover:scale-125 hover:text-violet-700 transition-all duration-200 cursor-pointer" />
+        </button>
+      )}
+    </div>
+  );
+});
+
+PropertyTypeSelect.displayName = 'PropertyTypeSelect';
+
 // Memoized numeric filter buttons for better performance
+// Moving this BEFORE FilterExplorador to fix the TypeScript errors
 const NumericFilterButton = memo(({ 
   value, 
   currentValue, 
@@ -100,11 +185,15 @@ const FilterExplorador = () => {
   // Use the filter context
   const { filters, updateFilter } = useFilters();
   const [zones, setZones] = useState<ZoneData[]>([]);
-  // Replace local currency state with the one from context
+  
+  // State for price dropdown and temporary values
+  const [isPriceDropdownOpen, setIsPriceDropdownOpen] = useState(false);
   const [minPriceInput, setMinPriceInput] = useState('');
   const [maxPriceInput, setMaxPriceInput] = useState('');
+  const [tempMinPrice, setTempMinPrice] = useState('');
+  const [tempMaxPrice, setTempMaxPrice] = useState('');
+  
   const [isClient, setIsClient] = useState(false);
-  // Replace fixed exchange rate with dynamic one from hook
   const { exchangeRate, convertMXNtoUSD, convertUSDtoMXN } = useExchangeRate();
 
   // Define types for numeric values
@@ -148,10 +237,18 @@ const FilterExplorador = () => {
     return new Intl.NumberFormat('es-MX').format(Math.round(displayValue));
   }, [filters.currency, convertMXNtoUSD]);
 
+  // Improved cleanNumberString function to handle millions and thousands better
   const cleanNumberString = useCallback((str: string): number => {
     if (!str) return 0;
-    const numericValue = Number(str.replace(/[^0-9]/g, ''));
-    return filters.currency === 'USD' ? convertUSDtoMXN(numericValue) : numericValue;
+    
+    // Remove commas, spaces and other non-numeric characters, but allow decimals
+    let numStr = str.replace(/[^\d.]/g, '');
+    const numericValue = Number(numStr);
+    
+    // Handle currency conversion
+    const convertedValue = filters.currency === 'USD' ? convertUSDtoMXN(numericValue) : numericValue;
+    
+    return convertedValue;
   }, [filters.currency, convertUSDtoMXN]);
 
   // Initialize input fields with formatted values when filters change
@@ -249,6 +346,11 @@ const FilterExplorador = () => {
     updateFilter('currency', currency);
   }, [updateFilter]);
 
+  // Memoized handler for property type selection
+  const handlePropertyTypeChange = useCallback((propertyType: string) => {
+    updateFilter('propertyType', propertyType);
+  }, [updateFilter]);
+
   // Move static styles outside component to avoid recreating them on each render
   const baseButtonStyles = `
     px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
@@ -265,8 +367,111 @@ const FilterExplorador = () => {
     border border-gray-200/75
   `;
 
+  // Enhanced price range display with proper formatting for large numbers
+  const formatPriceRangeForDisplay = useCallback(() => {
+    const hasMinPrice = filters.priceRange[0] > 0;
+    const hasMaxPrice = filters.priceRange[1] < MAX_PRICE;
+    
+    if (hasMinPrice && hasMaxPrice) {
+      return `${formatPrice(filters.priceRange[0])} - ${formatPrice(filters.priceRange[1])}`;
+    } else if (hasMinPrice) {
+      return `Desde ${formatPrice(filters.priceRange[0])}`;
+    } else if (hasMaxPrice) {
+      return `Hasta ${formatPrice(filters.priceRange[1])}`;
+    }
+    return 'Precio';
+  }, [filters.priceRange, formatPrice]);
+
+  // Apply price filter when button is clicked - update for better handling of large numbers
+  const applyPriceFilter = () => {
+    const minPrice = tempMinPrice.trim() ? cleanNumberString(tempMinPrice) : 0;
+    
+    // Handle max price with proper validation
+    let maxPrice = MAX_PRICE;
+    if (tempMaxPrice.trim()) {
+      maxPrice = cleanNumberString(tempMaxPrice);
+      
+      // Validate the max price - ensure it's a positive value
+      if (maxPrice <= 0) {
+        maxPrice = MAX_PRICE;
+      }
+      
+      // Make sure min price doesn't exceed max price
+      if (minPrice > 0 && minPrice >= maxPrice) {
+        // If min price is greater than max price, set max price to a reasonable multiple
+        maxPrice = Math.max(minPrice * 1.5, minPrice + 1000000);
+      }
+    }
+    
+    // Log the values for debugging
+    console.log("Applying price filter:", { 
+      minPrice,
+      maxPrice,
+      currency: filters.currency
+    });
+    
+    // Update the filter with validated values
+    updateFilter('priceRange', [minPrice, maxPrice]);
+    
+    // Update the displayed values
+    setMinPriceInput(minPrice > 0 ? formatPrice(minPrice) : '');
+    setMaxPriceInput(maxPrice < MAX_PRICE ? formatPrice(maxPrice) : '');
+    
+    // Close the dropdown
+    setIsPriceDropdownOpen(false);
+  };
+
+  // Clear price filter
+  const clearPriceFilter = () => {
+    updateFilter('priceRange', [0, MAX_PRICE]);
+    setMinPriceInput('');
+    setMaxPriceInput('');
+    setTempMinPrice('');
+    setTempMaxPrice('');
+    setIsPriceDropdownOpen(false);
+  };
+
+  // Initialize the price inputs when the component mounts or filters change
+  useEffect(() => {
+    if (filters.priceRange[0] > 0) {
+      setMinPriceInput(formatPrice(filters.priceRange[0]));
+      setTempMinPrice(formatPrice(filters.priceRange[0]));
+    } else {
+      setMinPriceInput('');
+      setTempMinPrice('');
+    }
+    
+    if (filters.priceRange[1] < MAX_PRICE) {
+      setMaxPriceInput(formatPrice(filters.priceRange[1]));
+      setTempMaxPrice(formatPrice(filters.priceRange[1]));
+    } else {
+      setMaxPriceInput('');
+      setTempMaxPrice('');
+    }
+  }, [filters.currency, filters.priceRange, formatPrice]);
+
+  // Add ref for price dropdown
+  const priceDropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Handle clicking outside to close the dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (priceDropdownRef.current && !priceDropdownRef.current.contains(event.target as Node)) {
+        setIsPriceDropdownOpen(false);
+      }
+    };
+
+    if (isPriceDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isPriceDropdownOpen]);
+
   return (
-    <div className="w-full bg-white border-b border-gray-200 sticky top-16 z-50 transition-all duration-300 shadow-sm hover:shadow-md">
+    <div className="w-full bg-white border-b border-gray-200 sticky top-16 z-40 transition-all duration-300 shadow-sm hover:shadow-md">
       <div className="px-[5vw] py-1.5">
         {/* Make layout stack on mobile with space between elements */}
         <div className="flex flex-col md:flex-row justify-between md:items-center gap-2 md:gap-0">
@@ -309,80 +514,124 @@ const FilterExplorador = () => {
                 />
               )}
 
+              {/* Property Type filter - Add right after Zona */}
+              {isClient && (
+                <PropertyTypeSelect
+                  selectedType={filters.propertyType}
+                  onChange={handlePropertyTypeChange}
+                />
+              )}
+
               {/* Precio - ajustes de tamaño */}
               {isClient && (
-                <div className="flex items-center gap-2">
-                {/* Selector de moneda más pequeño */}
-                <div className="flex bg-gray-50/80 rounded-full p-0.5 shadow-inner">
-                  {['MXN', 'USD'].map((curr) => (
+                <div className="relative" ref={priceDropdownRef}>
+                  {/* Price Button */}
                   <button
-                    key={curr}
-                    onClick={() => handleCurrencyChange(curr as 'MXN' | 'USD')}
+                    onClick={() => setIsPriceDropdownOpen(!isPriceDropdownOpen)}
                     className={`
-                    px-2 py-1 rounded-full text-xs font-medium transition-all duration-200
-                    cursor-pointer
-                    ${filters.currency === curr
-                      ? 'bg-violet-100 text-violet-700 shadow-sm ring-1 ring-violet-200'
-                      : 'text-gray-500 hover:text-violet-600 hover:bg-violet-50'}
+                      flex items-center justify-between gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all
+                      ${(filters.priceRange[0] > 0 || filters.priceRange[1] < MAX_PRICE)
+                        ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
+                        : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
                     `}
-                    suppressHydrationWarning
                   >
-                    {curr}
+                    <span>{formatPriceRangeForDisplay()}</span>
+                    <svg className={`w-3.5 h-3.5 transition-transform ${isPriceDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
                   </button>
-                  ))}
-                </div>
 
-                  {/* Inputs de precio más pequeños */}
-                  <div className={`
-                    flex items-center gap-2 rounded-full px-2.5 py-1.5
-                    ${(filters.priceRange[0] > 0 || filters.priceRange[1] < MAX_PRICE)
-                      ? 'bg-violet-50 ring-2 ring-violet-200'
-                      : 'bg-gray-50/80 border border-gray-200/75'}
-                  `}>
-                    <div className="flex items-center">
-                      <input
-                        type="text"
-                        placeholder="Min"
-                        className="w-14 sm:w-16 bg-transparent text-xs text-gray-600 placeholder-gray-400 focus:outline-none"
-                        value={minPriceInput}
-                        onChange={handleMinPriceChange}
-                        onBlur={() => {
-                          if (filters.priceRange[0] > 0) {
-                            setMinPriceInput(formatPrice(filters.priceRange[0]));
-                          }
-                        }}
-                        onFocus={(e) => {
-                          const val = e.target.value;
-                          e.target.value = '';
-                          e.target.value = val;
-                        }}
-                      />
-                      <span className="text-xs text-gray-500 ml-0.5" suppressHydrationWarning>{filters.currency}</span>
+                  {/* Price Dropdown with improved visibility */}
+                  {isPriceDropdownOpen && (
+                    <div className="fixed inset-0 z-50 overflow-y-auto md:fixed md:inset-auto md:absolute">
+                      <div className="flex min-h-full items-center justify-center md:items-start md:justify-start">
+                        {/* Overlay for mobile - helps with visibility */}
+                        <div className="fixed inset-0 bg-black bg-opacity-25 md:hidden" onClick={() => setIsPriceDropdownOpen(false)} />
+                        
+                        {/* Actual dropdown content */}
+                        <div className="bg-white rounded-lg shadow-xl w-[90vw] md:w-72 m-4 md:m-0 md:mt-2 md:shadow-lg relative md:left-0 md:right-auto">
+                          <div className="p-4">
+                            {/* Header with close button for mobile */}
+                            <div className="flex justify-between items-center mb-4 md:hidden">
+                              <h3 className="text-sm font-medium text-gray-900">Filtro de precio</h3>
+                              <button onClick={() => setIsPriceDropdownOpen(false)} className="p-1 rounded-full hover:bg-gray-100">
+                                <FaTimes className="w-4 h-4 text-gray-500" />
+                              </button>
+                            </div>
+                            
+                            {/* Currency Selector */}
+                            <div className="flex bg-gray-50/80 rounded-full p-0.5 shadow-inner mb-4 w-min">
+                              {['MXN', 'USD'].map((curr) => (
+                                <button
+                                  key={curr}
+                                  onClick={() => handleCurrencyChange(curr as 'MXN' | 'USD')}
+                                  className={`
+                                    px-2 py-1 rounded-full text-xs font-medium transition-all duration-200
+                                    cursor-pointer
+                                    ${filters.currency === curr
+                                      ? 'bg-violet-100 text-violet-700 shadow-sm ring-1 ring-violet-200'
+                                      : 'text-gray-500 hover:text-violet-600 hover:bg-violet-50'}
+                                  `}
+                                >
+                                  {curr}
+                                </button>
+                              ))}
+                            </div>
+
+                            {/* Min Price Input */}
+                            <div className="mb-2">
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Precio mínimo</label>
+                              <div className="relative">
+                                <input
+                                  type="text"
+                                  placeholder="Mínimo"
+                                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-violet-500"
+                                  value={tempMinPrice}
+                                  onChange={(e) => setTempMinPrice(e.target.value)}
+                                />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                                  {filters.currency}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Max Price Input */}
+                            <div className="mb-4">
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Precio máximo</label>
+                              <div className="relative">
+                                <input
+                                  type="text"
+                                  placeholder="Máximo"
+                                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-violet-500"
+                                  value={tempMaxPrice}
+                                  onChange={(e) => setTempMaxPrice(e.target.value)}
+                                />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                                  {filters.currency}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-2">
+                              <button
+                                onClick={clearPriceFilter}
+                                className="flex-1 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                              >
+                                Limpiar
+                              </button>
+                              <button
+                                onClick={applyPriceFilter}
+                                className="flex-1 px-3 py-2 text-xs font-medium text-white bg-violet-600 rounded-md hover:bg-violet-700 transition-colors"
+                              >
+                                Aplicar
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    
-                    <div className="h-3.5 w-px bg-gray-200"></div>
-                    
-                    <div className="flex items-center">
-                      <input
-                        type="text"
-                        placeholder="Max"
-                        className="w-14 sm:w-16 bg-transparent text-xs text-gray-600 placeholder-gray-400 focus:outline-none"
-                        value={maxPriceInput}
-                        onChange={handleMaxPriceChange}
-                        onBlur={() => {
-                          if (filters.priceRange[1] > 0 && filters.priceRange[1] < MAX_PRICE) {
-                            setMaxPriceInput(formatPrice(filters.priceRange[1]));
-                          }
-                        }}
-                        onFocus={(e) => {
-                          const val = e.target.value;
-                          e.target.value = '';
-                          e.target.value = val;
-                        }}
-                      />
-                      <span className="text-xs text-gray-500 ml-0.5" suppressHydrationWarning>{filters.currency}</span>
-                    </div>
-                  </div>
+                  )}
                 </div>
               )}
 
