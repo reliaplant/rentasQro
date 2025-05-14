@@ -21,12 +21,12 @@ export default function QueretaroVentaPage() {
   return (
     <main className="min-h-screen">
       {/* SEO-friendly header */}
-    <div className="bg-gradient-to-r from-violet-800 to-violet-700 py-8 px-20">
-      <div className="w-full">
-        <h1 className="!text-2xl md:text-4xl font-semibold mb-4 !text-white">
+            <div className="bg-gradient-to-r from-violet-800 to-violet-700 py-6 px-20">
+                <div className="w-full">
+                    <h1 className="!text-xl font-semibold mb-2 !text-white">
             Casas en Venta en Querétaro
           </h1>
-        <p className="!text-md md:text-xl !text-white/90">
+        <p className="!text-sm !text-white/90">
             Descubre propiedades excepcionales en Querétaro, la ciudad con mejor calidad de vida en México. 
             Encuentra tu hogar ideal entre nuestra selección de casas en las mejores zonas residenciales.
           </p>

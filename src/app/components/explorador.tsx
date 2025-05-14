@@ -55,7 +55,9 @@ const Explorador = () => {
       const { properties: newProperties, lastVisible, hasMoreDocs } = 
         await getPropertiesWithPagination(reset ? null : lastDoc, PROPERTIES_PER_PAGE);
       
+      // Only include properties with status 'publicada'
       const publishedProperties = newProperties.filter(p => p.status === 'publicada');
+      console.log(`Filtered ${newProperties.length - publishedProperties.length} non-published properties`);
       
       if (reset) {
         setProperties(publishedProperties);
@@ -98,6 +100,11 @@ const Explorador = () => {
       const logFilterStep = (step: string, count: number) => {
         console.log(`After ${step} filter: ${count} properties remaining`);
       };
+
+      // Ensure we only show properties with status 'publicada'
+      // This is redundant with the loadProperties filter, but serves as a safeguard
+      filtered = filtered.filter(property => property.status === 'publicada');
+      logFilterStep('status', filtered.length);
 
       // Filtrar por tipo de transacción
       if (filters.transactionType) {

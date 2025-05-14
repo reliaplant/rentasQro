@@ -6,7 +6,7 @@ import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { uploadBlogImage } from '@/app/shared/firebase';
 
 type RichTextEditorProps = {
@@ -20,6 +20,12 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Escribe
   const [isLinkMenuOpen, setIsLinkMenuOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  
+  // New state for image alt text modal
+  const [showAltTextModal, setShowAltTextModal] = useState(false);
+  const [currentImageFile, setCurrentImageFile] = useState<File | null>(null);
+  const [imageAltText, setImageAltText] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const editor = useEditor({
     extensions: [
@@ -68,30 +74,55 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Escribe
     setIsLinkMenuOpen(false);
   }, [editor, linkUrl]);
 
-  const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!editor || !postId) return;
-    
+  const handleImageFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !postId) return;
+    
+    // Set the current image file and show the alt text modal
+    setCurrentImageFile(file);
+    setImageAltText(''); // Reset alt text input
+    setShowAltTextModal(true);
+    
+  }, [postId]);
+
+  const handleImageUpload = useCallback(async () => {
+    if (!editor || !postId || !currentImageFile) return;
     
     try {
       setIsUploading(true);
+      setShowAltTextModal(false);
       
       // Upload to Firebase
-      const imageUrl = await uploadBlogImage(file, postId);
+      const imageUrl = await uploadBlogImage(currentImageFile, postId);
       
-      // Insert image at current cursor position
-      editor.chain().focus().setImage({ src: imageUrl, alt: file.name }).run();
+      // Insert image at current cursor position with the provided alt text
+      editor.chain().focus().setImage({ 
+        src: imageUrl, 
+        alt: imageAltText || currentImageFile.name 
+      }).run();
     } catch (error) {
       console.error('Error uploading image:', error);
       alert('Error al subir la imagen');
     } finally {
       setIsUploading(false);
+      setCurrentImageFile(null);
       
       // Reset the input value to allow uploading the same file again
-      e.target.value = '';
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
-  }, [editor, postId]);
+  }, [editor, postId, currentImageFile, imageAltText]);
+
+  const cancelImageUpload = useCallback(() => {
+    setShowAltTextModal(false);
+    setCurrentImageFile(null);
+    
+    // Reset the input value
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  }, []);
 
   if (!editor) {
     return null;
@@ -256,8 +287,9 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Escribe
             id="image-upload" 
             className="hidden" 
             accept="image/*"
-            onChange={handleImageUpload}
+            onChange={handleImageFileSelect}
             disabled={isUploading || !postId}
+            ref={fileInputRef}
           />
         </label>
       </div>
@@ -309,6 +341,49 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Escribe
       <div className="px-4 py-3 bg-white min-h-[300px] prose max-w-none">
         <EditorContent editor={editor} />
       </div>
+
+      {/* Alt Text Modal */}
+      {showAltTextModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-lg font-medium mb-4">Texto alternativo para la imagen</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              El texto alternativo (alt) ayuda a describir la imagen para lectores de pantalla y mejora la accesibilidad.
+            </p>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">
+                Texto alternativo
+              </label>
+              <input
+                type="text"
+                value={imageAltText}
+                onChange={(e) => setImageAltText(e.target.value)}
+                placeholder="Descripción de la imagen"
+                className="w-full p-2 border rounded"
+                autoFocus
+              />
+            </div>
+            
+            <div className="flex justify-end space-x-2">
+              <button
+                type="button"
+                onClick={cancelImageUpload}
+                className="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleImageUpload}
+                className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+              >
+                Subir imagen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
