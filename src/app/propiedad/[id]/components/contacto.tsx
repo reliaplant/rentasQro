@@ -365,7 +365,7 @@ export default function Contacto({
           </div>
         </div>
 
-        {/* WhatsApp button */}
+        {/* WhatsApp button with inline variant */}
         <WhatsAppButton
           propertyType={propertyType || 'propiedad'}
           transactionType={transactionType || (isRental ? 'renta' : 'venta')}
@@ -374,7 +374,8 @@ export default function Contacto({
           advisorPhone={advisorPhone}
           propertyId={propertyId}
           price={price}
-          contactRef={contactRef} 
+          variant="inline"
+          showPrice={false}
         />
       </div>
     </>

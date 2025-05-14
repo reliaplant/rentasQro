@@ -7,6 +7,7 @@ import Footer from "@/app/components/footer";
 import GoogleAnalytics from "@/app/components/GoogleAnalytics";
 import "./globals.css";
 import { FilterProvider } from './context/FilterContext';
+import { UTMParamsProvider } from './providers/UTMParamsProvider';
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -112,13 +113,15 @@ export default function RootLayout({
         {/* Google Analytics */}
         <GoogleAnalytics />
 
-        <FilterProvider>
-          <Menu />
-          <main className="flex-grow">
-            {children}
-          </main>
-          <Footer />
-        </FilterProvider>
+        <UTMParamsProvider>
+          <FilterProvider>
+            <Menu />
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Footer />
+          </FilterProvider>
+        </UTMParamsProvider>
       </body>
     </html>);
 }

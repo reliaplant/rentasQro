@@ -194,7 +194,7 @@ export default function PropertyClient({
           </div>
         </div>
 
-        {/* WhatsApp button */}
+        {/* WhatsApp button with fixed mobile variant */}
         <WhatsAppButton
           propertyType={property.propertyType}
           transactionType={property.transactionType}
@@ -204,6 +204,8 @@ export default function PropertyClient({
           propertyId={property.id!}
           price={property.price}
           contactRef={contactRef as React.RefObject<HTMLDivElement>}
+          variant="fixed"
+          showPrice={true}
         />
       </div>
     </div>
