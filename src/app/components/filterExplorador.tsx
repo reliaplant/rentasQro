@@ -470,6 +470,25 @@ const FilterExplorador = () => {
     };
   }, [isPriceDropdownOpen]);
 
+  // Add state to track mobile vs desktop view
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile screens on client side
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Check initially
+    checkMobile();
+    
+    // Add resize listener
+    window.addEventListener('resize', checkMobile);
+    
+    // Clean up
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
     <div className="w-full bg-white border-b border-gray-200 sticky top-16 z-40 transition-all duration-300 shadow-sm hover:shadow-md">
       <div className="px-[5vw] py-1.5">
@@ -482,10 +501,10 @@ const FilterExplorador = () => {
             {!isExplorarPage && <span>Encuentra la propiedad perfecta</span>}
           </div>
 
-          {/* Scrollable container for filters on mobile */}
-          <div className="overflow-x-auto pb-2 md:pb-0 -mx-[5vw] px-[5vw] md:mx-0 md:px-0">
+          {/* Fixed scrollable container for mobile */}
+          <div className="overflow-x-auto md:overflow-visible pb-2 md:pb-0 -mx-[5vw] px-[5vw] md:mx-0 md:px-0">
             {/* All filters horizontally scrollable on mobile, wrapping on larger screens */}
-            <div className="flex items-center gap-4 flex-nowrap md:flex-wrap min-w-max md:min-w-0">
+            <div className="flex items-center gap-4 flex-nowrap md:flex-wrap min-w-max md:min-w-0 relative">
               {/* Toggle Renta/Compra */}
               <div className="flex bg-gray-50/80 rounded-full p-0.5 shadow-inner">
                 {['compra','renta' ].map((type) => (
@@ -522,7 +541,7 @@ const FilterExplorador = () => {
                 />
               )}
 
-              {/* Precio - ajustes de tamaño */}
+              {/* Precio - with improved mobile dropdown visibility */}
               {isClient && (
                 <div className="relative" ref={priceDropdownRef}>
                   {/* Price Button */}
@@ -541,96 +560,105 @@ const FilterExplorador = () => {
                     </svg>
                   </button>
 
-                  {/* Price Dropdown with improved visibility */}
+                  {/* Mobile-optimized price dropdown */}
                   {isPriceDropdownOpen && (
-                    <div className="fixed inset-0 z-50 overflow-y-auto md:fixed md:inset-auto md:absolute">
-                      <div className="flex min-h-full items-center justify-center md:items-start md:justify-start">
-                        {/* Overlay for mobile - helps with visibility */}
-                        <div className="fixed inset-0 bg-black bg-opacity-25 md:hidden" onClick={() => setIsPriceDropdownOpen(false)} />
-                        
-                        {/* Actual dropdown content */}
-                        <div className="bg-white rounded-lg shadow-xl w-[90vw] md:w-72 m-4 md:m-0 md:mt-2 md:shadow-lg relative md:left-0 md:right-auto">
-                          <div className="p-4">
-                            {/* Header with close button for mobile */}
-                            <div className="flex justify-between items-center mb-4 md:hidden">
-                              <h3 className="text-sm font-medium text-gray-900">Filtro de precio</h3>
-                              <button onClick={() => setIsPriceDropdownOpen(false)} className="p-1 rounded-full hover:bg-gray-100">
-                                <FaTimes className="w-4 h-4 text-gray-500" />
-                              </button>
-                            </div>
-                            
-                            {/* Currency Selector */}
-                            <div className="flex bg-gray-50/80 rounded-full p-0.5 shadow-inner mb-4 w-min">
-                              {['MXN', 'USD'].map((curr) => (
-                                <button
-                                  key={curr}
-                                  onClick={() => handleCurrencyChange(curr as 'MXN' | 'USD')}
-                                  className={`
-                                    px-2 py-1 rounded-full text-xs font-medium transition-all duration-200
-                                    cursor-pointer
-                                    ${filters.currency === curr
-                                      ? 'bg-violet-100 text-violet-700 shadow-sm ring-1 ring-violet-200'
-                                      : 'text-gray-500 hover:text-violet-600 hover:bg-violet-50'}
-                                  `}
-                                >
-                                  {curr}
-                                </button>
-                              ))}
-                            </div>
-
-                            {/* Min Price Input */}
-                            <div className="mb-2">
-                              <label className="block text-xs font-medium text-gray-700 mb-1">Precio mínimo</label>
-                              <div className="relative">
-                                <input
-                                  type="text"
-                                  placeholder="Mínimo"
-                                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-violet-500"
-                                  value={tempMinPrice}
-                                  onChange={(e) => setTempMinPrice(e.target.value)}
-                                />
-                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
-                                  {filters.currency}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Max Price Input */}
-                            <div className="mb-4">
-                              <label className="block text-xs font-medium text-gray-700 mb-1">Precio máximo</label>
-                              <div className="relative">
-                                <input
-                                  type="text"
-                                  placeholder="Máximo"
-                                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-violet-500"
-                                  value={tempMaxPrice}
-                                  onChange={(e) => setTempMaxPrice(e.target.value)}
-                                />
-                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
-                                  {filters.currency}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex gap-2">
+                    <>
+                      {/* Mobile overlay */}
+                      {isMobile && (
+                        <div 
+                          className="fixed inset-0 bg-black/20 z-[60]" 
+                          onClick={() => setIsPriceDropdownOpen(false)}
+                        />
+                      )}
+                      
+                      {/* Dropdown content - fixed on mobile, absolute on desktop */}
+                      <div 
+                        className={`
+                          bg-white rounded-lg shadow-xl border border-gray-200 z-[70] w-[calc(100vw-40px)] max-w-[320px]
+                          ${isMobile 
+                            ? 'fixed top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2' 
+                            : 'absolute left-0 top-full mt-2'}
+                        `}
+                      >
+                        <div className="p-4">
+                          <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-sm font-medium text-gray-900">Filtro de precio</h3>
+                            <button onClick={() => setIsPriceDropdownOpen(false)} className="p-1 rounded-full hover:bg-gray-100">
+                              <FaTimes className="w-4 h-4 text-gray-500" />
+                            </button>
+                          </div>
+                          
+                          {/* Currency Selector */}
+                          <div className="flex bg-gray-50/80 rounded-full p-0.5 shadow-inner mb-4 w-min">
+                            {['MXN', 'USD'].map((curr) => (
                               <button
-                                onClick={clearPriceFilter}
-                                className="flex-1 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                                key={curr}
+                                onClick={() => handleCurrencyChange(curr as 'MXN' | 'USD')}
+                                className={`
+                                  px-2 py-1 rounded-full text-xs font-medium transition-all duration-200
+                                  cursor-pointer
+                                  ${filters.currency === curr
+                                    ? 'bg-violet-100 text-violet-700 shadow-sm ring-1 ring-violet-200'
+                                    : 'text-gray-500 hover:text-violet-600 hover:bg-violet-50'}
+                                `}
                               >
-                                Limpiar
+                                {curr}
                               </button>
-                              <button
-                                onClick={applyPriceFilter}
-                                className="flex-1 px-3 py-2 text-xs font-medium text-white bg-violet-600 rounded-md hover:bg-violet-700 transition-colors"
-                              >
-                                Aplicar
-                              </button>
+                            ))}
+                          </div>
+
+                          {/* Min Price Input */}
+                          <div className="mb-2">
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Precio mínimo</label>
+                            <div className="relative">
+                              <input
+                                type="text"
+                                placeholder="Mínimo"
+                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-violet-500"
+                                value={tempMinPrice}
+                                onChange={(e) => setTempMinPrice(e.target.value)}
+                              />
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                                {filters.currency}
+                              </span>
                             </div>
+                          </div>
+
+                          {/* Max Price Input */}
+                          <div className="mb-4">
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Precio máximo</label>
+                            <div className="relative">
+                              <input
+                                type="text"
+                                placeholder="Máximo"
+                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-violet-500"
+                                value={tempMaxPrice}
+                                onChange={(e) => setTempMaxPrice(e.target.value)}
+                              />
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                                {filters.currency}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex gap-2">
+                            <button
+                              onClick={clearPriceFilter}
+                              className="flex-1 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                            >
+                              Limpiar
+                            </button>
+                            <button
+                              onClick={applyPriceFilter}
+                              className="flex-1 px-3 py-2 text-xs font-medium text-white bg-violet-600 rounded-md hover:bg-violet-700 transition-colors"
+                            >
+                              Aplicar
+                            </button>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </>
                   )}
                 </div>
               )}
