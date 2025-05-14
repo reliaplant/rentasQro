@@ -1,6 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, ReactNode, useCallback, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import type { ZoneData } from '../shared/interfaces';
 
 // Update this line to use a much higher value
@@ -95,17 +96,56 @@ const filterReducer = (state: FilterState, action: FilterAction): FilterState =>
 // Provider component
 export const FilterProvider = ({ children }: { children: ReactNode }) => {
   const [filters, dispatch] = useReducer(filterReducer, defaultFilters);
+  const [initialized, setInitialized] = useState(false);
+  const searchParams = useSearchParams();
+  
+  // Get transaction type from URL without using window
+  const getURLTransactionType = useCallback(() => {
+    if (!searchParams) return null;
+    const transactionType = searchParams.get('t');
+    return transactionType === 'renta' || transactionType === 'compra' ? transactionType : null;
+  }, [searchParams]);
+  
+  // Enhanced function to check URL params for transaction type - SSR safe
+  const checkURLForTransactionType = useCallback(() => {
+    const transactionType = getURLTransactionType();
+    
+    // Only update if different from current state to avoid loops
+    if (transactionType && transactionType !== filters.transactionType) {
+      console.log(`Setting transaction type from URL: ${transactionType}`);
+      dispatch({
+        type: 'UPDATE_FILTER',
+        payload: { 
+          key: 'transactionType',
+          value: transactionType
+        },
+      });
+      return true; // Indicate that we found and applied URL param
+    }
+    return false; // No URL param found or no change needed
+  }, [filters.transactionType, getURLTransactionType]);
 
-  // Load saved filters from localStorage on initial render
+  // Initialize filters once on client-side
   useEffect(() => {
-    try {
-      if (typeof window !== 'undefined') {
+    if (initialized) return;
+    
+    // First check URL params which take precedence
+    const foundUrlParam = checkURLForTransactionType();
+    
+    // Then try to load from localStorage (only on client)
+    if (typeof window !== 'undefined') {
+      try {
         const savedFilters = localStorage.getItem('propertyFilters');
         if (savedFilters) {
           const parsedFilters = JSON.parse(savedFilters);
           
           // Update each filter individually to ensure type safety
           Object.keys(parsedFilters).forEach((key) => {
+            // Skip transaction type if we already set it from URL
+            if (key === 'transactionType' && foundUrlParam) {
+              return;
+            }
+            
             if (key in defaultFilters) {
               dispatch({
                 type: 'UPDATE_FILTER',
@@ -117,14 +157,29 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
             }
           });
         }
+      } catch (e) {
+        console.error('Error loading filters from localStorage:', e);
       }
-    } catch (e) {
-      console.error('Error loading filters from localStorage:', e);
     }
-  }, []);
+    
+    setInitialized(true);
+  }, [checkURLForTransactionType, initialized]);
 
-  // Function to update a single filter
+  // Watch for URL parameter changes
+  useEffect(() => {
+    if (!initialized) return;
+    
+    // Check for URL parameter changes
+    checkURLForTransactionType();
+  }, [searchParams, checkURLForTransactionType, initialized]);
+
+  // Add debug logging for filter updates
   const updateFilter = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
+    // Log transaction type changes for debugging
+    if (key === 'transactionType') {
+      console.log(`FilterContext: Updating transaction type from ${filters.transactionType} to ${value}`);
+    }
+    
     dispatch({
       type: 'UPDATE_FILTER',
       payload: { key, value },

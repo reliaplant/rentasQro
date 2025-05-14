@@ -272,18 +272,26 @@ const FilterExplorador = () => {
     setMaxPriceInput(filters.priceRange[1] < MAX_PRICE ? formatPrice(filters.priceRange[1]) : '');
   }, [filters.currency, filters.priceRange, formatPrice]);
 
-  // Force compra as default on first render
+  // Respond immediately to transaction type changes
   useEffect(() => {
-    // Only run once on mount
-    if (filters.transactionType === 'renta') {
-      updateFilter('transactionType', 'compra');
-    }
-  }, []); // Empty dependency array means it only runs once
+    console.log(`FilterExplorador: Current transaction type: ${filters.transactionType}`);
+  }, [filters.transactionType]);
 
-  // Actualizar el tipo de transacción - memoized for better performance
+  // Simplify the transaction type handling to prevent loops
   const handleTransactionTypeChange = useCallback((type: 'compra' | 'renta') => {
+    // Don't update if already set to this value
+    if (filters.transactionType === type) return;
+    
+    console.log(`FilterExplorador: Changing transaction type to ${type}`);
     updateFilter('transactionType', type);
-  }, [updateFilter]);
+    
+    // Update URL to reflect the change without causing a full page reload
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('t', type);
+      window.history.pushState({}, '', url);
+    }
+  }, [filters.transactionType, updateFilter]);
 
   // Función helper actualizada para manejar la selección/deselección - memoized
   const handleNumericFilter = useCallback((

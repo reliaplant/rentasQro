@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { FaHeart, FaBars, FaTimes } from 'react-icons/fa';
 import { useFavorites } from '@/app/hooks/useFavorites';
 import { useFilters } from '../context/FilterContext';
@@ -29,10 +29,12 @@ function MenuModals({
   );
 }
 
+// This component only renders on the client
 export default function Menu() {
-  // Get the current pathname using Next.js router
+  // Get the current pathname and search params using Next.js router
   const pathname = usePathname();
-
+  const searchParams = useSearchParams();
+  
   // Stop rendering early if on admin or advisor pages
   if (pathname?.startsWith('/admin') || pathname?.startsWith('/asesor')) {
     return null;
@@ -55,27 +57,62 @@ export default function Menu() {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const isActive = (path: string) => {
-    if (path === '/' && pathname === '/') return true;
+  // Remove the effect that causes the loop
+  // Instead, use a ref to track first render
+  const initialRenderRef = useRef(true);
+  useEffect(() => {
+    if (initialRenderRef.current) {
+      const transactionParam = searchParams?.get('t');
+      if ((transactionParam === 'renta' || transactionParam === 'compra') && 
+          transactionParam !== currentTransactionType) {
+        console.log(`Menu: Initial sync to URL param: ${transactionParam}`);
+        updateFilter('transactionType', transactionParam);
+      }
+      initialRenderRef.current = false;
+    }
+  }, [searchParams, currentTransactionType, updateFilter]);
 
-    // Special handling for rentar/comprar links using filter context
-    if (path === '/rentar') return pathname === '/explorar' && currentTransactionType === 'renta';
-    if (path === '/comprar') return pathname === '/explorar' && currentTransactionType === 'compra';
-
-    // Normal path checking for other links
-    if (path !== '/' && pathname?.startsWith(path)) return true;
-    return false;
-  };
-
-  const handleRentClick = () => {
+  // Simplified handlers that don't cause loops
+  const handleRentClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log('Menu: Setting transaction type to renta');
     updateFilter('transactionType', 'renta');
     setIsMobileMenuOpen(false);
-  };
+    router.push('/explorar?t=renta');
+  }, [updateFilter, router]);
 
-  const handleBuyClick = () => {
+  const handleBuyClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log('Menu: Setting transaction type to compra');
     updateFilter('transactionType', 'compra');
     setIsMobileMenuOpen(false);
-  };
+    router.push('/explorar?t=compra');
+  }, [updateFilter, router]);
+
+  // Simpler active tab detection that doesn't cause loops
+  const isActive = useCallback((path: string) => {
+    // Get URL parameter directly to avoid dependency on state
+    const urlTransactionType = searchParams?.get('t');
+
+    if (path === '/' && pathname === '/') return true;
+
+    // For rent/buy links, prioritize URL param
+    if (path === '/rentar') {
+      return pathname === '/explorar' && 
+             (urlTransactionType === 'renta' || 
+              (!urlTransactionType && currentTransactionType === 'renta'));
+    }
+    
+    if (path === '/comprar') {
+      return pathname === '/explorar' && 
+             (urlTransactionType === 'compra' || 
+              (!urlTransactionType && currentTransactionType === 'compra'));
+    }
+
+    if (path !== '/' && pathname?.startsWith(path)) return true;
+    
+    return false;
+  }, [pathname, searchParams, currentTransactionType]);
 
   return (
     <nav className="bg-white z-[9999] shadow-sm sticky top-0">
@@ -109,25 +146,27 @@ export default function Menu() {
             Explorar
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation with improved styling approach */}
           <nav className="hidden md:flex -mb-px space-x-8">
             <Link
-              href="/explorar"
+              href="/explorar?t=compra"
               onClick={handleBuyClick}
-              className={`${isActive('/comprar')
-                  ? 'border-violet-800 text-violet-800'
+              className={`whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer ${
+                isActive('/comprar') 
+                  ? 'border-violet-800 text-violet-800' 
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+              }`}
             >
               Comprar
             </Link>
             <Link
-              href="/explorar"
+              href="/explorar?t=renta"
               onClick={handleRentClick}
-              className={`${isActive('/rentar')
-                  ? 'border-violet-800 text-violet-800'
+              className={`whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer ${
+                isActive('/rentar') 
+                  ? 'border-violet-800 text-violet-800' 
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+              }`}
             >
               Rentar
             </Link>
@@ -205,7 +244,7 @@ export default function Menu() {
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile menu with same isActive logic */}
       {isMobileMenuOpen && (
         <div
           ref={mobileMenuRef}
@@ -220,9 +259,10 @@ export default function Menu() {
               Explorar
             </Link>
             <Link
-              href="/explorar"
+              href="/explorar?t=compra"
               onClick={handleBuyClick}
-              className={`flex items-center px-4 py-3 rounded-lg text-base font-medium ${currentTransactionType === 'compra'
+              className={`flex items-center px-4 py-3 rounded-lg text-base font-medium 
+                ${isActive('/comprar')
                   ? 'bg-violet-50 text-violet-700'
                   : 'text-gray-700 hover:bg-gray-50'
                 }`}
@@ -230,9 +270,10 @@ export default function Menu() {
               Comprar
             </Link>
             <Link
-              href="/explorar"
+              href="/explorar?t=renta"
               onClick={handleRentClick}
-              className={`flex items-center px-4 py-3 rounded-lg text-base font-medium ${currentTransactionType === 'renta'
+              className={`flex items-center px-4 py-3 rounded-lg text-base font-medium 
+                ${isActive('/rentar')
                   ? 'bg-violet-50 text-violet-700'
                   : 'text-gray-700 hover:bg-gray-50'
                 }`}
