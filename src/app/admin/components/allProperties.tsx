@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Eye, MessageSquare, ChevronDown, ChevronUp, UserCheck, PlusCircle } from 'lucide-react';
+import { Eye, MessageSquare, ChevronDown, ChevronUp, UserCheck, PlusCircle, Percent, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { getProperties, getAdvisorData, getAllAdvisors, updateProperty } from '@/app/shared/firebase';
 import { PropertyData } from '@/app/shared/interfaces';
@@ -154,6 +154,9 @@ export default function AllProperties() {
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Asesor
             </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Asesor Aliado / Pizo
+            </th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
@@ -256,6 +259,27 @@ export default function AllProperties() {
                     {getAdvisorName(property.advisor)}
                   </div>
                 )}
+              </td>
+              <td className="px-6 py-4">
+                <div className="flex flex-col gap-2">
+                  {property.asesorAliado && (
+                    <div className="flex items-center gap-1">
+                      <UserPlus size={16} className="text-blue-500" />
+                      <span className="text-sm font-medium">{property.asesorAliado}</span>
+                    </div>
+                  )}
+                  
+                  {property.porcentajePizo !== undefined && (
+                    <div className="flex items-center gap-1">
+                      <Percent size={16} className="text-green-500" />
+                      <span className="text-sm">{property.porcentajePizo}%</span>
+                    </div>
+                  )}
+                  
+                  {!property.asesorAliado && property.porcentajePizo === undefined && (
+                    <span className="text-xs text-gray-500">No especificado</span>
+                  )}
+                </div>
               </td>
             </tr>
           ))}

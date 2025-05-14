@@ -21,6 +21,7 @@ interface ValidationErrors {
   services?: string;
   propertyCondoNumber?: string;
   propertyCondoNumberPhoto?: string;
+  porcentajePizo?: string;
 }
 
 export default function PropertyType({ data, onChange, onError }: PropertyTypeProps) {
@@ -725,6 +726,75 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
             )}
             <p className="mt-1 text-xs text-gray-500">
               Sube una foto clara del número de la propiedad.
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      {/* Aliados y Pizo Section */}
+      <div>
+        <h3 className="text-lg font-medium mb-4">Información de Aliados y Pizo</h3>
+        <div className="space-y-4 bg-white rounded-lg border border-gray-200 p-6">
+          {/* Asesor Aliado */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Asesor Aliado
+            </label>
+            <input
+              type="text"
+              value={data.asesorAliado || ''}
+              onChange={(e) => onChange({ asesorAliado: e.target.value })}
+              className="py-3 px-4 block w-full rounded-lg border border-gray-300 focus:ring-violet-500 focus:border-violet-500"
+              placeholder="Nombre del asesor aliado (si aplica)"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Deja vacío si no aplica un asesor aliado.
+            </p>
+          </div>
+
+          {/* Porcentaje Pizo */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Porcentaje Pizo
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                value={data.porcentajePizo !== undefined ? data.porcentajePizo : ''}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? undefined : parseFloat(e.target.value);
+                  onChange({ porcentajePizo: value });
+                  
+                  // Validate the input
+                  if (value !== undefined && (value < 0 || value > 100)) {
+                    setValidationErrors({
+                      ...validationErrors,
+                      porcentajePizo: 'El porcentaje debe estar entre 0 y 100'
+                    });
+                  } else {
+                    setValidationErrors({
+                      ...validationErrors,
+                      porcentajePizo: undefined
+                    });
+                  }
+                }}
+                className={`py-3 px-4 pr-10 block w-full rounded-lg border ${
+                  validationErrors.porcentajePizo ? 'border-red-500' : 'border-gray-300'
+                } focus:ring-violet-500 focus:border-violet-500`}
+                placeholder="Porcentaje para Pizo"
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <span className="text-gray-500">%</span>
+              </div>
+            </div>
+            {validationErrors.porcentajePizo && (
+              <p className="text-sm text-red-600 mt-1">{validationErrors.porcentajePizo}</p>
+            )}
+            <p className="mt-1 text-xs text-gray-500">
+              Deja vacío si no aplica un porcentaje para Pizo.
             </p>
           </div>
         </div>

@@ -143,4 +143,6 @@ export interface PropertyData {
   views: number;
   whatsappClicks: number;
   isDummy?: boolean; // Added for dummy properties
+  asesorAliado?: string; // Added for allied advisor
+  porcentajePizo?: number; // Added for Pizo percentage
 }
