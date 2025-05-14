@@ -50,6 +50,26 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link href="/casas/renta/queretaro" className="text-xs md:text-sm text-gray-500 hover:text-violet-600">
+                  Casas en renta Querétaro
+                </Link>
+              </li>
+              <li>
+                <Link href="/casas/venta/queretaro" className="text-xs md:text-sm text-gray-500 hover:text-violet-600">
+                  Casas en venta Querétaro
+                </Link>
+              </li>
+              <li>
+                <Link href="/casas/renta/zibata" className="text-xs md:text-sm text-gray-500 hover:text-violet-600">
+                  Renta en Zibatá
+                </Link>
+              </li>
+              <li>
+                <Link href="/casas/venta/zibata" className="text-xs md:text-sm text-gray-500 hover:text-violet-600">
+                  Venta en Zibatá
+                </Link>
+              </li>
+              <li>
                 <Link href="/contacto" className="text-xs md:text-sm text-gray-500 hover:text-violet-600">
                   Contacto
                 </Link>

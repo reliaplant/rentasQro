@@ -1619,4 +1619,86 @@ export const getPromotorByCode = async (code: string): Promise<Promotor | null> 
   }
 };
 
+// Blog index document name
+const BLOG_INDEX_DOC = 'blogIndex';
+
+// Create or update the blog index
+export async function updateBlogIndex(): Promise<void> {
+  try {
+    console.log('Updating blog index...');
+    
+    // Get all blog posts
+    const posts = await getAllBlogPosts();
+    
+    // Create a mapping of slugs to post IDs
+    const slugToIdMap: Record<string, string> = {};
+    const idToSlugMap: Record<string, string> = {};
+    
+    // Only include published posts with slugs in the index
+    posts.filter(post => post.published && post.slug).forEach(post => {
+      if (post.slug && post.id) {
+        slugToIdMap[post.slug] = post.id;
+        idToSlugMap[post.id] = post.slug;
+      }
+    });
+    
+    // Create the index document
+    const indexData = {
+      slugToId: slugToIdMap,
+      idToSlug: idToSlugMap,
+      lastUpdated: new Date().toISOString(),
+      postCount: Object.keys(slugToIdMap).length
+    };
+    
+    // Save to Firestore
+    await setDoc(doc(db, 'blogMeta', BLOG_INDEX_DOC), indexData);
+    
+    console.log(`Blog index updated with ${Object.keys(slugToIdMap).length} posts`);
+    return;
+  } catch (error) {
+    console.error('Error updating blog index:', error);
+    throw error;
+  }
+}
+
+// Get a blog post by slug using the index for efficient lookup
+export async function getBlogPostBySlugWithIndex(slug: string): Promise<BlogPost | null> {
+  if (!slug) return null;
+  
+  try {
+    // First try to find the post ID from the index
+    const indexDoc = await getDoc(doc(db, 'blogMeta', BLOG_INDEX_DOC));
+    
+    if (indexDoc.exists()) {
+      const indexData = indexDoc.data();
+      const postId = indexData.slugToId[slug];
+      
+      // If we found the ID in the index, get the post directly
+      if (postId) {
+        return await getBlogPost(postId);
+      }
+      
+      // If it might be an ID instead of a slug, check that too
+      if (indexData.idToSlug[slug]) {
+        return await getBlogPost(slug);
+      }
+    }
+    
+    // Fallback: if the index doesn't exist or the slug isn't in the index
+    console.log('Blog index lookup failed, falling back to full search');
+    const posts = await getAllBlogPosts();
+    
+    // Try to find by slug
+    const postBySlug = posts.find(post => post.published && post.slug === slug);
+    if (postBySlug) return postBySlug;
+    
+    // Try to find by ID
+    const postById = posts.find(post => post.published && post.id === slug);
+    return postById || null;
+  } catch (error) {
+    console.error("Error fetching blog post:", error);
+    throw error;
+  }
+}
+
 export { db, auth, storage };

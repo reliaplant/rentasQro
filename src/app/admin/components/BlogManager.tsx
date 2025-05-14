@@ -6,11 +6,13 @@ import {
   getAllBlogPosts, 
   deleteBlogPost, 
   getAllContributors, 
-  deleteContributor 
+  deleteContributor,
+  
 } from '@/app/admin/blog-editor/utils/firebase';
 import { BlogPost, BlogContributor } from '@/app/admin/blog-editor/types';
-import { PlusIcon, PencilIcon, TrashIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
+import { updateBlogIndex } from '@/app/shared/firebase';
 
 export default function BlogManager() {
   const [activeTab, setActiveTab] = useState<'posts' | 'contributors'>('posts');
@@ -18,6 +20,7 @@ export default function BlogManager() {
   const [contributors, setContributors] = useState<BlogContributor[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [updatingIndex, setUpdatingIndex] = useState(false);
 
   useEffect(() => {
     if (activeTab === 'posts') {
@@ -89,6 +92,19 @@ export default function BlogManager() {
     }
   };
 
+  const handleUpdateIndex = async () => {
+    try {
+      setUpdatingIndex(true);
+      await updateBlogIndex();
+      toast.success("Índice de blog actualizado correctamente");
+    } catch (error) {
+      console.error("Error updating blog index:", error);
+      toast.error("Error al actualizar el índice del blog");
+    } finally {
+      setUpdatingIndex(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('es-MX', {
@@ -112,10 +128,31 @@ export default function BlogManager() {
         <h1 className="text-2xl font-bold text-gray-800">Administrar Blog</h1>
         
         {activeTab === 'posts' ? (
-          <Link href="/admin/blog-editor?return=blog" className="bg-indigo-600 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-indigo-700">
-            <PlusIcon className="h-5 w-5" />
-            <span>Nueva Entrada</span>
-          </Link>
+          <div className="flex space-x-2">
+            <button
+              onClick={handleUpdateIndex}
+              disabled={updatingIndex}
+              className={`bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-blue-700 ${
+                updatingIndex ? 'opacity-70 cursor-not-allowed' : ''
+              }`}
+            >
+              {updatingIndex ? (
+                <>
+                  <ArrowPathIcon className="h-5 w-5 animate-spin" />
+                  <span>Actualizando...</span>
+                </>
+              ) : (
+                <>
+                  <ArrowPathIcon className="h-5 w-5" />
+                  <span>Actualizar Índice</span>
+                </>
+              )}
+            </button>
+            <Link href="/admin/blog-editor?return=blog" className="bg-indigo-600 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-indigo-700">
+              <PlusIcon className="h-5 w-5" />
+              <span>Nueva Entrada</span>
+            </Link>
+          </div>
         ) : (
           <Link href="/admin/blog-editor/contributor?return=blog" className="bg-indigo-600 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-indigo-700">
             <PlusIcon className="h-5 w-5" />

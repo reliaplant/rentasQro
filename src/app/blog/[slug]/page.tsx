@@ -1,29 +1,8 @@
 import { notFound } from 'next/navigation';
-import { getAllBlogPosts } from '@/app/shared/firebase';
+import { getBlogPostBySlug } from './utils';
 import { BlogPost } from '@/app/admin/blog-editor/types';
 import BlogPostContent from './components/BlogPostContent';
 import { Metadata } from 'next';
-import { a } from 'framer-motion/client';
-
-// Helper function to get blog post by slug
-async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
-  if (!slug) return null;
-  
-  try {
-    const posts = await getAllBlogPosts();
-    
-    // First, try to find by slug
-    const postBySlug = posts.find(post => post.published && post.slug === slug);
-    if (postBySlug) return postBySlug;
-    
-    // If not found, try to find by ID (fallback)
-    const postById = posts.find(post => post.published && post.id === slug);
-    return postById || null;
-  } catch (error) {
-    console.error("Error fetching blog post:", error);
-    throw error; // Propagate the error
-  }
-}
 
 // Generate metadata for the page - properly handling params
 export async function generateMetadata({ params }: { params: any }): Promise<Metadata> {

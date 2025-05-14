@@ -51,6 +51,29 @@ function defaultMetadata(): Metadata {
   };
 }
 
+// Add this function to generate static params for all condos in Zibata
+export async function generateStaticParams() {
+  try {
+    // For Zibata, we use a fixed zoneid
+    const zoneid = 'zibata';
+    
+    // Get the zone
+    const zone = await getZoneByName(zoneid);
+    if (!zone || !zone.id) return [];
+    
+    // Get all condos in the zone
+    const condos = await getCondosByZone(zone.id);
+    
+    // Generate params for each condo
+    return condos.map(condo => ({
+      condoid: condo.name.toLowerCase().replace(/\s+/g, '-')
+    }));
+  } catch (error) {
+    console.error("Error generating static params for condos:", error);
+    return [];
+  }
+}
+
 // Main page component with proper params handling
 export default async function CondoDetailPage(props: any) {
   try {
