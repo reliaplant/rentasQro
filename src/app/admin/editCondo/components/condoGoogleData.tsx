@@ -72,6 +72,23 @@ export default function CondoGoogleData({ id, formData, onFormDataChange }: Cond
     }
   };
 
+  // Add coordinate handling functions
+  const handleCoordXChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value === '' ? undefined : parseFloat(e.target.value);
+    onFormDataChange({
+      ...formData,
+      coordX: value
+    });
+  };
+
+  const handleCoordYChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value === '' ? undefined : parseFloat(e.target.value);
+    onFormDataChange({
+      ...formData,
+      coordY: value
+    });
+  };
+
   const handleDeleteReview = (reviewToDelete: Review) => {
     onFormDataChange({
       ...formData,
@@ -344,6 +361,45 @@ export default function CondoGoogleData({ id, formData, onFormDataChange }: Cond
           <p className="mt-1 text-xs text-gray-500">
             Agrega un enlace directo a la vista de calle en Google Maps
           </p>
+        </div>
+      </div>
+
+      {/* Coordinate Section */}
+      <div className="space-y-3">
+        <h4 className="text-md font-medium text-gray-800 mb-2">Coordenadas del Mapa</h4>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Coordenada X (Longitud)
+            </label>
+            <input
+              type="number"
+              step="0.000001"
+              value={formData.coordX !== undefined ? formData.coordX : ''}
+              onChange={handleCoordXChange}
+              className="w-full rounded-lg border-gray-300 px-4 py-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="-100.353529"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Longitud para ubicar el condominio en el mapa
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Coordenada Y (Latitud)
+            </label>
+            <input
+              type="number"
+              step="0.000001"
+              value={formData.coordY !== undefined ? formData.coordY : ''}
+              onChange={handleCoordYChange}
+              className="w-full rounded-lg border-gray-300 px-4 py-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="20.684225"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Latitud para ubicar el condominio en el mapa
+            </p>
+          </div>
         </div>
       </div>
 

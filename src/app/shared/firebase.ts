@@ -7,7 +7,7 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc, Timestamp, getDocs, doc, getDoc, updateDoc, deleteDoc, query, where, increment, setDoc, limit, Query, DocumentData, orderBy, startAfter, QueryDocumentSnapshot } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL, uploadBytesResumable, listAll } from "firebase/storage";
 import { getAuth, signInWithEmailAndPassword, signOut as firebaseSignOut, onAuthStateChanged, User, fetchSignInMethodsForEmail } from "firebase/auth";
-import { ZoneData, CondoData } from '@/app/shared/interfaces';
+import { ZoneData, CondoData, resumenCondo } from '@/app/shared/interfaces';
 import { PropertyData, Desarrolladora } from '@/app/shared/interfaces';
 import { BlogPost, BlogContributor } from '@/app/admin/blog-editor/types';
 
@@ -380,6 +380,7 @@ export const deleteZone = async (id: string): Promise<void> => {
   }
 };
 
+// Modify addCondo to store condo info in its zone document
 export const addCondo = async (
   condoData: CondoData, 
   imageFiles: File[],
@@ -450,6 +451,36 @@ export const addCondo = async (
     
     const docRef = await addDoc(collection(db, "condominiums"), dataToSave);
     console.log('Condominio creado con ID:', docRef.id);
+    
+    // Update the zone document to include this condo in its condos array
+    try {
+      const zoneRef = doc(db, "zones", condoData.zoneId);
+      const zoneDoc = await getDoc(zoneRef);
+      
+      if (zoneDoc.exists()) {
+        // Get current condos array or initialize if it doesn't exist
+        const currentZoneData = zoneDoc.data();
+        const currentCondos = currentZoneData.condos || [];
+        
+        // Add the new condo to the array
+        await updateDoc(zoneRef, {
+          condos: [...currentCondos, {
+            condoId: docRef.id,
+            condoName: condoData.name,
+            coordX: condoData.coordX || 0,
+            coordY: condoData.coordY || 0,
+            zoneId: condoData.zoneId
+          }]
+        });
+        
+        console.log('Condominio agregado al resumen de la zona:', condoData.zoneId);
+      } else {
+        console.error('La zona no existe:', condoData.zoneId);
+      }
+    } catch (zoneError) {
+      console.error('Error al actualizar la zona con el nuevo condominio:', zoneError);
+      // We don't throw here to not fail the condo creation if zone update fails
+    }
     
     return docRef.id;
   } catch (error) {
@@ -531,7 +562,7 @@ export const getCondominiums = async (): Promise<CondoData[]> => {
   }
 };
 
-// Update updateCondo function to handle selected reviews
+// Modify updateCondo to update condo info in its zone document
 export const updateCondo = async (
   id: string,
   data: Partial<CondoData>,
@@ -559,6 +590,95 @@ export const updateCondo = async (
     }
 
     await updateDoc(condoRef, updateData);
+    
+    // If coordinates or name changed, update the condo in the zone's condos array
+    if (data.coordX !== undefined || data.coordY !== undefined || data.name || data.zoneId) {
+      try {
+        // Get complete current condo data
+        const condoDoc = await getDoc(condoRef);
+        if (condoDoc.exists()) {
+          const currentCondoData = condoDoc.data();
+          const oldZoneId = currentCondoData.zoneId;
+          const newZoneId = data.zoneId || oldZoneId;
+          
+          // If zone changed, we need to remove from old zone and add to new zone
+          if (data.zoneId && data.zoneId !== oldZoneId) {
+            // Remove from old zone
+            const oldZoneRef = doc(db, "zones", oldZoneId);
+            const oldZoneDoc = await getDoc(oldZoneRef);
+            
+            if (oldZoneDoc.exists()) {
+              const oldZoneData = oldZoneDoc.data();
+              const updatedCondos = (oldZoneData.condos || []).filter(
+                (condo: any) => condo.condoId !== id
+              );
+              
+              await updateDoc(oldZoneRef, { condos: updatedCondos });
+              console.log(`Condominio removido de la zona anterior: ${oldZoneId}`);
+            }
+            
+            // Add to new zone
+            const newZoneRef = doc(db, "zones", newZoneId);
+            const newZoneDoc = await getDoc(newZoneRef);
+            
+            if (newZoneDoc.exists()) {
+              const newZoneData = newZoneDoc.data();
+              const newZoneCondos = newZoneData.condos || [];
+              
+              await updateDoc(newZoneRef, {
+                condos: [...newZoneCondos, {
+                  condoId: id,
+                  condoName: data.name || currentCondoData.name,
+                  coordX: data.coordX !== undefined ? data.coordX : currentCondoData.coordX || 0,
+                  coordY: data.coordY !== undefined ? data.coordY : currentCondoData.coordY || 0,
+                  zoneId: newZoneId
+                }]
+              });
+              
+              console.log(`Condominio añadido a la nueva zona: ${newZoneId}`);
+            }
+          } else {
+            // Just update in current zone
+            const zoneRef = doc(db, "zones", newZoneId);
+            const zoneDoc = await getDoc(zoneRef);
+            
+            if (zoneDoc.exists()) {
+              const zoneData = zoneDoc.data();
+              const zoneCondos = zoneData.condos || [];
+              
+              // Update the specific condo in the array
+              const updatedCondos = zoneCondos.map((condo: any) => {
+                if (condo.condoId === id) {
+                  return {
+                    ...condo,
+                    condoName: data.name || condo.condoName,
+                    coordX: data.coordX !== undefined ? data.coordX : condo.coordX,
+                    coordY: data.coordY !== undefined ? data.coordY : condo.coordY
+                  };
+                }
+                return condo;
+              });
+              
+              // If condo wasn't found in the zone (rare case), add it
+              if (!zoneCondos.some((condo: any) => condo.condoId === id)) {
+                updatedCondos.push({
+                  condoId: id,
+                  condoName: data.name || currentCondoData.name,
+                  coordX: data.coordX !== undefined ? data.coordX : currentCondoData.coordX || 0,
+                  coordY: data.coordY !== undefined ? data.coordY : currentCondoData.coordY || 0,
+                  zoneId: newZoneId
+                });
+              }
+              
+              await updateDoc(zoneRef, { condos: updatedCondos });
+              console.log(`Información del condominio actualizada en la zona: ${newZoneId}`);
+            }
+          }
+        }
+      } catch (zoneError) {
+        console.error('Error updating condo information in zone:', zoneError);
+      }
+    }
   } catch (error) {
     console.error('Error updating condominium:', error);
     throw error;
@@ -1700,5 +1820,211 @@ export async function getBlogPostBySlugWithIndex(slug: string): Promise<BlogPost
     throw error;
   }
 }
+
+// Function to get condo summaries for a specific zone
+export const getZoneCondos = async (zoneId: string): Promise<resumenCondo[]> => {
+  try {
+    console.log(`Fetching condos from zone document: ${zoneId}`);
+    const zoneRef = doc(db, "zones", zoneId);
+    const zoneDoc = await getDoc(zoneRef);
+    
+    if (zoneDoc.exists()) {
+      const zoneData = zoneDoc.data();
+      // Check if there's a condos array in the zone document
+      if (zoneData.condos && Array.isArray(zoneData.condos)) {
+        console.log(`Found ${zoneData.condos.length} condos in zone`);
+        return zoneData.condos;
+      } else {
+        console.log(`No condos array found in zone ${zoneId}`);
+        return [];
+      }
+    }
+    
+    console.error(`Zone not found: ${zoneId}`);
+    return [];
+  } catch (error) {
+    console.error(`Error fetching condos for zone ${zoneId}:`, error);
+    return [];
+  }
+};
+
+// Function to update property counts for all zones and condos
+export const updatePropertyCountsForAllZones = async (): Promise<void> => {
+  try {
+    console.log('Starting to update property counts in zones...');
+    
+    // Step 1: Get all published properties
+    const propertiesRef = collection(db, "properties");
+    const publishedQuery = query(
+      propertiesRef,
+      where("status", "==", "publicada")
+    );
+    
+    const propertiesSnapshot = await getDocs(publishedQuery);
+    const properties = propertiesSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as PropertyData[];
+    
+    console.log(`Found ${properties.length} published properties`);
+    
+    // Step 2: Group properties by condo
+    const condoMap: { [condoId: string]: {
+      rentProps: {
+        id: string,
+        price: number,
+        transactionType: 'renta' | 'venta' | 'ventaRenta',
+        bedrooms: number,
+        bathrooms: number,
+        parkingSpots: number
+      }[],
+      saleProps: {
+        id: string,
+        price: number,
+        transactionType: 'renta' | 'venta' | 'ventaRenta',
+        bedrooms: number,
+        bathrooms: number,
+        parkingSpots: number
+      }[],
+      condoName: string,
+      zoneId: string
+    }} = {};
+    
+    properties.forEach(property => {
+      if (!property.condo) return; // Skip properties without condo
+      
+      if (!condoMap[property.condo]) {
+        condoMap[property.condo] = {
+          rentProps: [],
+          saleProps: [],
+          condoName: property.condoName || '',
+          zoneId: property.zone || ''
+        };
+      }
+      
+      // Create a property summary
+      const propSummary = {
+        id: property.id!,
+        price: property.price || 0,
+        transactionType: property.transactionType || 'venta',
+        bedrooms: property.bedrooms || 0,
+        bathrooms: property.bathrooms || 0,
+        parkingSpots: property.parkingSpots || 0
+      };
+      
+      // Add to appropriate array based on transaction type
+      if (property.transactionType === 'renta') {
+        condoMap[property.condo].rentProps.push(propSummary);
+      } 
+      else if (property.transactionType === 'venta') {
+        condoMap[property.condo].saleProps.push(propSummary);
+      }
+      else if (property.transactionType === 'ventaRenta') {
+        // Add to both arrays for ventaRenta
+        condoMap[property.condo].rentProps.push(propSummary);
+        condoMap[property.condo].saleProps.push(propSummary);
+      }
+    });
+    
+    console.log(`Grouped properties for ${Object.keys(condoMap).length} condos`);
+    
+    // Step 3: Group condos by zone
+    const zoneMap: { [zoneId: string]: {
+      condos: { [condoId: string]: {
+        rentProps: {
+          id: string,
+          price: number,
+          transactionType: 'renta' | 'venta' | 'ventaRenta',
+          bedrooms: number,
+          bathrooms: number,
+          parkingSpots: number
+        }[],
+        saleProps: {
+          id: string,
+          price: number,
+          transactionType: 'renta' | 'venta' | 'ventaRenta',
+          bedrooms: number,
+          bathrooms: number,
+          parkingSpots: number
+        }[],
+        condoName: string
+      }}
+    }} = {};
+    
+    Object.entries(condoMap).forEach(([condoId, condoData]) => {
+      const { zoneId, condoName, rentProps, saleProps } = condoData;
+      if (!zoneId) return; // Skip if no zone
+      
+      if (!zoneMap[zoneId]) {
+        zoneMap[zoneId] = { condos: {} };
+      }
+      
+      zoneMap[zoneId].condos[condoId] = {
+        rentProps,
+        saleProps,
+        condoName
+      };
+    });
+    
+    // Step 4: Update each zone
+    const updatePromises = Object.entries(zoneMap).map(async ([zoneId, zoneData]) => {
+      try {
+        const zoneRef = doc(db, "zones", zoneId);
+        const zoneDoc = await getDoc(zoneRef);
+        
+        if (!zoneDoc.exists()) {
+          console.log(`Zone ${zoneId} not found, skipping`);
+          return;
+        }
+        
+        const currentZoneData = zoneDoc.data();
+        const existingCondos = currentZoneData.condos || [];
+        
+        // Create updated condos array
+        const updatedCondos = existingCondos.map((condo: any) => {
+          const condoId = condo.condoId;
+          
+          // If we have new data for this condo, update it
+          if (zoneData.condos[condoId]) {
+            const { rentProps, saleProps } = zoneData.condos[condoId];
+            
+            return {
+              ...condo,
+              propiedadesEnRenta: rentProps.length,
+              propiedadesEnVenta: saleProps.length,
+              propiedadesRentaResumen: rentProps,
+              propiedadesVentaResumen: saleProps
+            };
+          }
+          
+          // If no new data, keep existing or initialize with zeros
+          return {
+            ...condo,
+            propiedadesEnRenta: condo.propiedadesEnRenta || 0,
+            propiedadesEnVenta: condo.propiedadesEnVenta || 0,
+            propiedadesRentaResumen: condo.propiedadesRentaResumen || [],
+            propiedadesVentaResumen: condo.propiedadesVentaResumen || []
+          };
+        });
+        
+        await updateDoc(zoneRef, {
+          condos: updatedCondos,
+          lastUpdated: Timestamp.now()
+        });
+        
+        console.log(`Updated zone ${zoneId} with property counts for ${Object.keys(zoneData.condos).length} condos`);
+      } catch (error) {
+        console.error(`Error updating zone ${zoneId}:`, error);
+      }
+    });
+    
+    await Promise.all(updatePromises);
+    console.log('Successfully updated all zones with property counts');
+    
+  } catch (error) {
+    console.error('Error updating property counts:', error);
+    throw error;
+  }
+};
 
 export { db, auth, storage };

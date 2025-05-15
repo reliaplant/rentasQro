@@ -56,6 +56,8 @@ export interface CondoData {
   desarrolladoraDescripcion?: string;
   desarrolladoraName?: string;
   desarrolladoraId: string;
+  coordX?: number; // Coordenadas X para el mapa
+  coordY?: number; // Coordenadas Y para el mapa
 }
 
 export interface Desarrolladora {
@@ -145,4 +147,13 @@ export interface PropertyData {
   isDummy?: boolean; // Added for dummy properties
   asesorAliado?: string; // Added for allied advisor
   porcentajePizo?: number; // Added for Pizo percentage
+}
+
+export interface resumenCondo{
+  condoId: string;
+  condoName: string;
+  coordX: number;
+  coordY: number;
+  propiedadesEnRenta: number;
+  propiedadesEnVenta: number;
 }

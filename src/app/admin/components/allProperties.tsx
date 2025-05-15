@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Eye, MessageSquare, ChevronDown, ChevronUp, UserCheck, PlusCircle, Percent, UserPlus } from 'lucide-react';
+import { Eye, MessageSquare, ChevronDown, ChevronUp, UserCheck, PlusCircle, Percent, UserPlus, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
-import { getProperties, getAdvisorData, getAllAdvisors, updateProperty } from '@/app/shared/firebase';
+import { getProperties, getAdvisorData, getAllAdvisors, updateProperty, updatePropertyCountsForAllZones } from '@/app/shared/firebase';
 import { PropertyData } from '@/app/shared/interfaces';
 
 export default function AllProperties() {
@@ -13,6 +13,8 @@ export default function AllProperties() {
   const [sortField, setSortField] = useState<keyof PropertyData>('publicationDate');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [updatingAdvisor, setUpdatingAdvisor] = useState<string | null>(null);
+  const [updatingCounts, setUpdatingCounts] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -115,17 +117,72 @@ export default function AllProperties() {
     return sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />;
   };
 
+  // Add a function to update property counts
+  const handleUpdatePropertyCounts = async () => {
+    if (updatingCounts) return;
+    
+    try {
+      setUpdatingCounts(true);
+      setUpdateMessage(null);
+      
+      await updatePropertyCountsForAllZones();
+      
+      setUpdateMessage({
+        type: 'success',
+        text: 'Conteo de propiedades actualizado correctamente'
+      });
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setUpdateMessage(null);
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Error updating property counts:', error);
+      setUpdateMessage({
+        type: 'error',
+        text: 'Error al actualizar conteo de propiedades'
+      });
+    } finally {
+      setUpdatingCounts(false);
+    }
+  };
+
   return (
     <div className="overflow-x-auto">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-medium text-gray-900">Administrar Propiedades</h2>
-        <Link
-          href="/admin/editarPropiedad?id=new"
-          className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-        >
-          <PlusCircle className="w-[18px] h-[18px]" />
-          <span>Crear Nueva Propiedad</span>
-        </Link>
+        <div className="flex items-center gap-4">
+          <h2 className="text-lg font-medium text-gray-900">Administrar Propiedades</h2>
+          
+          {updateMessage && (
+            <div className={`text-sm px-3 py-1 rounded-md ${
+              updateMessage.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            }`}>
+              {updateMessage.text}
+            </div>
+          )}
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleUpdatePropertyCounts}
+            disabled={updatingCounts}
+            className={`inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              updatingCounts ? 'opacity-70 cursor-not-allowed' : ''
+            }`}
+          >
+            <RefreshCw className={`w-4 h-4 ${updatingCounts ? 'animate-spin' : ''}`} />
+            <span>{updatingCounts ? 'Actualizando...' : 'Actualizar Conteos'}</span>
+          </button>
+          
+          <Link
+            href="/admin/editarPropiedad?id=new"
+            className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          >
+            <PlusCircle className="w-[18px] h-[18px]" />
+            <span>Crear Nueva Propiedad</span>
+          </Link>
+        </div>
       </div>
       
       <table className="min-w-full divide-y divide-gray-200">
