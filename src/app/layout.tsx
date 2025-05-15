@@ -8,6 +8,7 @@ import GoogleAnalytics from "@/app/components/GoogleAnalytics";
 import "./globals.css";
 import { FilterProvider } from './context/FilterContext';
 import { UTMParamsProvider } from './providers/UTMParamsProvider';
+import Script from 'next/script';
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -97,7 +98,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
-        {/* Google tag (gtag.js) */}
+        {/* Google tag (gtag.js)
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-8CENRP7LCJ" />
         <script dangerouslySetInnerHTML={{
           __html: `
@@ -107,11 +108,21 @@ export default function RootLayout({
             gtag('config', 'G-8CENRP7LCJ');
           `
         }} />
-        <link rel="manifest" href="/site.webmanifest" />
+        <link rel="manifest" href="/site.webmanifest" /> */}
+        <Script id="gtm-init" strategy="afterInteractive">
+          {`
+    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id=GTM-MXT26WNQ'+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MXT26WNQ');
+  `}
+        </Script>
+
       </head>
       <body className={`${poppins.className} ${geistMono.variable} min-h-screen flex flex-col antialiased`}>
         {/* Google Analytics */}
-        <GoogleAnalytics />
+        {/* <GoogleAnalytics /> */}
 
         <UTMParamsProvider>
           <FilterProvider>
