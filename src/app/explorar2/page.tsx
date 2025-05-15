@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import FilterExplorador from '../components/filterExplorador';
 import { FilterProvider } from '../context/FilterContext';
 import ListaExplorador from './components/ListaExplorador';
+import MapaZibata2 from '../mapaZibata2/components/mapaZibata2';
 
 export default function Explorar2() {
   // Get height of filter component to position the map properly
@@ -33,8 +34,8 @@ export default function Explorar2() {
   return (
     <FilterProvider>
       <div className="flex flex-col min-h-screen">
-        {/* Filter below the main menu (which is already rendered in the parent layout) */}
-        <div ref={filterRef} className="w-full">
+        {/* Filter below the main menu - made sticky to remain visible during scroll */}
+        <div ref={filterRef} className="sticky w-full z-30" style={{ top: '64px' }}>
           <FilterExplorador />
         </div>
         
@@ -47,15 +48,16 @@ export default function Explorar2() {
           
           {/* Right section - map (40%) - sticky */}
           <div 
-            className="w-[40%] bg-amber-50 flex items-center justify-center"
+            className="w-[40%]"
             style={{
               position: 'sticky',
               top: topOffset,
               height: `calc(100vh - ${topOffset})`,
-              alignSelf: 'flex-start'
+              alignSelf: 'flex-start',
+              overflow: 'hidden' // Prevent any overflow issues
             }}
           >
-            <span className="text-2xl font-semibold text-amber-800">Mapa</span>
+            <MapaZibata2 />
           </div>
         </div>
       </div>

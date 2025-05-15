@@ -492,7 +492,7 @@ export default function MapaZibata2() {
   }
 
   return (
-    <div className="relative">
+    <div className="relative h-full w-full">
       {/* Custom CSS for popups and markers */}
       <style jsx global>{`
         .mapboxgl-popup-content {
@@ -596,7 +596,7 @@ export default function MapaZibata2() {
       
       <div
         ref={mapContainer}
-        className="w-full h-[800px] rounded-xl shadow-md"
+        className="w-full h-full  shadow-md"
       />
     </div>
   );
