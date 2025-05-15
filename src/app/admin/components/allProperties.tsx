@@ -2,7 +2,13 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Eye, MessageSquare, ChevronDown, ChevronUp, UserCheck, PlusCircle, Percent, UserPlus, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
-import { getProperties, getAdvisorData, getAllAdvisors, updateProperty, updatePropertyCountsForAllZones } from '@/app/shared/firebase';
+import { 
+  getProperties, 
+  getAdvisorData, 
+  getAllAdvisors, 
+  updateProperty, 
+  updatePropertyCountsForAllZones
+} from '@/app/shared/firebase';
 import { PropertyData } from '@/app/shared/interfaces';
 
 export default function AllProperties() {

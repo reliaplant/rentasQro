@@ -1876,7 +1876,10 @@ export const updatePropertyCountsForAllZones = async (): Promise<void> => {
         transactionType: 'renta' | 'venta' | 'ventaRenta',
         bedrooms: number,
         bathrooms: number,
-        parkingSpots: number
+        parkingSpots: number,
+        imageUrl?: string,
+        propertyType?: string,  // Added property type field
+        construccionM2?: number // Added construccion m² field
       }[],
       saleProps: {
         id: string,
@@ -1884,7 +1887,10 @@ export const updatePropertyCountsForAllZones = async (): Promise<void> => {
         transactionType: 'renta' | 'venta' | 'ventaRenta',
         bedrooms: number,
         bathrooms: number,
-        parkingSpots: number
+        parkingSpots: number,
+        imageUrl?: string,
+        propertyType?: string,  // Added property type field
+        construccionM2?: number // Added construccion m² field
       }[],
       condoName: string,
       zoneId: string
@@ -1909,7 +1915,10 @@ export const updatePropertyCountsForAllZones = async (): Promise<void> => {
         transactionType: property.transactionType || 'venta',
         bedrooms: property.bedrooms || 0,
         bathrooms: property.bathrooms || 0,
-        parkingSpots: property.parkingSpots || 0
+        parkingSpots: property.parkingSpots || 0,
+        imageUrl: property.imageUrls && property.imageUrls.length > 0 ? property.imageUrls[0] : undefined,
+        propertyType: property.propertyType || 'casa', // Include property type
+        construccionM2: property.construccionM2 || 0   // Include construction area
       };
       
       // Add to appropriate array based on transaction type
@@ -1937,7 +1946,8 @@ export const updatePropertyCountsForAllZones = async (): Promise<void> => {
           transactionType: 'renta' | 'venta' | 'ventaRenta',
           bedrooms: number,
           bathrooms: number,
-          parkingSpots: number
+          parkingSpots: number,
+          imageUrl?: string // Added imageUrl field
         }[],
         saleProps: {
           id: string,
@@ -1945,7 +1955,8 @@ export const updatePropertyCountsForAllZones = async (): Promise<void> => {
           transactionType: 'renta' | 'venta' | 'ventaRenta',
           bedrooms: number,
           bathrooms: number,
-          parkingSpots: number
+          parkingSpots: number,
+          imageUrl?: string // Added imageUrl field
         }[],
         condoName: string
       }}

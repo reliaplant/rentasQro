@@ -156,4 +156,6 @@ export interface resumenCondo{
   coordY: number;
   propiedadesEnRenta: number;
   propiedadesEnVenta: number;
+  propiedadesRentaResumen?: any[]; // Add this property
+  propiedadesVentaResumen?: any[]; // Add this property
 }
