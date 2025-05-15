@@ -180,7 +180,7 @@ NumericFilterButton.displayName = 'NumericFilterButton';
 
 const FilterExplorador = () => {
   const pathname = usePathname();
-  const isExplorarPage = pathname === '/explorar';
+  const isExplorarPage = pathname === '/explorar2';
   
   // Use the filter context
   const { filters, updateFilter } = useFilters();
