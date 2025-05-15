@@ -1878,8 +1878,8 @@ export const updatePropertyCountsForAllZones = async (): Promise<void> => {
         bathrooms: number,
         parkingSpots: number,
         imageUrl?: string,
-        propertyType?: string,  // Added property type field
-        construccionM2?: number // Added construccion m² field
+        propertyType?: string,
+        construccionM2?: number
       }[],
       saleProps: {
         id: string,
@@ -1889,11 +1889,15 @@ export const updatePropertyCountsForAllZones = async (): Promise<void> => {
         bathrooms: number,
         parkingSpots: number,
         imageUrl?: string,
-        propertyType?: string,  // Added property type field
-        construccionM2?: number // Added construccion m² field
+        propertyType?: string,
+        construccionM2?: number
       }[],
       condoName: string,
-      zoneId: string
+      zoneId: string,
+      rentPriceMin: number,
+      rentPriceMax: number,
+      salePriceMin: number,
+      salePriceMax: number
     }} = {};
     
     properties.forEach(property => {
@@ -1904,7 +1908,11 @@ export const updatePropertyCountsForAllZones = async (): Promise<void> => {
           rentProps: [],
           saleProps: [],
           condoName: property.condoName || '',
-          zoneId: property.zone || ''
+          zoneId: property.zone || '',
+          rentPriceMin: Number.MAX_SAFE_INTEGER,
+          rentPriceMax: 0,
+          salePriceMin: Number.MAX_SAFE_INTEGER,
+          salePriceMax: 0
         };
       }
       
@@ -1917,25 +1925,50 @@ export const updatePropertyCountsForAllZones = async (): Promise<void> => {
         bathrooms: property.bathrooms || 0,
         parkingSpots: property.parkingSpots || 0,
         imageUrl: property.imageUrls && property.imageUrls.length > 0 ? property.imageUrls[0] : undefined,
-        propertyType: property.propertyType || 'casa', // Include property type
-        construccionM2: property.construccionM2 || 0   // Include construction area
+        propertyType: property.propertyType || 'casa',
+        construccionM2: property.construccionM2 || 0
       };
       
       // Add to appropriate array based on transaction type
       if (property.transactionType === 'renta') {
         condoMap[property.condo].rentProps.push(propSummary);
+        // Update min/max rent prices
+        if (property.price > 0) {
+          condoMap[property.condo].rentPriceMin = Math.min(condoMap[property.condo].rentPriceMin, property.price);
+          condoMap[property.condo].rentPriceMax = Math.max(condoMap[property.condo].rentPriceMax, property.price);
+        }
       } 
       else if (property.transactionType === 'venta') {
         condoMap[property.condo].saleProps.push(propSummary);
+        // Update min/max sale prices
+        if (property.price > 0) {
+          condoMap[property.condo].salePriceMin = Math.min(condoMap[property.condo].salePriceMin, property.price);
+          condoMap[property.condo].salePriceMax = Math.max(condoMap[property.condo].salePriceMax, property.price);
+        }
       }
       else if (property.transactionType === 'ventaRenta') {
         // Add to both arrays for ventaRenta
         condoMap[property.condo].rentProps.push(propSummary);
         condoMap[property.condo].saleProps.push(propSummary);
+        // Update min/max rent prices
+        if (property.price > 0) {
+          condoMap[property.condo].rentPriceMin = Math.min(condoMap[property.condo].rentPriceMin, property.price);
+          condoMap[property.condo].rentPriceMax = Math.max(condoMap[property.condo].rentPriceMax, property.price);
+          condoMap[property.condo].salePriceMin = Math.min(condoMap[property.condo].salePriceMin, property.price);
+          condoMap[property.condo].salePriceMax = Math.max(condoMap[property.condo].salePriceMax, property.price);
+        }
       }
     });
     
-    console.log(`Grouped properties for ${Object.keys(condoMap).length} condos`);
+    // Reset any condos with no properties to zero for min value
+    Object.keys(condoMap).forEach(condoId => {
+      if (condoMap[condoId].rentPriceMin === Number.MAX_SAFE_INTEGER) {
+        condoMap[condoId].rentPriceMin = 0;
+      }
+      if (condoMap[condoId].salePriceMin === Number.MAX_SAFE_INTEGER) {
+        condoMap[condoId].salePriceMin = 0;
+      }
+    });
     
     // Step 3: Group condos by zone
     const zoneMap: { [zoneId: string]: {
@@ -1998,13 +2031,19 @@ export const updatePropertyCountsForAllZones = async (): Promise<void> => {
           // If we have new data for this condo, update it
           if (zoneData.condos[condoId]) {
             const { rentProps, saleProps } = zoneData.condos[condoId];
+            const condoData = condoMap[condoId] || {};
             
             return {
               ...condo,
               propiedadesEnRenta: rentProps.length,
               propiedadesEnVenta: saleProps.length,
               propiedadesRentaResumen: rentProps,
-              propiedadesVentaResumen: saleProps
+              propiedadesVentaResumen: saleProps,
+              // Add the price ranges to the condo data
+              rentPriceMin: condoData.rentPriceMin || 0,
+              rentPriceMax: condoData.rentPriceMax || 0,
+              salePriceMin: condoData.salePriceMin || 0,
+              salePriceMax: condoData.salePriceMax || 0
             };
           }
           
@@ -2014,7 +2053,12 @@ export const updatePropertyCountsForAllZones = async (): Promise<void> => {
             propiedadesEnRenta: condo.propiedadesEnRenta || 0,
             propiedadesEnVenta: condo.propiedadesEnVenta || 0,
             propiedadesRentaResumen: condo.propiedadesRentaResumen || [],
-            propiedadesVentaResumen: condo.propiedadesVentaResumen || []
+            propiedadesVentaResumen: condo.propiedadesVentaResumen || [],
+            // Keep existing price ranges or set to zero
+            rentPriceMin: condo.rentPriceMin || 0,
+            rentPriceMax: condo.rentPriceMax || 0,
+            salePriceMin: condo.salePriceMin || 0,
+            salePriceMax: condo.salePriceMax || 0
           };
         });
         
@@ -2030,7 +2074,7 @@ export const updatePropertyCountsForAllZones = async (): Promise<void> => {
     });
     
     await Promise.all(updatePromises);
-    console.log('Successfully updated all zones with property counts');
+    console.log('Successfully updated all zones with property counts and price ranges');
     
   } catch (error) {
     console.error('Error updating property counts:', error);

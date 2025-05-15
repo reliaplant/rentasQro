@@ -158,4 +158,8 @@ export interface resumenCondo{
   propiedadesEnVenta: number;
   propiedadesRentaResumen?: any[]; // Add this property
   propiedadesVentaResumen?: any[]; // Add this property
+  rentPriceMin: number;
+  rentPriceMax: number;
+  salePriceMin: number;
+  salePriceMax: number;
 }
