@@ -13,7 +13,7 @@ import { useExchangeRate } from '../../hooks/useExchangeRate';
 const ListaExplorador = () => {
   // Change default sort option to 'relevante'
   const [sortOption, setSortOption] = useState('relevante');
-  const { filters } = useFilters();
+  const { filters, updateFilter } = useFilters();
   
   // States for properties management
   const [properties, setProperties] = useState<PropertyData[]>([]);
@@ -80,6 +80,11 @@ const ListaExplorador = () => {
       filtered = filtered.filter(property => property.zone === filters.selectedZone);
     }
     
+    // Filter by condo
+    if (filters.selectedCondo) {
+      filtered = filtered.filter(property => property.condo === filters.selectedCondo);
+    }
+
     // Filter by property type
     if (filters.propertyType) {
       filtered = filtered.filter(property => property.propertyType === filters.propertyType);
@@ -364,6 +369,11 @@ const ListaExplorador = () => {
     </div>
   );
 
+  // Add a function to clear condo filter
+  const clearCondoFilter = useCallback(() => {
+    updateFilter('selectedCondo', '');
+  }, [updateFilter]);
+
   return (
     <div className="w-full">
       {/* Header with property count and sorting options */}
@@ -374,6 +384,18 @@ const ListaExplorador = () => {
             <span className="text-xl font-semibold text-gray-800">{filteredProperties.length} inmuebles</span>
             <span className="text-sm text-gray-500">
               {filters.transactionType === 'renta' ? 'en renta' : 'en venta'} en Querétaro
+              {filters.selectedCondo && (
+                <>
+                  {' '}- <span className="font-medium">Condominio seleccionado</span>
+                  <button
+                    onClick={clearCondoFilter}
+                    className="ml-2 text-violet-600 hover:text-violet-800 text-xs"
+                  >
+                    <FaTimes className="inline w-3 h-3 mr-1" />
+                    Quitar filtro
+                  </button>
+                </>
+              )}
             </span>
           </div>
           

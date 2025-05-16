@@ -17,8 +17,9 @@ export interface FilterState {
   isFurnished: boolean;
   petsAllowed: boolean;
   parkingSpots: number | null;
-  currency: 'MXN' | 'USD'; // New currency property
-  propertyType: string; // Add propertyType filter
+  currency: 'MXN' | 'USD'; 
+  propertyType: string;
+  selectedCondo: string; // Add this property
 }
 
 // Define filter action interface
@@ -51,6 +52,7 @@ const defaultFilters: FilterState = {
   parkingSpots: null,
   currency: 'MXN', // Default to MXN
   propertyType: '', // Empty string means all property types
+  selectedCondo: '', // Initialize with empty string
 };
 
 // Create the context

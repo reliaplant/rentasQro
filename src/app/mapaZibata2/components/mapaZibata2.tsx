@@ -35,7 +35,7 @@ export default function MapaZibata2() {
   const [error, setError] = useState<string | null>(null);
   
   // Get filters from context instead of using local state
-  const { filters } = useFilters();
+  const { filters, updateFilter } = useFilters();
   
   // Define a fixed center point for Zibatá that won't change
   const ZIBATA_CENTER: [number, number] = [-100.335007, 20.680079];
@@ -180,6 +180,11 @@ export default function MapaZibata2() {
       const el = document.createElement('div');
       el.className = 'custom-marker';
       
+      // Add selected-marker class if this location is the selected condo
+      if (filters.selectedCondo === location.condoId) {
+        el.classList.add('selected-marker');
+      }
+      
       // Set accent color based on transaction type
       const accentColor = isRentView ? '#EAB308' : '#8B5CF6';
       
@@ -212,6 +217,30 @@ export default function MapaZibata2() {
       })
         .setLngLat(location.coordinates)
         .addTo(map.current!);
+      
+      // Add click handler to filter properties by this condo
+      el.addEventListener('click', () => {
+        // If this condo is already selected, deselect it
+        if (filters.selectedCondo === location.condoId) {
+          updateFilter('selectedCondo', '');
+          
+          // Remove selected-marker class from all markers
+          markersRef.current.forEach(marker => {
+            marker.getElement().classList.remove('selected-marker');
+          });
+        } else {
+          // Otherwise, select this condo
+          updateFilter('selectedCondo', location.condoId);
+          
+          // Remove selected-marker class from all markers first
+          markersRef.current.forEach(marker => {
+            marker.getElement().classList.remove('selected-marker');
+          });
+          
+          // Add selected-marker class to this marker
+          el.classList.add('selected-marker');
+        }
+      });
       
       // Store marker reference
       markersRef.current.push(marker);
@@ -303,6 +332,19 @@ export default function MapaZibata2() {
           bottom: -6px;
           left: 50%;
           transform: translateX(-50%);
+        }
+        /* Add back selected marker styles */
+        .selected-marker .marker-container > div:first-child {
+          transform: scale(1.1);
+          box-shadow: 0 0 0 2px #8B5CF6;
+          transition: all 0.2s ease-in-out;
+        }
+        /* Ensure the pointer doesn't get the outline or scale effect */
+        .selected-marker .marker-pointer {
+          transform: translateX(-50%);
+          box-shadow: none;
+          bottom: -10px;
+          transition: all 0.2s ease-in-out;
         }
       `}</style>
       
