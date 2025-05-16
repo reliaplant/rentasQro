@@ -7,8 +7,7 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc, Timestamp, getDocs, doc, getDoc, updateDoc, deleteDoc, query, where, increment, setDoc, limit, Query, DocumentData, orderBy, startAfter, QueryDocumentSnapshot } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL, uploadBytesResumable, listAll } from "firebase/storage";
 import { getAuth, signInWithEmailAndPassword, signOut as firebaseSignOut, onAuthStateChanged, User, fetchSignInMethodsForEmail } from "firebase/auth";
-import { ZoneData, CondoData, resumenCondo } from '@/app/shared/interfaces';
-import { PropertyData, Desarrolladora } from '@/app/shared/interfaces';
+import { ZoneData, CondoData, resumenCondo, PropertyData, Desarrolladora, negocio } from '@/app/shared/interfaces';
 import { BlogPost, BlogContributor } from '@/app/admin/blog-editor/types';
 
 const firebaseConfig = {
@@ -2079,6 +2078,196 @@ export const updatePropertyCountsForAllZones = async (): Promise<void> => {
   } catch (error) {
     console.error('Error updating property counts:', error);
     throw error;
+  }
+};
+
+// NEGOCIOS (LEADS) CRUD OPERATIONS
+
+/**
+ * Fetches all negocio (lead) documents from Firestore
+ * @param filters Optional filter parameters
+ * @returns Array of negocio objects with their IDs
+ */
+export const getNegocios = async (filters: {
+  asesor?: string;
+  estatus?: string;
+  transactionType?: string;
+  showDormant?: boolean;
+} = {}): Promise<negocio[]> => {
+  try {
+    console.log("Fetching all negocios");
+    
+    // Simplified query - just get all negocios sorted by creation date
+    // This avoids the need for composite indexes
+    const q = query(collection(db, "negocios"), orderBy("fechaCreacion", "desc"));
+    
+    const querySnapshot = await getDocs(q);
+    console.log(`Query returned ${querySnapshot.docs.length} documents`);
+    
+    // Convert to array of negocio objects
+    let negocios = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as negocio));
+    
+    // Apply all filters client-side
+    if (filters.asesor && filters.asesor !== 'all') {
+      negocios = negocios.filter(n => n.asesor === filters.asesor);
+    }
+    
+    if (filters.estatus && filters.estatus !== 'all') {
+      negocios = negocios.filter(n => n.estatus === filters.estatus);
+    }
+    
+    if (filters.transactionType && filters.transactionType !== 'all') {
+      negocios = negocios.filter(n => n.transactionType === filters.transactionType);
+    }
+    
+    // Filter dormant leads if needed
+    if (filters.showDormant === false) {
+      const now = new Date();
+      negocios = negocios.filter(negocio => {
+        // If not dormant, show the lead
+        if (!negocio.dormido) return true;
+        
+        // If dormant but no end date specified, hide it
+        if (!negocio.dormidoHasta) return false;
+        
+        // If dormant period has ended, show the lead
+        const dormantUntil = negocio.dormidoHasta.toDate();
+        return dormantUntil <= now;
+      });
+      console.log(`After filtering dormant leads: ${negocios.length} leads remaining`);
+    }
+    
+    return negocios;
+  } catch (error) {
+    console.error("Error fetching negocios:", error);
+    throw new Error("Error al obtener los leads");
+  }
+};
+
+/**
+ * Fetches a single negocio (lead) by its ID
+ * @param id The ID of the negocio to fetch
+ * @returns The negocio object or null if not found
+ */
+export const getNegocioById = async (id: string): Promise<negocio | null> => {
+  try {
+    const docRef = doc(db, "negocios", id);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() } as negocio;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error getting negocio:", error);
+    throw error;
+  }
+};
+
+/**
+ * Creates a new negocio (lead) in Firestore
+ * @param negocioData The negocio data to create
+ * @returns The ID of the newly created negocio
+ */
+export const createNegocio = async (negocioData: Partial<negocio>): Promise<string> => {
+  try {
+    // Ensure required fields are present
+    if (!negocioData.estatus) {
+      negocioData.estatus = "propuesta";
+    }
+    
+    const dataToSave = {
+      ...negocioData,
+      fechaCreacion: Timestamp.now(),
+      dormido: negocioData.dormido || false
+    };
+    
+    const docRef = await addDoc(collection(db, "negocios"), dataToSave);
+    return docRef.id;
+  } catch (error) {
+    console.error("Error creating negocio:", error);
+    throw new Error("Error al crear el lead");
+  }
+};
+
+/**
+ * Updates an existing negocio (lead) in Firestore
+ * @param id The ID of the negocio to update
+ * @param negocioData The updated negocio data
+ * @returns A boolean indicating success
+ */
+export const updateNegocio = async (id: string, negocioData: Partial<negocio>): Promise<boolean> => {
+  try {
+    const negocioRef = doc(db, "negocios", id);
+    
+    // Get existing negocio to compare changes
+    const negocioSnap = await getDoc(negocioRef);
+    if (!negocioSnap.exists()) {
+      throw new Error("Negocio no encontrado");
+    }
+    
+    const existingData = negocioSnap.data() as negocio;
+    
+    // Add timestamps for certain status changes
+    let updateData = { ...negocioData };
+    
+    // If status changed to 'cerrada', set fechaCierre
+    if (negocioData.estatus === 'cerrada' && existingData.estatus !== 'cerrada') {
+      updateData.fechaCierre = Timestamp.now();
+    }
+    
+    // If dormido changed to true, set fechaDormido
+    if (negocioData.dormido === true && existingData.dormido !== true) {
+      updateData.fechaDormido = Timestamp.now();
+    }
+    
+    await updateDoc(negocioRef, updateData);
+    return true;
+  } catch (error) {
+    console.error("Error updating negocio:", error);
+    throw new Error("Error al actualizar el lead");
+  }
+};
+
+/**
+ * Deletes a negocio (lead) from Firestore
+ * @param id The ID of the negocio to delete
+ * @returns A boolean indicating success
+ */
+export const deleteNegocio = async (id: string): Promise<boolean> => {
+  try {
+    await deleteDoc(doc(db, "negocios", id));
+    return true;
+  } catch (error) {
+    console.error("Error deleting negocio:", error);
+    throw new Error("Error al eliminar el lead");
+  }
+};
+
+/**
+ * Gets all unique advisors from negocios collection
+ * @returns Array of unique advisor names
+ */
+export const getNegocioAdvisors = async (): Promise<string[]> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "negocios"));
+    const advisors = new Set<string>();
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.asesor) {
+        advisors.add(data.asesor);
+      }
+    });
+    
+    return Array.from(advisors).sort();
+  } catch (error) {
+    console.error("Error fetching negocio advisors:", error);
+    throw new Error("Error al obtener los asesores");
   }
 };
 

@@ -1,0 +1,598 @@
+import { useState, useEffect, useRef } from 'react';
+import { negocio, PropertyData } from '@/app/shared/interfaces';
+import { doc, updateDoc, Timestamp, addDoc, collection, getDocs, query, where } from 'firebase/firestore';
+import { db, createNegocio, updateNegocio, deleteNegocio } from '@/app/shared/firebase';
+
+interface FieldEditorProps {
+  negocio: negocio;
+  onClose: () => void;
+  isCreating?: boolean;
+}
+
+// Reusable form field components with proper TypeScript typing
+const FormField = ({ 
+  label, 
+  children, 
+  className = '' 
+}: { 
+  label: string; 
+  children: React.ReactNode; 
+  className?: string 
+}) => (
+  <div className={className}>
+    <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+    {children}
+  </div>
+);
+
+const ReadOnlyField = ({ 
+  label, 
+  value 
+}: { 
+  label: string; 
+  value: React.ReactNode 
+}) => (
+  <div className="block w-full py-2 px-3 bg-gray-100 rounded-md text-gray-700 text-sm border border-gray-300">
+    {value}
+  </div>
+);
+
+export default function FieldEditor({ negocio, onClose, isCreating = false }: FieldEditorProps) {
+  const [formData, setFormData] = useState<Partial<negocio>>({
+    propiedadId: negocio.propiedadId,
+    propertyType: negocio.propertyType,
+    condoName: negocio.condoName,
+    transactionType: negocio.transactionType,
+    price: negocio.price,
+    comision: negocio.comision,
+    asesorAliado: negocio.asesorAliado || '',
+    porcentajePizo: negocio.porcentajePizo || 50,
+    estatus: negocio.estatus,
+    notas: negocio.notas || '',
+    origenTexto: negocio.origenTexto || '',
+    origenUrl: negocio.origenUrl || '',
+    asesor: negocio.asesor || '',
+    nombreCompleto: negocio.nombreCompleto || '',
+    telefono: negocio.telefono || '',
+    correo: negocio.correo || '',
+    dormido: negocio.dormido || false,
+    dormidoHasta: negocio.dormidoHasta || null
+  });
+
+  // Add dormant periods dropdown options
+  const dormantPeriods = [
+    { label: "No dormido", value: 0 },
+    { label: "1 día", value: 1 },
+    { label: "2 días", value: 2 },
+    { label: "3 días", value: 3 },
+    { label: "5 días", value: 5 },
+    { label: "7 días", value: 7 },
+    { label: "2 semanas", value: 14 },
+    { label: "1 mes", value: 30 },
+    { label: "2 meses", value: 60 },
+    { label: "6 meses", value: 180 }
+  ];
+
+  // Add state for selected dormant period
+  const [selectedDormantPeriod, setSelectedDormantPeriod] = useState<number>(0);
+
+  // Check if lead is currently dormant and set initial dropdown value
+  useEffect(() => {
+    if (negocio.dormidoHasta && negocio.dormido) {
+      const now = new Date();
+      const dormantUntil = negocio.dormidoHasta.toDate();
+      
+      // If dormidoHasta date is in the future, calculate the approximate period
+      if (dormantUntil > now) {
+        const diffDays = Math.ceil((dormantUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        
+        // Find the closest period option
+        let closestPeriod = 0;
+        let minDifference = Number.MAX_SAFE_INTEGER;
+        
+        dormantPeriods.forEach(period => {
+          if (period.value > 0) {
+            const difference = Math.abs(period.value - diffDays);
+            if (difference < minDifference) {
+              minDifference = difference;
+              closestPeriod = period.value;
+            }
+          }
+        });
+        
+        setSelectedDormantPeriod(closestPeriod);
+      }
+    }
+  }, [negocio.dormidoHasta, negocio.dormido]);
+
+  // Add handler for dormant period changes
+  const handleDormantPeriodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const days = parseInt(e.target.value, 10);
+    setSelectedDormantPeriod(days);
+    
+    if (days === 0) {
+      // If "No dormido" is selected, set dormido to false and clear dormidoHasta
+      setFormData(prev => ({
+        ...prev,
+        dormido: false,
+        dormidoHasta: null
+      }));
+    } else {
+      // Calculate dormidoHasta date
+      const now = new Date();
+      const dormantUntil = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+      
+      setFormData(prev => ({
+        ...prev,
+        dormido: true,
+        dormidoHasta: Timestamp.fromDate(dormantUntil)
+      }));
+    }
+  };
+
+  // State for property search and related functionality
+  const [properties, setProperties] = useState<PropertyData[]>([]);
+  const [filteredProperties, setFilteredProperties] = useState<PropertyData[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState<PropertyData | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const availableAdvisors = ['Guille', 'Andres', 'Adri'];
+
+  // Format currency for display
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  // Fetch properties for typeahead
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "properties"));
+        setProperties(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PropertyData[]);
+      } catch (error) {
+        console.error("Error fetching properties:", error);
+      }
+    };
+    fetchProperties();
+  }, []);
+
+  // Handle search term changes for property typeahead
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredProperties([]);
+      return;
+    }
+    
+    const lowerSearchTerm = searchTerm.toLowerCase();
+    setFilteredProperties(
+      properties.filter(property => 
+        property.id?.toLowerCase().includes(lowerSearchTerm) ||
+        property.condoName?.toLowerCase().includes(lowerSearchTerm) ||
+        property.propertyCondoNumber?.toLowerCase().includes(lowerSearchTerm)
+      ).slice(0, 10)
+    );
+  }, [searchTerm, properties]);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Fetch property by ID if needed
+  useEffect(() => {
+    if (!isCreating && formData.propiedadId && !selectedProperty) {
+      const fetchPropertyById = async () => {
+        try {
+          const propertyDoc = await getDocs(
+            query(collection(db, "properties"), where("id", "==", formData.propiedadId))
+          );
+          
+          if (!propertyDoc.empty) {
+            setSelectedProperty({ 
+              id: propertyDoc.docs[0].id, 
+              ...propertyDoc.docs[0].data() 
+            } as PropertyData);
+          }
+        } catch (error) {
+          console.error("Error fetching property by ID:", error);
+        }
+      };
+      fetchPropertyById();
+    }
+  }, [formData.propiedadId, isCreating, selectedProperty]);
+
+  const handleSelectProperty = (property: PropertyData) => {
+    setSelectedProperty(property);
+    setFormData(prev => ({
+      ...prev,
+      propiedadId: property.id || '',
+      propertyType: property.propertyType,
+      condoName: property.condoName,
+      transactionType: property.transactionType,
+      price: property.price,
+      comision: property.comision || prev.comision || 5,
+      asesorAliado: property.asesorAliado || prev.asesorAliado || '',
+      porcentajePizo: property.porcentajePizo || prev.porcentajePizo || 50 // Ensure a default value
+    }));
+    setSearchTerm(`${property.condoName} - ${property.propertyType}`);
+    setIsDropdownOpen(false);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' 
+        ? (e.target as HTMLInputElement).checked
+        : type === 'number' && value !== '' 
+          ? Number(value) 
+          : value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSaving(true);
+    setError('');
+    
+    try {
+      // Define a type that properly allows all possible value types, including null
+      type CleanedFormDataType = {
+        [K in keyof negocio]?: negocio[K] | null;
+      };
+      
+      // Use the correctly typed object for temporary storage
+      const tempFormData: CleanedFormDataType = {};
+      
+      // Copy all non-undefined values to tempFormData
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== undefined) {
+          // Use type assertion to bypass TypeScript's type checking
+          // This is safe because we're ensuring proper types through our type definition
+          tempFormData[key as keyof negocio] = value as any;
+        }
+      });
+      
+      // Ensure porcentajePizo has a default value
+      if (tempFormData.porcentajePizo === undefined) {
+        tempFormData.porcentajePizo = 50;
+      }
+      
+      // For the final data sent to the API, use the correct Partial<negocio> type
+      const cleanedFormData: Partial<negocio> = {};
+      
+      // Copy values from tempFormData to cleanedFormData, handling nulls appropriately
+      Object.entries(tempFormData).forEach(([key, value]) => {
+        // Skip id if it's null
+        if (key === 'id' && value === null) {
+          return;
+        }
+        
+        // For other fields, include all values (including null)
+        cleanedFormData[key as keyof negocio] = value as any;
+      });
+      
+      if (isCreating) {
+        await createNegocio(cleanedFormData);
+        console.log("New negocio created successfully");
+      } else {
+        if (!negocio.id) {
+          setError('ID de negocio no encontrado');
+          setSaving(false);
+          return;
+        }
+        
+        await updateNegocio(negocio.id, cleanedFormData);
+      }
+      
+      onClose();
+    } catch (err) {
+      setError('Error al guardar los cambios');
+      console.error('Error saving negocio:', err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Add a function to handle delete
+  const handleDelete = async () => {
+    if (!negocio.id) return;
+    
+    try {
+      if (confirm('¿Estás seguro de eliminar este lead? Esta acción no se puede deshacer.')) {
+        setSaving(true);
+        await deleteNegocio(negocio.id);
+        onClose();
+      }
+    } catch (error) {
+      console.error("Error deleting negocio:", error);
+      setError('Error al eliminar el lead');
+      setSaving(false);
+    }
+  };
+
+  // Property info renderer - consolidates duplicate property info rendering
+  const renderPropertyInfo = () => {
+    if (!formData.propiedadId) return null;
+    
+    interface PropertyField {
+      label: string;
+      value: string | number | React.ReactNode;
+      colSpan?: number;
+      isBold?: boolean;
+    }
+    
+    const propertyFields: PropertyField[] = [
+      { label: 'ID', value: formData.propiedadId || 'No seleccionado' },
+      { label: 'Tipo', value: formData.propertyType || 'No seleccionado' },
+      { label: 'Condominio', value: formData.condoName || 'No seleccionado' },
+      { label: 'Transacción', value: formData.transactionType === 'renta' ? 'Renta' : 
+                              formData.transactionType === 'venta' ? 'Venta' : 
+                              formData.transactionType === 'ventaRenta' ? 'Venta y Renta' : 'No seleccionado' },
+      { label: 'Precio', value: formData.price ? formatCurrency(formData.price) : 'No seleccionado', colSpan: 2, isBold: true },
+      { label: 'Comisión', value: `${formData.comision || 5}%` },
+      { label: 'Asesor Aliado', value: formData.asesorAliado || 'No especificado' },
+      { label: 'Porcentaje para Pizo', value: `${formData.porcentajePizo || 50}%`, colSpan: 2 }
+    ];
+
+    return (
+      <div className="mb-4 bg-indigo-50 p-3 rounded-md">
+        <h3 className="text-sm font-semibold text-indigo-700 mb-1">Propiedad seleccionada:</h3>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          {propertyFields.map((field, index) => (
+            <div key={index} className={field.colSpan === 2 ? "col-span-2" : ""}>
+              <span className="text-gray-500">{field.label}: </span>
+              <span className={`text-gray-800 ${field.isBold ? "font-semibold" : ""}`}>{field.value}</span>
+            </div>
+          ))}
+        </div>
+        
+        {/* Hidden inputs for form submission */}
+        <input type="hidden" name="propiedadId" value={formData.propiedadId || ''} />
+        <input type="hidden" name="propertyType" value={formData.propertyType || ''} />
+        <input type="hidden" name="condoName" value={formData.condoName || ''} />
+        <input type="hidden" name="transactionType" value={formData.transactionType || ''} />
+        <input type="hidden" name="price" value={formData.price?.toString() || '0'} />
+        <input type="hidden" name="comision" value={formData.comision?.toString() || '5'} />
+        <input type="hidden" name="asesorAliado" value={formData.asesorAliado || ''} />
+        <input type="hidden" name="porcentajePizo" value={formData.porcentajePizo?.toString() || '50'} />
+      </div>
+    );
+  };
+
+  // Property search dropdown renderer - Modified to always show regardless of edit/create mode
+  const renderPropertySearch = () => {
+    // Remove the condition that was hiding the search when editing
+    // if (selectedProperty && !isCreating) return null;
+    
+    return (
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          {selectedProperty ? "Cambiar Propiedad" : "Buscar Propiedad"}
+        </label>
+        <div className="relative" ref={dropdownRef}>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setIsDropdownOpen(true);
+            }}
+            onClick={() => setIsDropdownOpen(true)}
+            placeholder="Buscar por ID, nombre de condominio o número"
+            className="input1 pr-10"
+          />
+          
+          {isDropdownOpen && filteredProperties.length > 0 && (
+            <div className="absolute z-10 w-full mt-1 bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-y-auto">
+              {filteredProperties.map((property) => (
+                <div
+                  key={property.id}
+                  className="px-4 py-2 hover:bg-indigo-50 cursor-pointer flex justify-between items-center"
+                  onClick={() => handleSelectProperty(property)}
+                >
+                  <div>
+                    <div className="font-medium">{property.condoName}</div>
+                    <div className="text-xs text-gray-500">
+                      {property.propertyType} - ID: {property.id}
+                    </div>
+                  </div>
+                  <div className="text-indigo-600 font-medium">
+                    {formatCurrency(property.price)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 bg-gray-600/40 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-md max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        {/* More compact header */}
+        <div className="flex justify-between items-center p-3 border-b border-gray-300 bg-gray-50">
+          <h2 className="text-base font-medium">{isCreating ? "Crear Nuevo Lead" : "Editar Lead"}</h2>
+          <button 
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-500"
+          >
+            <svg className="h-5 w-5" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+              <path d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-3">
+          {error && (
+            <div className="mb-3 bg-red-50 text-red-600 p-2 rounded-md text-sm">{error}</div>
+          )}
+          
+          {/* Always show property search, regardless of edit/create mode */}
+          {renderPropertySearch()}
+          
+          {/* Show property info if a property is selected */}
+          {formData.propiedadId && renderPropertyInfo()}
+          
+          {/* Datos del cliente section - more compact */}
+          <div className="mb-3">
+            <h3 className="text-sm font-semibold text-blue-700 mb-2">Datos del Cliente</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <FormField label="Nombre Completo">
+                <input
+                  type="text"
+                  name="nombreCompleto"
+                  value={formData.nombreCompleto || ''}
+                  onChange={handleChange}
+                  className="input1"
+                />
+              </FormField>
+              
+              <FormField label="Teléfono">
+                <input
+                  type="tel"
+                  name="telefono"
+                  value={formData.telefono || ''}
+                  onChange={handleChange}
+                  className="input1"
+                />
+              </FormField>
+              
+              <FormField label="Correo Electrónico" className="md:col-span-2">
+                <input
+                  type="email"
+                  name="correo"
+                  value={formData.correo || ''}
+                  onChange={handleChange}
+                  className="input1"
+                />
+              </FormField>
+            </div>
+          </div>
+          
+          <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+            <FormField label="Estado de dormido">
+              <select
+                value={selectedDormantPeriod}
+                onChange={handleDormantPeriodChange}
+                className="input1"
+              >
+                {dormantPeriods.map(period => (
+                  <option key={period.value} value={period.value}>
+                    {period.label}
+                  </option>
+                ))}
+              </select>
+              {formData.dormidoHasta && formData.dormido && (
+                <p className="mt-1 text-xs text-indigo-600">
+                  Dormido hasta: {formData.dormidoHasta.toDate().toLocaleDateString()}
+                </p>
+              )}
+            </FormField>
+            
+            <FormField label="Estado">
+              <select
+                name="estatus"
+                value={formData.estatus || ''}
+                onChange={handleChange}
+                className="input1"
+              >
+                {["propuesta", "evaluación", "comercialización", "congeladora", "cerrada", "cancelada"].map(status => (
+                  <option key={status} value={status}>
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+          </div>
+          
+          <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+            <FormField label="Asesor">
+              <select
+                name="asesor"
+                value={formData.asesor || ''}
+                onChange={handleChange}
+                className="input1"
+              >
+                <option value="">Selecciona un asesor</option>
+                {availableAdvisors.map(advisor => (
+                  <option key={advisor} value={advisor}>{advisor}</option>
+                ))}
+              </select>
+            </FormField>
+            
+            <FormField label="Origen (Texto)">
+              <input
+                type="text"
+                name="origenTexto"
+                value={formData.origenTexto || ''}
+                onChange={handleChange}
+                className="input1"
+              />
+            </FormField>
+          </div>
+          
+          <FormField label="Notas" className="mt-3">
+            <textarea
+              name="notas"
+              rows={2}
+              value={formData.notas || ''}
+              onChange={handleChange}
+              className="textArea1"
+            />
+          </FormField>
+          
+          {/* Compact buttons row at bottom */}
+          <div className="mt-3 flex justify-between pt-2">
+            {/* Delete button - only show when editing, not when creating */}
+            {!isCreating && negocio.id && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 text-xs font-medium"
+              >
+                Eliminar Lead
+              </button>
+            )}
+            
+            <div className="flex space-x-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-3 py-1.5 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 text-xs font-medium"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={saving}
+                className="px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-xs font-medium disabled:opacity-50"
+              >
+                {saving ? 'Guardando...' : isCreating ? 'Crear Lead' : 'Guardar Cambios'}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

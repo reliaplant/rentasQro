@@ -163,3 +163,32 @@ export interface resumenCondo{
   salePriceMin: number;
   salePriceMax: number;
 }
+
+export interface negocio{
+  id?: string;
+  propiedadId: string;
+  propertyType: string; // 'casa', 'departamento', etc.
+  condoName: string;  // Nombre del condominio
+  transactionType: 'renta' | 'venta' | 'ventaRenta';
+  price: number;
+  comision: number;
+  asesorAliado?: string; // Added for allied advisor
+  porcentajePizo?: number; // Added for Pizo percentage
+  estatus: "propuesta" | "evaluación" | "comercialización" | "congeladora" | "cerrada" | "cancelada";
+  fechaCreacion: Timestamp;
+  fechaCierre?: Timestamp;
+  vigenciaEnDias?: number;
+  dormido?: boolean;
+  fechaDormido?: Timestamp;
+  dormidoHasta?: Timestamp | null; // Updated to allow null values
+  notas?: string;
+  souurce?: string;
+  campaign?: string;
+  medium?: string;
+  origenTexto: string;
+  origenUrl: string;
+  asesor: string;
+  nombreCompleto?: string;
+  telefono?: string;
+  correo?: string;
+}
