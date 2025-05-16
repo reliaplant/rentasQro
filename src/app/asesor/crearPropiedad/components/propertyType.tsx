@@ -50,15 +50,16 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
     { id: 'departamento', label: 'Departamento', icon: '🏢' },
     { id: 'terreno', label: 'Terreno', icon: '🏞️' },
     { id: 'local', label: 'Local Comercial', icon: '🏪' },
+    { id: 'preventa', label: 'Preventa', icon: '🏗️' },
     // { id: 'oficina', label: 'Oficina', icon: '🏢' },
     // { id: 'bodega', label: 'Bodega', icon: '🏭' },
   ];
 
   // Transaction types with explicit type for type safety
-  const transactionTypes: {id: 'renta' | 'venta' | 'ventaRenta', label: string, icon: string}[] = [
+  const transactionTypes: {id: 'renta' | 'venta', label: string, icon: string}[] = [
     { id: 'renta', label: 'Renta', icon: '🔑' },
     { id: 'venta', label: 'Venta', icon: '💰' },
-    { id: 'ventaRenta', label: 'Venta y Renta', icon: '💰🔑' },
+    // Removed ventaRenta option
   ];
 
   // Fetch zones on component mount
@@ -117,7 +118,7 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
   };
 
   // Create type-safe onChange handler for transactionType
-  const handleTransactionTypeChange = (type: 'renta' | 'venta' | 'ventaRenta') => {
+  const handleTransactionTypeChange = (type: 'renta' | 'venta') => {
     const updates: Partial<PropertyData> = { 
       transactionType: type 
     };
@@ -138,7 +139,7 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
     }
     
     // If switching to rental type, set default values
-    if (type === 'renta' || type === 'ventaRenta') {
+    if (type === 'renta') {
       updates.furnished = false;
       updates.petsAllowed = false;
       updates.servicesIncluded = false;
@@ -189,7 +190,7 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
     }
 
     // Rental specific validations
-    if (data.transactionType === 'renta' || data.transactionType === 'ventaRenta') {
+    if (data.transactionType === 'renta') {
       if (!data.maintenanceIncluded && (!data.maintenanceCost || data.maintenanceCost <= 0)) {
         errors.maintenance = 'Debe especificar un costo de mantenimiento mayor a 0';
       }
@@ -228,7 +229,7 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
   }, [data.condo]);
 
   useEffect(() => {
-    if (data.transactionType === 'renta' || data.transactionType === 'ventaRenta') {
+    if (data.transactionType === 'renta') {
       if (!data.maintenanceIncluded) {
         validateField('maintenance');
       }
@@ -393,8 +394,8 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
         errors.condo = 'El condominio es requerido';
       }
 
-      // Rental specific validations
-      if (data.transactionType === 'renta' || data.transactionType === 'ventaRenta') {
+      // Rental specific validations - update to check only for 'renta'
+      if (data.transactionType === 'renta') {
         if (!data.maintenanceIncluded && (!data.maintenanceCost || data.maintenanceCost <= 0)) {
           errors.maintenance = 'Debe especificar un costo de mantenimiento mayor a 0';
         }
@@ -752,6 +753,51 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
             </p>
           </div>
 
+          {/* Comisión */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Comisión
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                value={data.comision !== undefined ? data.comision : ''}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? undefined : parseFloat(e.target.value);
+                  onChange({ comision: value });
+                }}
+                className="py-3 px-4 pr-10 block w-full rounded-lg border border-gray-300 focus:ring-violet-500 focus:border-violet-500"
+                placeholder="Porcentaje de comisión"
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <span className="text-gray-500">%</span>
+              </div>
+            </div>
+            <p className="mt-1 text-xs text-gray-500">
+              Porcentaje de comisión para esta propiedad.
+            </p>
+          </div>
+
+          {/* Modelo */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Modelo
+            </label>
+            <input
+              type="text"
+              value={data.modelo || ''}
+              onChange={(e) => onChange({ modelo: e.target.value })}
+              className="py-3 px-4 block w-full rounded-lg border border-gray-300 focus:ring-violet-500 focus:border-violet-500"
+              placeholder="Modelo de la propiedad (si aplica)"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Especifica el modelo de la propiedad, especialmente útil para preventas.
+            </p>
+          </div>
+
           {/* Porcentaje Pizo */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -801,7 +847,7 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
       </div>
       
       {/* Rental Requirements Section */}
-      {(data.transactionType === 'renta' || data.transactionType === 'ventaRenta') && (
+      {data.transactionType === 'renta' && (
         <div className="space-y-6">
           <h3 className="text-lg font-medium mb-4">Requisitos de Renta</h3>
           <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">

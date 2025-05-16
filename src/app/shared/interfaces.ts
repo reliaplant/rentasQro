@@ -110,7 +110,7 @@ export interface PropertyData {
   imageUrls: string[];
   propertyType: string; // 'casa', 'departamento', etc.
   price: number;
-  transactionType: 'renta' | 'venta' | 'ventaRenta';
+  transactionType: 'renta' | 'venta'
   descripcion: string;
   status: 'borrador' | 'publicada' | 'en_cierre' | 'vendida' | 'descartada';
   bedrooms: number;
@@ -147,6 +147,8 @@ export interface PropertyData {
   isDummy?: boolean; // Added for dummy properties
   asesorAliado?: string; // Added for allied advisor
   porcentajePizo?: number; // Added for Pizo percentage
+  comision?: number; // Added for commission
+  modelo?: string; // Added for model
 }
 
 export interface resumenCondo{
