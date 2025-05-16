@@ -701,33 +701,33 @@ const FilterExplorador = () => {
                 </div>
               </div>
 
-              {/* Amueblado - Solo en /explorar */}
-              {isExplorarPage && (
+              {/* Amueblado - Solo en /explorar y cuando el tipo de transacción es renta */}
+              {isExplorarPage && filters.transactionType === 'renta' && (
                 <button
-                onClick={() => handleToggle('isFurnished')}
-                className={`
-                  ${baseButtonStyles}
-                  ${filters.isFurnished ? selectedButtonStyles : unselectedButtonStyles}
-                  flex items-center gap-2 cursor-pointer
-                `}
+                  onClick={() => handleToggle('isFurnished')}
+                  className={`
+                    ${baseButtonStyles}
+                    ${filters.isFurnished ? selectedButtonStyles : unselectedButtonStyles}
+                    flex items-center gap-2 cursor-pointer
+                  `}
                 >
-                {filters.isFurnished && <FaCheck className="w-3 h-3 text-violet-600" />}
-                Amueblado
+                  {filters.isFurnished && <FaCheck className="w-3 h-3 text-violet-600" />}
+                  Amueblado
                 </button>
               )}
 
-              {/* Mascotas - Solo en /explorar */}
-              {isExplorarPage && (
+              {/* Mascotas - Solo en /explorar y cuando el tipo de transacción es renta */}
+              {isExplorarPage && filters.transactionType === 'renta' && (
                 <button
-                onClick={() => handleToggle('petsAllowed')}
-                className={`
-                  ${baseButtonStyles}
-                  ${filters.petsAllowed ? selectedButtonStyles : unselectedButtonStyles}
-                  flex items-center gap-2 cursor-pointer
-                `}
+                  onClick={() => handleToggle('petsAllowed')}
+                  className={`
+                    ${baseButtonStyles}
+                    ${filters.petsAllowed ? selectedButtonStyles : unselectedButtonStyles}
+                    flex items-center gap-2 cursor-pointer
+                  `}
                 >
-                {filters.petsAllowed && <FaCheck className="w-3 h-3 text-violet-600" />}
-                Mascotas
+                  {filters.petsAllowed && <FaCheck className="w-3 h-3 text-violet-600" />}
+                  Mascotas
                 </button>
               )}
 

@@ -18,8 +18,10 @@ const ListaExplorador = () => {
   // States for properties management
   const [properties, setProperties] = useState<PropertyData[]>([]);
   const [filteredProperties, setFilteredProperties] = useState<PropertyData[]>([]);
+  const [displayedProperties, setDisplayedProperties] = useState<PropertyData[]>([]);
   const [currentImageIndices, setCurrentImageIndices] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(12); // Initial number of visible properties
   
   // Get exchange rate for currency conversion
   const { convertMXNtoUSD } = useExchangeRate();
@@ -34,6 +36,9 @@ const ListaExplorador = () => {
 
   // Get the label of the current sort option
   const selectedSortLabel = sortOptions.find(option => option.id === sortOption)?.label || 'Ordenar';
+
+  // State to store the selected condo name
+  const [selectedCondoName, setSelectedCondoName] = useState<string>("");
 
   // Load properties
   useEffect(() => {
@@ -72,6 +77,8 @@ const ListaExplorador = () => {
         filtered = filtered.filter(property => 
           ['venta', 'ventaRenta'].includes(property.transactionType)
         );
+        
+        // For compra mode, we'll handle the reset of isFurnished/petsAllowed outside this effect
       }
     }
 
@@ -83,6 +90,14 @@ const ListaExplorador = () => {
     // Filter by condo
     if (filters.selectedCondo) {
       filtered = filtered.filter(property => property.condo === filters.selectedCondo);
+      
+      // Find the condo name from the first matching property
+      if (filtered.length > 0 && filtered[0].condoName) {
+        setSelectedCondoName(filtered[0].condoName);
+      }
+    } else {
+      // Reset condo name when no condo is selected
+      setSelectedCondoName("");
     }
 
     // Filter by property type
@@ -120,13 +135,13 @@ const ListaExplorador = () => {
       filtered = filtered.filter(property => property.price <= filters.priceRange[1]);
     }
 
-    // Filter by furnished
-    if (filters.isFurnished) {
+    // Filter by furnished - only apply when transaction type is 'renta'
+    if (filters.transactionType === 'renta' && filters.isFurnished) {
       filtered = filtered.filter(property => property.furnished);
     }
 
-    // Filter by pets allowed
-    if (filters.petsAllowed) {
+    // Filter by pets allowed - only apply when transaction type is 'renta'
+    if (filters.transactionType === 'renta' && filters.petsAllowed) {
       filtered = filtered.filter(property => property.petsAllowed);
     }
 
@@ -140,6 +155,9 @@ const ListaExplorador = () => {
       });
     }
 
+    // When filters change, reset visible count to initial 12
+    setVisibleCount(12);
+    
     // Apply sorting
     const sortedFiltered = [...filtered].sort((a, b) => {
       if (sortOption === 'precio-alto') {
@@ -154,9 +172,50 @@ const ListaExplorador = () => {
       return 0; // No specific sorting for 'relevante'
     });
 
-    // Limit to 12 properties
-    setFilteredProperties(sortedFiltered.slice(0, 12));
-  }, [filters, properties, sortOption]);
+    // Store all filtered properties
+    setFilteredProperties(sortedFiltered);
+  }, [filters.transactionType, 
+      filters.selectedZone,
+      filters.priceRange, 
+      filters.bedrooms,
+      filters.bathrooms,
+      filters.isFurnished,
+      filters.petsAllowed,
+      filters.parkingSpots,
+      filters.propertyType,
+      filters.selectedCondo,
+      properties,
+      sortOption]); // Use individual filter properties instead of the whole filters object
+
+  // Separate effect to reset filters when transaction type changes to 'compra'
+  useEffect(() => {
+    if (filters.transactionType === 'compra') {
+      if (filters.isFurnished) {
+        updateFilter('isFurnished', false);
+      }
+      if (filters.petsAllowed) {
+        updateFilter('petsAllowed', false);
+      }
+    }
+  }, [filters.transactionType, updateFilter]);
+
+  // Add a separate effect for resetting rental-only filters
+  useEffect(() => {
+    if (filters.transactionType === 'compra') {
+      if (filters.isFurnished || filters.petsAllowed) {
+        // Use setTimeout to avoid the state update during render
+        setTimeout(() => {
+          if (filters.isFurnished) updateFilter('isFurnished', false);
+          if (filters.petsAllowed) updateFilter('petsAllowed', false);
+        }, 0);
+      }
+    }
+  }, [filters.transactionType, filters.isFurnished, filters.petsAllowed, updateFilter]);
+
+  // Update displayed properties whenever filtered properties or visible count changes
+  useEffect(() => {
+    setDisplayedProperties(filteredProperties.slice(0, visibleCount));
+  }, [filteredProperties, visibleCount]);
 
   // Handle image navigation
   const navigateImage = (e: React.MouseEvent, propertyId: string, direction: 'prev' | 'next', maxImages: number) => {
@@ -374,6 +433,23 @@ const ListaExplorador = () => {
     updateFilter('selectedCondo', '');
   }, [updateFilter]);
 
+  // Format property count text with proper grammar
+  const formatPropertyCount = () => {
+    const count = filteredProperties.length;
+    const isPlural = count !== 1;
+    
+    if (selectedCondoName && filters.selectedCondo) {
+      return `${count} ${isPlural ? 'inmuebles' : 'inmueble'} en ${selectedCondoName}`;
+    } else {
+      return `${count} ${isPlural ? 'inmuebles' : 'inmueble'}`;
+    }
+  };
+
+  // Function to show more properties
+  const handleShowMore = () => {
+    setVisibleCount(prev => prev + 12); // Show 12 more properties
+  };
+
   return (
     <div className="w-full">
       {/* Header with property count and sorting options */}
@@ -381,18 +457,17 @@ const ListaExplorador = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
           {/* Property count information */}
           <div className="flex flex-col">
-            <span className="text-xl font-semibold text-gray-800">{filteredProperties.length} inmuebles</span>
+            <span className="text-xl font-semibold text-gray-800">{formatPropertyCount()}</span>
             <span className="text-sm text-gray-500">
               {filters.transactionType === 'renta' ? 'en renta' : 'en venta'} en Querétaro
               {filters.selectedCondo && (
                 <>
-                  {' '}- <span className="font-medium">Condominio seleccionado</span>
                   <button
                     onClick={clearCondoFilter}
                     className="ml-2 text-violet-600 hover:text-violet-800 text-xs"
                   >
                     <FaTimes className="inline w-3 h-3 mr-1" />
-                    Quitar filtro
+                    Quitar filtro de condominio
                   </button>
                 </>
               )}
@@ -454,19 +529,33 @@ const ListaExplorador = () => {
               <PropertySkeleton key={`skeleton-${index}`} />
             ))}
           </div>
-        ) : filteredProperties.length > 0 ? (
-          // Property cards in 3 columns
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {filteredProperties.map((property, index) => (
-              <Link 
-                href={`/propiedad/${property.id}`} 
-                key={property.id}
-                className="cursor-pointer mb-2 sm:mb-4"
-              >
-                <PropertyCard property={property} index={index} />
-              </Link>
-            ))}
-          </div>
+        ) : displayedProperties.length > 0 ? (
+          <>
+            {/* Property cards in 3 columns */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {displayedProperties.map((property, index) => (
+                <Link 
+                  href={`/propiedad/${property.id}`} 
+                  key={property.id}
+                  className="cursor-pointer mb-2 sm:mb-4"
+                >
+                  <PropertyCard property={property} index={index} />
+                </Link>
+              ))}
+            </div>
+            
+            {/* Show more button */}
+            {displayedProperties.length < filteredProperties.length && (
+              <div className="flex justify-center mt-8">
+                <button
+                  onClick={handleShowMore}
+                  className="px-6 py-2.5 bg-violet-100 hover:bg-violet-200 text-violet-800 rounded-full text-sm font-medium transition-colors duration-200"
+                >
+                  Mostrar más ({Math.min(12, filteredProperties.length - displayedProperties.length)} de {filteredProperties.length - displayedProperties.length} restantes)
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           // No properties found message
           <div className="text-center py-12">

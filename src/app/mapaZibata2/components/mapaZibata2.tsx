@@ -144,23 +144,109 @@ export default function MapaZibata2() {
     const isRentView = filters.transactionType === 'renta';
     
     // Filter locations based on current transaction type from filters
-    const filteredLocations = locations.filter(location => 
+    let filteredLocations = locations.filter(location => 
       isRentView ? location.forRent > 0 : location.forSale > 0
     );
     
-    // Create new markers
-    filteredLocations.forEach(location => {
-      // Calculate price range
-      let priceRangeText = '';
-      let priceMin = 0, priceMax = 0;
+    // Get the properties that will be used for filtering
+    const propertiesByLocation = filteredLocations.map(location => {
+      const propertiesToCheck = isRentView 
+        ? location.propiedadesRentaResumen || []
+        : location.propiedadesVentaResumen || [];
+        
+      return {
+        location,
+        properties: propertiesToCheck
+      };
+    });
+    
+    // Apply filters to properties in each location
+    const filteredLocationData = propertiesByLocation.map(({ location, properties }) => {
+      // Apply property type filter
+      let filteredProps = properties;
       
-      if (isRentView) {
-        priceMin = location.rentPriceMin || 0;
-        priceMax = location.rentPriceMax || 0;
-      } else {
-        priceMin = location.salePriceMin || 0;
-        priceMax = location.salePriceMax || 0;
+      if (filters.propertyType) {
+        filteredProps = filteredProps.filter((prop: any) => 
+          prop.propertyType === filters.propertyType
+        );
       }
+      
+      // Apply bedrooms filter
+      if (filters.bedrooms !== null) {
+        filteredProps = filteredProps.filter((prop: any) => {
+          if (filters.bedrooms === 3) {
+            return prop.bedrooms >= 3;
+          }
+          return prop.bedrooms === filters.bedrooms;
+        });
+      }
+      
+      // Apply bathrooms filter
+      if (filters.bathrooms !== null) {
+        filteredProps = filteredProps.filter((prop: any) => {
+          if (filters.bathrooms === 2) {
+            return prop.bathrooms >= 2;
+          }
+          return prop.bathrooms === filters.bathrooms;
+        });
+      }
+      
+      // Apply parking spots filter
+      if (filters.parkingSpots !== null) {
+        filteredProps = filteredProps.filter((prop: any) => {
+          if (filters.parkingSpots === 3) {
+            return prop.parkingSpots >= 3;
+          }
+          return prop.parkingSpots === filters.parkingSpots;
+        });
+      }
+      
+      // Apply furnished filter - only for rentals
+      if (isRentView && filters.isFurnished) {
+        filteredProps = filteredProps.filter((prop: any) => prop.furnished);
+      }
+      
+      // Apply pets allowed filter - only for rentals
+      if (isRentView && filters.petsAllowed) {
+        filteredProps = filteredProps.filter((prop: any) => prop.petsAllowed);
+      }
+      
+      // Apply price filter
+      const minPrice = filters.priceRange[0];
+      const maxPrice = filters.priceRange[1];
+      const MAX_THRESHOLD = 999999999;
+      
+      if (minPrice > 0 || maxPrice < MAX_THRESHOLD) {
+        filteredProps = filteredProps.filter((prop: any) => {
+          const price = prop.price || 0;
+          return (minPrice === 0 || price >= minPrice) && 
+                 (maxPrice >= MAX_THRESHOLD || price <= maxPrice);
+        });
+      }
+      
+      return {
+        location,
+        filteredProperties: filteredProps
+      };
+    });
+    
+    // Only keep locations that have properties matching all filters
+    const locationsWithMatchingProps = filteredLocationData
+      .filter(data => data.filteredProperties.length > 0)
+      .map(data => ({
+        ...data.location,
+        matchingPropertiesCount: data.filteredProperties.length,
+        // Calculate new price ranges based on filtered properties
+        filteredMinPrice: Math.min(...data.filteredProperties.map((p: any) => p.price || Infinity)),
+        filteredMaxPrice: Math.max(...data.filteredProperties.map((p: any) => p.price || 0)),
+      }));
+    
+    // Create new markers from the filtered locations
+    locationsWithMatchingProps.forEach(location => {
+      // Calculate price range using the filtered properties
+      let priceRangeText = '';
+      let priceMin = location.filteredMinPrice === Infinity ? 0 : location.filteredMinPrice;
+      let priceMax = location.filteredMaxPrice || 0;
       
       // Format price range text - only show suffix at the end
       if (priceMin > 0 && priceMax > 0) {
@@ -173,8 +259,8 @@ export default function MapaZibata2() {
         }
       }
       
-      // Get property count
-      const propertyCount = isRentView ? location.forRent : location.forSale;
+      // Get actual property count from filtered properties
+      const propertyCount = location.matchingPropertiesCount;
       
       // Create custom HTML element for marker
       const el = document.createElement('div');
@@ -281,11 +367,22 @@ export default function MapaZibata2() {
     };
   }, [loading, locations]);
 
-  // Update markers when filters change (especially transactionType)
+  // Update markers when filters change (including parking spots)
   useEffect(() => {
     if (!map.current || locations.length === 0) return;
     createMarkers();
-  }, [filters.transactionType, locations]);
+  }, [
+    filters.transactionType,
+    filters.propertyType, 
+    filters.selectedCondo,
+    filters.priceRange,
+    filters.bedrooms,
+    filters.bathrooms,
+    filters.parkingSpots,
+    filters.isFurnished,
+    filters.petsAllowed,
+    locations
+  ]);
 
   if (error) {
     return (
