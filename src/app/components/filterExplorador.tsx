@@ -86,7 +86,9 @@ const PropertyTypeSelect = memo(({
   const propertyTypes = [
     { id: 'casa', name: 'Casa' },
     { id: 'departamento', name: 'Depa' },
-    { id: 'terreno', name: 'Terreno' }
+    { id: 'terreno', name: 'Terreno' },
+    { id: 'local', name: 'Local' },
+    { id: 'preventa', name: 'Preventa' }
   ];
   
   // Find the current property type name for display

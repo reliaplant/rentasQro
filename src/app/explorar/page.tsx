@@ -1,37 +1,66 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import FilterExplorador from '../components/filterExplorador';
-import Explorador from '../components/explorador';
-import { useSearchParams } from 'next/navigation';
-import { useFilters } from '../context/FilterContext';
+import { FilterProvider } from '../context/FilterContext';
+import ListaExplorador from './components/ListaExplorador';
+import MapaZibata2 from '../mapaZibata2/components/mapaZibata2';
 
-export default function ExplorarPage() {
-  const searchParams = useSearchParams();
-  const { filters, updateFilter } = useFilters();
-  
-  // Use ref to ensure we only update on mount
-  const hasInitializedRef = useRef(false);
-  
-  // Apply transaction type from URL if present - with safety check to prevent loops
+export default function Explorar2() {
+  // Get height of filter component to position the map properly
+  const filterRef = useRef<HTMLDivElement>(null);
+  const [topOffset, setTopOffset] = useState('64px'); // Default to menu height
+
+  // Calculate top position for the sticky map after component mounts
   useEffect(() => {
-    if (hasInitializedRef.current) return;
-    
-    const transactionType = searchParams?.get('t');
-    
-    if ((transactionType === 'renta' || transactionType === 'compra') && 
-        transactionType !== filters.transactionType) {
-      console.log(`ExplorarPage: Setting transaction type: ${transactionType}`);
-      updateFilter('transactionType', transactionType);
+    if (filterRef.current) {
+      const filterHeight = filterRef.current.offsetHeight;
+      // Set top offset to account for menu (64px) + filter height
+      setTopOffset(`${64 + filterHeight}px`);
     }
     
-    hasInitializedRef.current = true;
+    // Update on resize in case filter height changes on different screen sizes
+    const handleResize = () => {
+      if (filterRef.current) {
+        const filterHeight = filterRef.current.offsetHeight;
+        setTopOffset(`${64 + filterHeight}px`);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
-  
+
   return (
-    <main className="min-h-screen">
-      <FilterExplorador />
-      <Explorador />
-    </main>
+    <FilterProvider>
+      <div className="flex flex-col min-h-screen">
+        {/* Filter below the main menu - made sticky to remain visible during scroll */}
+        <div ref={filterRef} className="sticky w-full z-30" style={{ top: '64px' }}>
+          <FilterExplorador />
+        </div>
+        
+        {/* Content area with regular page scroll */}
+        <div className="flex w-full">
+          {/* Left section - properties list (60%) */}
+          <div className="w-[60%]">
+            <ListaExplorador />
+          </div>
+          
+          {/* Right section - map (40%) - sticky */}
+          <div 
+            className="w-[40%]"
+            style={{
+              position: 'sticky',
+              top: topOffset,
+              height: `calc(100vh - ${topOffset})`,
+              alignSelf: 'flex-start',
+              overflow: 'hidden' // Prevent any overflow issues
+            }}
+          >
+            <MapaZibata2 />
+          </div>
+        </div>
+      </div>
+    </FilterProvider>
   );
 }

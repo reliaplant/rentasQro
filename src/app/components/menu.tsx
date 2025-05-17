@@ -77,6 +77,10 @@ export default function Menu() {
     e.preventDefault();
     console.log('Menu: Setting transaction type to renta');
     updateFilter('transactionType', 'renta');
+    
+    // Clear preventa filter when switching tabs
+    updateFilter('propertyType', '');
+    
     setIsMobileMenuOpen(false);
     router.push('/explorar?t=renta');
   }, [updateFilter, router]);
@@ -85,28 +89,53 @@ export default function Menu() {
     e.preventDefault();
     console.log('Menu: Setting transaction type to compra');
     updateFilter('transactionType', 'compra');
+    
+    // Clear preventa filter when switching tabs
+    updateFilter('propertyType', '');
+    
     setIsMobileMenuOpen(false);
     router.push('/explorar?t=compra');
+  }, [updateFilter, router]);
+
+  // Handler for Preventa click to filter by property type and set transaction to compra
+  const handlePreventaClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log('Menu: Setting property filter to preventa and transaction to compra');
+    updateFilter('propertyType', 'preventa');
+    updateFilter('transactionType', 'compra');
+    setIsMobileMenuOpen(false);
+    router.push('/explorar?propertyType=preventa&t=compra');
   }, [updateFilter, router]);
 
   // Simpler active tab detection that doesn't cause loops
   const isActive = useCallback((path: string) => {
     // Get URL parameter directly to avoid dependency on state
     const urlTransactionType = searchParams?.get('t');
+    const urlPropertyType = searchParams?.get('propertyType');
+    
+    // Check if preventa filter is active
+    const isPreventaActive = urlPropertyType === 'preventa';
 
     if (path === '/' && pathname === '/') return true;
 
-    // For rent/buy links, prioritize URL param
+    // For rent/buy links, prioritize URL param and make sure preventa isn't active
     if (path === '/rentar') {
       return pathname === '/explorar' && 
+             !isPreventaActive &&
              (urlTransactionType === 'renta' || 
               (!urlTransactionType && currentTransactionType === 'renta'));
     }
     
     if (path === '/comprar') {
       return pathname === '/explorar' && 
+             !isPreventaActive &&
              (urlTransactionType === 'compra' || 
               (!urlTransactionType && currentTransactionType === 'compra'));
+    }
+
+    // For Preventa link, check if propertyType=preventa is in URL
+    if (path === '/preventa') {
+      return pathname === '/explorar' && isPreventaActive;
     }
 
     if (path !== '/' && pathname?.startsWith(path)) return true;
@@ -171,9 +200,9 @@ export default function Menu() {
               Rentar
             </Link>
 
-            {/* <Link
-              href="/preventa"
-              onClick={() => setIsMobileMenuOpen(false)}
+            <Link
+              href="/explorar?propertyType=preventa&t=compra"
+              onClick={handlePreventaClick}
               className={`${
                 isActive('/preventa')
                   ? 'border-violet-800 text-violet-800'
@@ -181,9 +210,13 @@ export default function Menu() {
               } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
             >
               Preventa
-            </Link> */}
+            </Link>
             <Link
               href="/qro/zibata"
+              onClick={() => {
+                // Clear preventa filter when navigating away
+                updateFilter('propertyType', '');
+              }}
               className={`${pathname?.startsWith('/qro/zibata')
                   ? 'border-violet-800 text-violet-800'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -193,6 +226,10 @@ export default function Menu() {
             </Link>
             <Link
               href="/blog"
+              onClick={() => {
+                // Clear preventa filter when navigating away
+                updateFilter('propertyType', '');
+              }}
               className={`${pathname?.startsWith('/blog')
                   ? 'border-violet-800 text-violet-800'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -220,6 +257,10 @@ export default function Menu() {
         <div className="hidden md:flex items-center space-x-4">
           <Link
             href="/favoritos"
+            onClick={() => {
+              // Clear preventa filter when navigating away
+              updateFilter('propertyType', '');
+            }}
             className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-full transition-colors relative ${favorites.length > 0
                 ? 'text-violet-800 bg-violet-50 hover:bg-violet-100'
                 : 'text-gray-500 bg-gray-50 hover:bg-gray-100'
@@ -235,7 +276,11 @@ export default function Menu() {
             )}
           </Link>
           <button
-            onClick={openPropertyListingModal}
+            onClick={() => {
+              openPropertyListingModal();
+              // Clear preventa filter when using modal
+              updateFilter('propertyType', '');
+            }}
             className="text-sm font-medium text-gray-700 hover:text-violet-800 cursor-pointer"
           >
             Publica tu propiedad
@@ -253,7 +298,11 @@ export default function Menu() {
           <div className="p-4 space-y-3">
             <Link
               href="/explorar"
-              onClick={() => setIsMobileMenuOpen(false)}
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                // Clear preventa filter when using Explorar
+                updateFilter('propertyType', '');
+              }}
               className="flex items-center px-4 py-3 rounded-lg text-base font-medium bg-violet-600 text-white hover:bg-violet-700"
             >
               Explorar
@@ -282,9 +331,9 @@ export default function Menu() {
             </Link>
 
             <Link
-              href="/preventa"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={`flex items-center px-4 py-3 rounded-lg text-base font-medium ${pathname?.startsWith('/preventa')
+              href="/explorar?propertyType=preventa&t=compra"
+              onClick={handlePreventaClick}
+              className={`flex items-center px-4 py-3 rounded-lg text-base font-medium ${isActive('/preventa')
                   ? 'bg-violet-50 text-violet-700'
                   : 'text-gray-700 hover:bg-gray-50'
                 }`}
@@ -293,7 +342,11 @@ export default function Menu() {
             </Link>
             <Link
               href="/qro/zibata"
-              onClick={() => setIsMobileMenuOpen(false)}
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                // Clear preventa filter when navigating away
+                updateFilter('propertyType', '');
+              }}
               className={`flex items-center px-4 py-3 rounded-lg text-base font-medium ${pathname?.startsWith('/qro/zibata')
                   ? 'bg-violet-50 text-violet-700'
                   : 'text-gray-700 hover:bg-gray-50'
@@ -304,7 +357,11 @@ export default function Menu() {
             <div className="border-t border-gray-200 my-3"></div>
             <Link
               href="/favoritos"
-              onClick={() => setIsMobileMenuOpen(false)}
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                // Clear preventa filter when navigating away
+                updateFilter('propertyType', '');
+              }}
               className="flex items-center px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-50"
             >
               <FaHeart className={`w-4 h-4 mr-3 ${favorites.length > 0 ? 'text-red-500' : 'text-gray-400'
@@ -320,6 +377,8 @@ export default function Menu() {
               onClick={() => {
                 openPropertyListingModal();
                 setIsMobileMenuOpen(false);
+                // Clear preventa filter when using modal
+                updateFilter('propertyType', '');
               }}
               className="flex w-full items-center px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-50"
             >
