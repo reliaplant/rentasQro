@@ -176,7 +176,7 @@ export interface negocio{
   comision: number;
   asesorAliado?: string; // Added for allied advisor
   porcentajePizo?: number; // Added for Pizo percentage
-  estatus: "propuesta" | "evaluación" | "comercialización" | "congeladora" | "cerrada" | "cancelada";
+  estatus: "form" | "propuesta" | "evaluación" | "comercialización" | "congeladora" | "cerrada" | "cancelada";
   fechaCreacion: Timestamp;
   fechaCierre?: Timestamp;
   vigenciaEnDias?: number;

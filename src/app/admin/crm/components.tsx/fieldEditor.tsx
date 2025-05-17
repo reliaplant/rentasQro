@@ -59,77 +59,6 @@ export default function FieldEditor({ negocio, onClose, isCreating = false }: Fi
     dormidoHasta: negocio.dormidoHasta || null
   });
 
-  // Add dormant periods dropdown options
-  const dormantPeriods = [
-    { label: "No dormido", value: 0 },
-    { label: "1 día", value: 1 },
-    { label: "2 días", value: 2 },
-    { label: "3 días", value: 3 },
-    { label: "5 días", value: 5 },
-    { label: "7 días", value: 7 },
-    { label: "2 semanas", value: 14 },
-    { label: "1 mes", value: 30 },
-    { label: "2 meses", value: 60 },
-    { label: "6 meses", value: 180 }
-  ];
-
-  // Add state for selected dormant period
-  const [selectedDormantPeriod, setSelectedDormantPeriod] = useState<number>(0);
-
-  // Check if lead is currently dormant and set initial dropdown value
-  useEffect(() => {
-    if (negocio.dormidoHasta && negocio.dormido) {
-      const now = new Date();
-      const dormantUntil = negocio.dormidoHasta.toDate();
-      
-      // If dormidoHasta date is in the future, calculate the approximate period
-      if (dormantUntil > now) {
-        const diffDays = Math.ceil((dormantUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-        
-        // Find the closest period option
-        let closestPeriod = 0;
-        let minDifference = Number.MAX_SAFE_INTEGER;
-        
-        dormantPeriods.forEach(period => {
-          if (period.value > 0) {
-            const difference = Math.abs(period.value - diffDays);
-            if (difference < minDifference) {
-              minDifference = difference;
-              closestPeriod = period.value;
-            }
-          }
-        });
-        
-        setSelectedDormantPeriod(closestPeriod);
-      }
-    }
-  }, [negocio.dormidoHasta, negocio.dormido]);
-
-  // Add handler for dormant period changes
-  const handleDormantPeriodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const days = parseInt(e.target.value, 10);
-    setSelectedDormantPeriod(days);
-    
-    if (days === 0) {
-      // If "No dormido" is selected, set dormido to false and clear dormidoHasta
-      setFormData(prev => ({
-        ...prev,
-        dormido: false,
-        dormidoHasta: null
-      }));
-    } else {
-      // Calculate dormidoHasta date
-      const now = new Date();
-      const dormantUntil = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
-      
-      setFormData(prev => ({
-        ...prev,
-        dormido: true,
-        dormidoHasta: Timestamp.fromDate(dormantUntil)
-      }));
-    }
-  };
-
   // State for property search and related functionality
   const [properties, setProperties] = useState<PropertyData[]>([]);
   const [filteredProperties, setFilteredProperties] = useState<PropertyData[]>([]);
@@ -490,25 +419,6 @@ export default function FieldEditor({ negocio, onClose, isCreating = false }: Fi
           </div>
           
           <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
-            <FormField label="Estado de dormido">
-              <select
-                value={selectedDormantPeriod}
-                onChange={handleDormantPeriodChange}
-                className="input1"
-              >
-                {dormantPeriods.map(period => (
-                  <option key={period.value} value={period.value}>
-                    {period.label}
-                  </option>
-                ))}
-              </select>
-              {formData.dormidoHasta && formData.dormido && (
-                <p className="mt-1 text-xs text-indigo-600">
-                  Dormido hasta: {formData.dormidoHasta.toDate().toLocaleDateString()}
-                </p>
-              )}
-            </FormField>
-            
             <FormField label="Estado">
               <select
                 name="estatus"
@@ -516,16 +426,14 @@ export default function FieldEditor({ negocio, onClose, isCreating = false }: Fi
                 onChange={handleChange}
                 className="input1"
               >
-                {["propuesta", "evaluación", "comercialización", "congeladora", "cerrada", "cancelada"].map(status => (
+                {["form", "propuesta", "evaluación", "comercialización", "congeladora", "cerrada", "cancelada"].map(status => (
                   <option key={status} value={status}>
                     {status.charAt(0).toUpperCase() + status.slice(1)}
                   </option>
                 ))}
               </select>
             </FormField>
-          </div>
-          
-          <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+            
             <FormField label="Asesor">
               <select
                 name="asesor"
@@ -539,7 +447,9 @@ export default function FieldEditor({ negocio, onClose, isCreating = false }: Fi
                 ))}
               </select>
             </FormField>
-            
+          </div>
+          
+          <div className="mt-3">
             <FormField label="Origen (Texto)">
               <input
                 type="text"

@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { negocio } from '@/app/shared/interfaces';
 import { updateNegocio, deleteNegocio } from '@/app/shared/firebase';
+import { Timestamp } from 'firebase/firestore';
 import FieldEditor from './fieldEditor';
 
 // Define column types with their display names
 const columns = [
+  { id: 'form', name: 'Formulario' },  // New first stage
   { id: 'propuesta', name: 'Propuesta' },
   { id: 'evaluación', name: 'Evaluación' },
   { id: 'comercialización', name: 'Comercialización' },
@@ -12,6 +14,19 @@ const columns = [
   { id: 'cerrada', name: 'Cerrada' },
   { id: 'cancelada', name: 'Cancelada' }
 ] as const;
+
+// Define dormant periods
+const dormantPeriods = [
+  { label: "1 día", value: 1 },
+  { label: "2 días", value: 2 },
+  { label: "3 días", value: 3 },
+  { label: "5 días", value: 5 },
+  { label: "7 días", value: 7 },
+  { label: "2 semanas", value: 14 },
+  { label: "1 mes", value: 30 },
+  { label: "2 meses", value: 60 },
+  { label: "6 meses", value: 180 }
+];
 
 type ColumnType = typeof columns[number]['id'];
 
@@ -23,12 +38,53 @@ interface PipelineProps {
 export default function Pipeline({ negocios, onNegocioUpdate }: PipelineProps) {
   const [editingNegocio, setEditingNegocio] = useState<negocio | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [dormantMenuOpen, setDormantMenuOpen] = useState<string | null>(null);
+  const dormantMenuRef = useRef<HTMLDivElement>(null);
 
   // Group negocios by status
   const negociosByColumn = columns.reduce((acc, column) => {
     acc[column.id] = negocios.filter(n => n.estatus === column.id);
     return acc;
   }, {} as Record<ColumnType, negocio[]>);
+
+  // Handler to toggle dormant status
+  const handleSetDormant = async (negocioId: string, days: number) => {
+    try {
+      // If days is 0, we're waking up the lead
+      if (days === 0) {
+        await updateNegocio(negocioId, {
+          dormido: false,
+          dormidoHasta: null
+        });
+      } else {
+        // Calculate dormidoHasta date
+        const now = new Date();
+        const dormantUntil = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+        
+        await updateNegocio(negocioId, {
+          dormido: true,
+          dormidoHasta: Timestamp.fromDate(dormantUntil)
+        });
+      }
+      setDormantMenuOpen(null);
+      onNegocioUpdate();
+    } catch (error) {
+      console.error("Error updating dormant status:", error);
+      alert("Error al actualizar el estado dormido");
+    }
+  };
+
+  // Close dormant menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dormantMenuRef.current && !dormantMenuRef.current.contains(e.target as Node)) {
+        setDormantMenuOpen(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleStatusChange = async (negocioId: string, newStatus: ColumnType, event: React.MouseEvent) => {
     event.stopPropagation();
@@ -116,6 +172,7 @@ export default function Pipeline({ negocios, onNegocioUpdate }: PipelineProps) {
 
   // Status styling
   const statusColors = {
+    form: 'bg-purple-400',       // New color for form stage
     propuesta: 'bg-yellow-400',
     evaluación: 'bg-blue-400',
     comercialización: 'bg-indigo-400',
@@ -146,11 +203,11 @@ export default function Pipeline({ negocios, onNegocioUpdate }: PipelineProps) {
     if (daysRemaining === null) return null;
     
     if (daysRemaining === 0) {
-      return "Dormido (hoy)";
+      return "Hasta hoy";
     } else if (daysRemaining === 1) {
-      return "Dormido (1 día)";
+      return "Hasta mañana";
     } else {
-      return `Dormido (${daysRemaining} días)`;
+      return `Hasta dentro de ${daysRemaining} días`;
     }
   };
 
@@ -222,14 +279,66 @@ export default function Pipeline({ negocios, onNegocioUpdate }: PipelineProps) {
                       </div>
                     )}
                     
-                    {/* Only show dormant status if the lead is dormant - removed creation date */}
-                    {negocio.dormido && (
-                      <div className="mt-1 text-xs">
-                        <span className="text-amber-600 font-medium">
-                          {formatDormantStatus(negocio)}
-                        </span>
+                    {/* Bottom row with dormant status and actions */}
+                    <div className="mt-1 flex justify-between items-center">
+                      {/* Dormant status */}
+                      <div className="flex items-center">
+                        {negocio.dormido && (
+                          <span className="text-xs text-amber-600 font-medium">
+                            {formatDormantStatus(negocio)}
+                          </span>
+                        )}
                       </div>
-                    )}
+                      
+                      {/* Dormant toggle button - UPDATED: smaller, thinner */}
+                      <div className="relative">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // If already dormant, wake up immediately
+                            if (negocio.dormido) {
+                              handleSetDormant(negocio.id!, 0);
+                            } else {
+                              // Otherwise open menu to select dormant period
+                              // Fix: Ensure we only pass string or null, not undefined
+                              setDormantMenuOpen(dormantMenuOpen === negocio.id ? null : negocio.id || null);
+                            }
+                          }}
+                          className={`text-xs px-2 py-0.5 rounded ${
+                            negocio.dormido 
+                              ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' 
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          } text-[10px] leading-none min-h-[20px]`}
+                        >
+                          {negocio.dormido ? 'Despertar' : 'Dormir'}
+                        </button>
+                        
+                        {/* Dormant periods dropdown */}
+                        {dormantMenuOpen === negocio.id && !negocio.dormido && (
+                          <div 
+                            ref={dormantMenuRef} 
+                            className="absolute right-0 mt-1 z-10 bg-white border border-gray-200 rounded-md shadow-lg py-1"
+                            style={{width: '120px'}}
+                          >
+                            {dormantPeriods.map((period) => (
+                              <button
+                                key={period.value}
+                                className="w-full text-left text-xs px-3 py-1 hover:bg-gray-100"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // Fix: Ensure negocio.id exists before passing it
+                                  if (negocio.id) {
+                                    handleSetDormant(negocio.id, period.value);
+                                  }
+                                }}
+                              >
+                                {period.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
