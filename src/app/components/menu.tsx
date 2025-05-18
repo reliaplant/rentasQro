@@ -44,7 +44,7 @@ export default function Menu() {
   const [isPropertyListingModalOpen, setIsPropertyListingModalOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const { favorites } = useFavorites();
-  const { filters, updateFilter } = useFilters();
+  const { filters, updateFilter, resetFilters } = useFilters();
 
   const router = useRouter();
   const currentTransactionType = filters.transactionType;
@@ -75,73 +75,89 @@ export default function Menu() {
   // Simplified handlers that don't cause loops
   const handleRentClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    console.log('Menu: Setting transaction type to renta');
-    updateFilter('transactionType', 'renta');
+    console.log('Menu: Setting transaction type to renta and clearing filters');
     
-    // Clear preventa filter when switching tabs
-    updateFilter('propertyType', '');
+    // Reset all filters first
+    resetFilters(); 
+    
+    // Then set only the transaction type
+    updateFilter('transactionType', 'renta');
+    // Explicitly ensure preventa is false for renta
+    updateFilter('preventa', false);
     
     setIsMobileMenuOpen(false);
     router.push('/explorar?t=renta');
-  }, [updateFilter, router]);
+  }, [updateFilter, router, resetFilters]);
 
   const handleBuyClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    console.log('Menu: Setting transaction type to compra');
-    updateFilter('transactionType', 'compra');
+    console.log('Menu: Setting transaction type to compra and clearing filters');
     
-    // Clear preventa filter when switching tabs
-    updateFilter('propertyType', '');
+    // Reset all filters first
+    resetFilters();
+    
+    // Then set only the transaction type, explicitly ensure preventa is false
+    updateFilter('transactionType', 'compra');
+    updateFilter('preventa', false); // Explicitly ensure preventa is false
     
     setIsMobileMenuOpen(false);
     router.push('/explorar?t=compra');
-  }, [updateFilter, router]);
+  }, [updateFilter, router, resetFilters]);
 
-  // Handler for Preventa click to filter by property type and set transaction to compra
+  // Handler for Preventa click - updated to handle the boolean preventa flag
   const handlePreventaClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    console.log('Menu: Setting property filter to preventa and transaction to compra');
-    updateFilter('propertyType', 'preventa');
+    console.log('Menu: Setting preventa filter to true and transaction to compra');
+    
+    // Reset all filters first
+    resetFilters(); 
+    
+    // Then set only what we need - this should be done with a custom filter for preventa
     updateFilter('transactionType', 'compra');
+    updateFilter('preventa', true);
+    
     setIsMobileMenuOpen(false);
-    router.push('/explorar?propertyType=preventa&t=compra');
-  }, [updateFilter, router]);
+    router.push('/explorar?preventa=true&t=compra');
+  }, [updateFilter, router, resetFilters]);
 
-  // Simpler active tab detection that doesn't cause loops
+  // Update isActive function to properly check for the preventa flag
   const isActive = useCallback((path: string) => {
     // Get URL parameter directly to avoid dependency on state
     const urlTransactionType = searchParams?.get('t');
-    const urlPropertyType = searchParams?.get('propertyType');
+    const urlPreventa = searchParams?.get('preventa');
     
-    // Check if preventa filter is active
-    const isPreventaActive = urlPropertyType === 'preventa';
-
     if (path === '/' && pathname === '/') return true;
 
-    // For rent/buy links, prioritize URL param and make sure preventa isn't active
+    // For Preventa link, only consider it active when preventa is true
+    if (path === '/preventa') {
+      return pathname === '/explorar' && 
+             ((urlPreventa === 'true') || 
+             (filters.preventa === true));
+    }
+
+    // For rent/buy links, check if we're not in preventa mode
+    const isPreventaActive = urlPreventa === 'true' || filters.preventa === true;
+
+    // For Rent Tab - don't show as active if preventa is active
     if (path === '/rentar') {
       return pathname === '/explorar' && 
              !isPreventaActive &&
-             (urlTransactionType === 'renta' || 
-              (!urlTransactionType && currentTransactionType === 'renta'));
+             ((urlTransactionType === 'renta') || 
+             (!urlTransactionType && filters.transactionType === 'renta'));
     }
     
+    // For Buy Tab - don't show as active if preventa is active
     if (path === '/comprar') {
       return pathname === '/explorar' && 
              !isPreventaActive &&
-             (urlTransactionType === 'compra' || 
-              (!urlTransactionType && currentTransactionType === 'compra'));
-    }
-
-    // For Preventa link, check if propertyType=preventa is in URL
-    if (path === '/preventa') {
-      return pathname === '/explorar' && isPreventaActive;
+             ((urlTransactionType === 'compra') || 
+             (!urlTransactionType && filters.transactionType === 'compra'));
     }
 
     if (path !== '/' && pathname?.startsWith(path)) return true;
     
     return false;
-  }, [pathname, searchParams, currentTransactionType]);
+  }, [pathname, searchParams, filters.transactionType, filters.preventa]);
 
   return (
     <nav className="bg-white z-[9999] shadow-sm sticky top-0">
@@ -201,7 +217,7 @@ export default function Menu() {
             </Link>
 
             <Link
-              href="/explorar?propertyType=preventa&t=compra"
+              href="/explorar?preventa=true&t=compra"
               onClick={handlePreventaClick}
               className={`${
                 isActive('/preventa')
@@ -300,8 +316,7 @@ export default function Menu() {
               href="/explorar"
               onClick={() => {
                 setIsMobileMenuOpen(false);
-                // Clear preventa filter when using Explorar
-                updateFilter('propertyType', '');
+                resetFilters(); // Reset all filters when clicking "Explorar"
               }}
               className="flex items-center px-4 py-3 rounded-lg text-base font-medium bg-violet-600 text-white hover:bg-violet-700"
             >
@@ -331,7 +346,7 @@ export default function Menu() {
             </Link>
 
             <Link
-              href="/explorar?propertyType=preventa&t=compra"
+              href="/explorar?preventa=true&t=compra"
               onClick={handlePreventaClick}
               className={`flex items-center px-4 py-3 rounded-lg text-base font-medium ${isActive('/preventa')
                   ? 'bg-violet-50 text-violet-700'

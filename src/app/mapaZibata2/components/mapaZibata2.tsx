@@ -171,6 +171,12 @@ export default function MapaZibata2() {
         );
       }
       
+      // Apply preventa filter (using the boolean field, not availability)
+      if (filters.preventa) {
+        console.log(`Filtering for preventa properties in map`);
+        filteredProps = filteredProps.filter((prop: any) => prop.preventa === true);
+      }
+      
       // Apply bedrooms filter
       if (filters.bedrooms !== null) {
         filteredProps = filteredProps.filter((prop: any) => {
@@ -367,7 +373,7 @@ export default function MapaZibata2() {
     };
   }, [loading, locations]);
 
-  // Update markers when filters change (including parking spots)
+  // Update markers when filters change (including availability)
   useEffect(() => {
     if (!map.current || locations.length === 0) return;
     createMarkers();
@@ -381,6 +387,7 @@ export default function MapaZibata2() {
     filters.parkingSpots,
     filters.isFurnished,
     filters.petsAllowed,
+    filters.preventa, // Use preventa instead of availability
     locations
   ]);
 

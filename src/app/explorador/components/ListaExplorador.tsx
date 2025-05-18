@@ -103,7 +103,7 @@ const ListaExplorador = () => {
       filtered = filtered.filter(property => property.propertyType === filters.propertyType);
     }
 
-    // Filter by preventa boolean directly (not availability)
+    // Filter by preventa (boolean field)
     if (filters.preventa) {
       console.log(`ListaExplorador: Filtering for preventa properties`);
       filtered = filtered.filter(property => property.preventa === true);

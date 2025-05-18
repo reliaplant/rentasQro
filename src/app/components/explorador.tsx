@@ -102,7 +102,6 @@ const Explorador = () => {
       };
 
       // Ensure we only show properties with status 'publicada'
-      // This is redundant with the loadProperties filter, but serves as a safeguard
       filtered = filtered.filter(property => property.status === 'publicada');
       logFilterStep('status', filtered.length);
 
@@ -130,6 +129,21 @@ const Explorador = () => {
       if (filters.propertyType) {
         filtered = filtered.filter(property => property.propertyType === filters.propertyType);
         logFilterStep('property type', filtered.length);
+      }
+      
+      // Apply availability filter (inmediata or preventa)
+      // Handle properties based on preventa boolean field
+      if (filters.preventa === true) {
+        console.log(`Explorador: Filtering for preventa properties`);
+        filtered = filtered.filter(property => property.preventa === true);
+        logFilterStep('preventa', filtered.length);
+      }
+
+      // Filter by preventa boolean field (not availability)
+      if (filters.preventa) {
+        console.log(`Explorador: Filtering for preventa properties`);
+        filtered = filtered.filter(property => property.preventa === true);
+        logFilterStep('preventa', filtered.length);
       }
 
       // Filtrar por recámaras
@@ -206,7 +220,21 @@ const Explorador = () => {
     };
 
     filterProperties();
-  }, [filters, properties, convertMXNtoUSD]);
+  }, [
+    filters.transactionType, 
+    filters.selectedZone,
+    filters.priceRange, 
+    filters.bedrooms,
+    filters.bathrooms,
+    filters.isFurnished,
+    filters.petsAllowed,
+    filters.parkingSpots,
+    filters.propertyType,
+    filters.selectedCondo,
+    filters.preventa, // Use preventa instead of availability
+    properties,
+    convertMXNtoUSD
+  ]);
 
   // Manejar navegación de imágenes con loop
   const navigateImage = (e: React.MouseEvent, propertyId: string, direction: 'prev' | 'next', maxImages: number) => {
@@ -295,6 +323,15 @@ const Explorador = () => {
               {property.transactionType === 'renta' ? 'En renta' : 'En venta'}
             </span>
           </div>
+
+          {/* Add Preventa badge if property is preventa */}
+          {property.preventa && (
+            <div className="absolute top-1.5 sm:top-3 left-[85px] sm:left-[100px] z-20">
+              <span className="bg-yellow-400/90 backdrop-blur-sm text-yellow-800 text-[10px] sm:text-xs font-medium px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-sm">
+                Preventa
+              </span>
+            </div>
+          )}
 
           {/* Botón Favorito con hover effect - updated with favorite functionality */}
           <button 

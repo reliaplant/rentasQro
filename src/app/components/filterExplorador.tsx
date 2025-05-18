@@ -87,8 +87,7 @@ const PropertyTypeSelect = memo(({
     { id: 'casa', name: 'Casa' },
     { id: 'departamento', name: 'Depa' },
     { id: 'terreno', name: 'Terreno' },
-    { id: 'local', name: 'Local' },
-    { id: 'preventa', name: 'Preventa' }
+    { id: 'local', name: 'Local' }
   ];
   
   // Find the current property type name for display
@@ -143,6 +142,33 @@ const PropertyTypeSelect = memo(({
 });
 
 PropertyTypeSelect.displayName = 'PropertyTypeSelect';
+
+// Replace AvailabilitySelect with PreventaToggle
+const PreventaToggle = memo(({ 
+  isPreventa,
+  onChange 
+}: { 
+  isPreventa: boolean,
+  onChange: (value: boolean) => void 
+}) => {
+  return (
+    <button
+      onClick={() => onChange(!isPreventa)}
+      className={`
+        px-3 py-1.5 rounded-full text-xs font-medium transition-all
+        ${isPreventa
+          ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
+          : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
+        flex items-center gap-2 cursor-pointer
+      `}
+    >
+      {isPreventa && <FaCheck className="w-3 h-3 text-violet-600" />}
+      Preventa
+    </button>
+  );
+});
+
+PreventaToggle.displayName = 'PreventaToggle';
 
 // Memoized numeric filter buttons for better performance
 // Moving this BEFORE FilterExplorador to fix the TypeScript errors
@@ -361,6 +387,11 @@ const FilterExplorador = () => {
     updateFilter('propertyType', propertyType);
   }, [updateFilter]);
 
+  // Replace handleAvailabilityChange with a direct toggle handler for preventa
+  const handlePreventaToggle = useCallback((value: boolean) => {
+    updateFilter('preventa', value);
+  }, [updateFilter]);
+
   // Move static styles outside component to avoid recreating them on each render
   const baseButtonStyles = `
     px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
@@ -499,6 +530,14 @@ const FilterExplorador = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Remove all references to availability in the effect
+  useEffect(() => {
+    // If transaction type changes to renta, set preventa to false
+    if (filters.transactionType === 'renta' && filters.preventa) {
+      updateFilter('preventa', false);
+    }
+  }, [filters.transactionType, filters.preventa, updateFilter]);
+
   return (
     <div className="w-full bg-white border-b border-gray-200 sticky top-16 z-40 transition-all duration-300 shadow-sm hover:shadow-md">
       <div className="px-[5vw] py-1.5">
@@ -548,6 +587,14 @@ const FilterExplorador = () => {
                 <PropertyTypeSelect
                   selectedType={filters.propertyType}
                   onChange={handlePropertyTypeChange}
+                />
+              )}
+
+              {/* Add Preventa filter */}
+              {isClient && filters.transactionType === 'compra' && (
+                <PreventaToggle
+                  isPreventa={filters.preventa}
+                  onChange={handlePreventaToggle}
                 />
               )}
 

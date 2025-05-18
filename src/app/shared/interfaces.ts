@@ -99,6 +99,11 @@ export interface ImageWithTag {
 
 export interface PropertyData {
   id?: string;
+  propertyType: string;
+  preventa?: boolean; // Boolean field for preventa status
+  transactionType: string;
+  title?: string;
+  description?: string;
   advisor: string;
   createdAt?: Timestamp;
   publicationDate: Timestamp;
@@ -108,9 +113,7 @@ export interface PropertyData {
   condo: string;  // ID del condominio
   condoName: string;  // Nombre del condominio
   imageUrls: string[];
-  propertyType: string; // 'casa', 'departamento', etc.
   price: number;
-  transactionType: 'renta' | 'venta'
   descripcion: string;
   status: 'borrador' | 'publicada' | 'en_cierre' | 'vendida' | 'descartada';
   bedrooms: number;
@@ -149,6 +152,7 @@ export interface PropertyData {
   porcentajePizo?: number; // Added for Pizo percentage
   comision?: number; // Added for commission
   modelo?: string; // Added for model
+  availability?: 'inmediata' | 'preventa' | string; // Add availability field
 }
 
 export interface resumenCondo{
