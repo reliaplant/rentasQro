@@ -163,16 +163,16 @@ export default function SimilarProperties({
       if (usdPrice < 1000) {
         return `USD ${usdPrice.toFixed(0)}`;
       } else if (usdPrice < 1000000) {
-        return `USD ${(usdPrice / 1000).toFixed(usdPrice % 1000 === 0 ? 0 : 1)}K`;
+        return `USD ${(usdPrice / 1000).toFixed(usdPrice % 1000 === 0 ? 0 : 1)} K`;
       } else {
-        return `USD ${(usdPrice / 1000000).toFixed(1)}M`;
+        return `USD ${(usdPrice / 1000000).toFixed(1)} M`;
       }
     } else {
       // MXN formatting
       if (priceValue < 1000000) {
         return `${(priceValue / 1000).toFixed(priceValue % 1000 === 0 ? 0 : 1)}K`;
       } else {
-        return `${(priceValue / 1000000).toFixed(1)}MDP`;
+        return `${(priceValue / 1000000).toFixed(1)} MDP`;
       }
     }
   };
@@ -263,9 +263,11 @@ function PropertyCard({
         
         {/* Property Info - Simplified for smaller cards */}
         <div className="p-2">
-          <h4 className="font-medium text-gray-900 text-xs truncate">
-            {`${property.propertyType === 'departamento' ? 'Depa' : 'Casa'}${property.condoName ? ` en ${property.condoName}` : ''}`}
-          </h4>
+            <h4 className="font-medium text-gray-900 text-xs truncate">
+            {property.propertyType === 'departamento' ? 'Depa' : 'Casa'}
+            {property.modelo && ` ${property.modelo}`}
+            {property.condoName && ` en ${property.condoName}`}
+            </h4>
           <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
             {property.bedrooms && (
               <div className="flex items-center gap-1">

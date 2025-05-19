@@ -199,7 +199,17 @@ export default function PropertyInfo({
                 </div>
               )}
             </div>
-          </section>
+            </section>
+            {property.description && (
+            <section>
+              <h3 className="text-lg font-semibold mb-4">Descripción</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="col-span-full">
+                <p className="text-sm text-gray-600">{property.description}</p>
+              </div>
+              </div>
+            </section>
+            )}
         </>
       )}
     </div>

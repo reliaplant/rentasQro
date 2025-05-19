@@ -83,7 +83,10 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
   const PropertyTypeIcon = property.propertyType === 'casa' ? BiHome : BiBuildings;
 
   // Create a more descriptive title
-  const fullTitle = `${propertyTypeFormatted} en ${(isRental ? 'Renta' : 'Venta')}${
+  const fullTitle = `${propertyTypeFormatted} en ${
+    property.preventa ? 'Preventa' : 
+    isRental ? 'Renta' : 'Venta'
+  }${
     condoData?.name ? ` en ${condoData.name}` : ''
   }${zoneData?.name ? `, ${zoneData.name}` : ''}`;
 
@@ -95,21 +98,24 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
         <span className="hover:text-gray-700 cursor-pointer">Querétaro</span>
         {zoneData?.name && (
           <>
-            <span className="mx-2">›</span>
-            <span className="hover:text-gray-700 cursor-pointer">{zoneData.name}</span>
+        <span className="mx-2">›</span>
+        <span className="hover:text-gray-700 cursor-pointer">{zoneData.name}</span>
           </>
         )}
         {condoData?.name && (
           <>
-            <span className="mx-2">›</span>
-            <span className="hover:text-gray-700 cursor-pointer">{condoData.name}</span>
+        <span className="mx-2">›</span>
+        <span className="hover:text-gray-700 cursor-pointer">{condoData.name}</span>
           </>
         )}
         <span className={`inline-block ml-2 px-3 py-1 rounded-full text-xs font-medium ${
-            isRental ? 'ml-4 bg-violet-50 border border-violet-500 text-violet-600' : 'border border-green-600 bg-green-50 text-green-600'
+        property.preventa ? 'ml-4 bg-orange-50 border border-orange-500 text-orange-600' :
+        isRental ? 'ml-4 bg-violet-50 border border-violet-500 text-violet-600' : 
+        'border border-green-600 bg-green-50 text-green-600'
           }`}>
-            {isRental ? 'En renta' : 'En venta'}
+        {property.preventa ? 'En preventa' : isRental ? 'En renta' : 'En venta'}
           </span>
+          
       </div>
 
       {/* Main property info */}
@@ -119,6 +125,7 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
           <h1 className="text-3xl font-semibold text-gray-900 mt-2">
             {fullTitle.charAt(0).toUpperCase() + fullTitle.slice(1)}
           </h1>
+          <h2 className="mt-2 text-2xl text-gray-600">Modelo: {property.modelo}</h2>
         </div>
 
         {/* Combined price and features section */}

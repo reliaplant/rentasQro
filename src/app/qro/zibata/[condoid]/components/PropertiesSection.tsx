@@ -132,7 +132,7 @@ export default function PropertiesSection({ properties, condoName }: PropertiesS
                   <div className="flex items-start justify-between">
                     <div className="w-full">
                       <h3 className="font-medium text-gray-900 truncate text-xs md:text-sm">
-                        {formatPropertyType(property.propertyType)} • {property.condoName}
+                        {formatPropertyType(property.propertyType)} • {property.modelo} • {property.condoName}
                       </h3>
                       <div className="flex items-center gap-1.5 text-[10px] md:text-xs text-gray-500">
                         <div className="flex items-center gap-0.5">

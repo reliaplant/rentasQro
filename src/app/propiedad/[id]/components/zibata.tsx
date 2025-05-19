@@ -128,7 +128,7 @@ export default function ZibataInfo() {
 
       <div className="bg-white ">
         {/* Hero Section */}
-        <div className="relative h-[280px] md:h-[400px] w-full overflow-hidden rounded-t-4xl">
+        <div className="relative h-[280px] md:h-[400px] w-full overflow-hidden rounded-xl">
           <Image
             src="/assets/zibata/zibata.jpg"
             alt="Zibatá - Vista aérea"
@@ -136,11 +136,6 @@ export default function ZibataInfo() {
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-            <div className="p-6">
-              <p className="text-white/90 text-base md:text-lg">Estilo de vida incomparable en Querétaro</p>
-            </div>
-          </div>
         </div>
 
         <div className="p-5 md:p-6">
