@@ -11,12 +11,11 @@ interface PropertyType {
   label: string;
 }
 
-// Define property types array
+// Define property types array - removed 'local'
 const propertyTypes: PropertyType[] = [
   { id: 'casa', label: 'Casa' },
   { id: 'departamento', label: 'Departamento' },
-  { id: 'terreno', label: 'Terreno' },
-  { id: 'local', label: 'Local' }
+  { id: 'terreno', label: 'Terreno' }
 ];
 
 const MobileSearchHeader = () => {
@@ -107,7 +106,7 @@ const MobileSearchHeader = () => {
     return localPreventa ? "preventa" : "inmediata";
   };
 
-  // Updated handler for the availability toggle
+  // Updated handler for the availability toggle with chips UI
   const handleAvailabilityChange = (value: string) => {
     console.log(`MobileSearchHeader: User selected availability: ${value}`);
     
@@ -121,17 +120,33 @@ const MobileSearchHeader = () => {
       updateFilter('preventa', false);
       updateFilter('preventaFilterActive', false);
     } else if (value === "preventa") {
-      // "Preventa" selected - enable filter and set to true
-      setLocalPreventa(true);
-      setIsPreventaFilterActive(true);
-      updateFilter('preventa', true);
-      updateFilter('preventaFilterActive', true);
+      // If preventa is already active, toggle it off
+      if (isPreventaFilterActive && localPreventa) {
+        setLocalPreventa(false);
+        setIsPreventaFilterActive(false);
+        updateFilter('preventa', false);
+        updateFilter('preventaFilterActive', false);
+      } else {
+        // Otherwise, enable preventa
+        setLocalPreventa(true);
+        setIsPreventaFilterActive(true);
+        updateFilter('preventa', true);
+        updateFilter('preventaFilterActive', true);
+      }
     } else if (value === "inmediata") {
-      // "Inmediata" selected - enable filter and set to false
-      setLocalPreventa(false);
-      setIsPreventaFilterActive(true);
-      updateFilter('preventa', false);
-      updateFilter('preventaFilterActive', true);
+      // If inmediata is already active, toggle it off
+      if (isPreventaFilterActive && !localPreventa) {
+        setLocalPreventa(false);
+        setIsPreventaFilterActive(false);
+        updateFilter('preventa', false);
+        updateFilter('preventaFilterActive', false);
+      } else {
+        // Otherwise, enable inmediata
+        setLocalPreventa(false);
+        setIsPreventaFilterActive(true);
+        updateFilter('preventa', false);
+        updateFilter('preventaFilterActive', true);
+      }
     }
     
     // Set a small timeout before allowing synchronization again
@@ -257,46 +272,75 @@ const MobileSearchHeader = () => {
                 </div>
               </div>
               
-              {/* 3. Group Property Type and Availability under a common heading */}
+              {/* 3. Property Type - Now with selectable chips */}
               <div className="mb-6">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">Características de la propiedad</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Property Type Select */}
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">Tipo de inmueble</label>
-                    <select
-                      value={filters.propertyType}
-                      onChange={(e) => handlePropertyTypeChange(e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded-md"
-                    >
-                      <option value="">Todos los tipos</option>
-                      {propertyTypes.map(type => (
-                        <option key={type.id} value={type.id}>
-                          {type.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  {/* Availability Select - only show for compra */}
-                  {filters.transactionType === 'compra' && (
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1">Disponibilidad</label>
-                      <select
-                        value={getAvailabilitySelectValue()}
-                        onChange={(e) => handleAvailabilityChange(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-md"
+                <h3 className="text-sm font-medium text-gray-700 mb-2">Tipo de inmueble</h3>
+                <div className="flex overflow-x-auto pb-2 -mx-1 px-1">
+                  <div className="flex space-x-2 flex-nowrap">
+                    {propertyTypes.map(type => (
+                      <button
+                        key={type.id}
+                        onClick={() => handlePropertyTypeChange(type.id)}
+                        className={`
+                          whitespace-nowrap px-3 py-2 rounded-lg text-sm font-medium
+                          transition-all duration-200
+                          ${filters.propertyType === type.id
+                            ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
+                            : 'bg-gray-50/80 text-gray-700 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
+                        `}
                       >
-                        <option value="all">Todas</option>
-                        <option value="inmediata">Inmediata</option>
-                        <option value="preventa">Preventa</option>
-                      </select>
-                    </div>
-                  )}
+                        {type.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
               
-              {/* 4. Bedrooms with circular buttons */}
+              {/* 4. Availability - Now with two selectable chips */}
+              {filters.transactionType === 'compra' && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">Disponibilidad</h3>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleAvailabilityChange("inmediata")}
+                      className={`
+                        flex-1 px-3 py-2 rounded-lg text-sm font-medium
+                        transition-all duration-200 flex items-center justify-center gap-2
+                        ${isPreventaFilterActive && !localPreventa
+                          ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
+                          : 'bg-gray-50/80 text-gray-700 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
+                      `}
+                    >
+                      {isPreventaFilterActive && !localPreventa && <FaCheck className="w-4 h-4 text-violet-600" />}
+                      Inmediata
+                    </button>
+                    <button
+                      onClick={() => handleAvailabilityChange("preventa")}
+                      className={`
+                        flex-1 px-3 py-2 rounded-lg text-sm font-medium
+                        transition-all duration-200 flex items-center justify-center gap-2
+                        ${isPreventaFilterActive && localPreventa
+                          ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
+                          : 'bg-gray-50/80 text-gray-700 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
+                      `}
+                    >
+                      {isPreventaFilterActive && localPreventa && <FaCheck className="w-4 h-4 text-violet-600" />}
+                      Preventa
+                    </button>
+                  </div>
+                  {isPreventaFilterActive && (
+                    <button
+                      onClick={() => handleAvailabilityChange("all")}
+                      className="mt-2 text-xs text-violet-600 font-medium flex items-center gap-1"
+                    >
+                      <FaTimes className="w-3 h-3" />
+                      Quitar filtro
+                    </button>
+                  )}
+                </div>
+              )}
+              
+              {/* 5. Bedrooms */}
               <div className="mb-6">
                 <h3 className="text-sm font-medium text-gray-700 mb-2">Recámaras</h3>
                 <div className="flex items-center gap-2">
@@ -312,7 +356,7 @@ const MobileSearchHeader = () => {
                       }}
                       className={`
                         w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium
-                        transition-all duration-200 cursor-pointer
+                        transition-all duration-200 cursor-pointer relative group
                         ${filters.bedrooms === (num === 3 ? 3 : num)
                           ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
                           : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
@@ -324,7 +368,7 @@ const MobileSearchHeader = () => {
                 </div>
               </div>
               
-              {/* 5. Bathrooms with circular buttons */}
+              {/* 6. Bathrooms */}
               <div className="mb-6">
                 <h3 className="text-sm font-medium text-gray-700 mb-2">Baños</h3>
                 <div className="flex items-center gap-2">
@@ -340,7 +384,7 @@ const MobileSearchHeader = () => {
                       }}
                       className={`
                         w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium
-                        transition-all duration-200 cursor-pointer
+                        transition-all duration-200 cursor-pointer relative group
                         ${filters.bathrooms === (num === 2 ? 2 : num)
                           ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
                           : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
@@ -352,7 +396,7 @@ const MobileSearchHeader = () => {
                 </div>
               </div>
               
-              {/* 6. Parking spots with circular buttons */}
+              {/* 7. Parking spots */}
               <div className="mb-6">
                 <h3 className="text-sm font-medium text-gray-700 mb-2">Estacionamientos</h3>
                 <div className="flex items-center gap-2">
@@ -368,7 +412,7 @@ const MobileSearchHeader = () => {
                       }}
                       className={`
                         w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium
-                        transition-all duration-200 cursor-pointer
+                        transition-all duration-200 cursor-pointer relative group
                         ${filters.parkingSpots === (num === 3 ? 3 : num)
                           ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
                           : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
@@ -380,7 +424,7 @@ const MobileSearchHeader = () => {
                 </div>
               </div>
               
-              {/* 7. Additional filters for renta */}
+              {/* 8. Additional filters for renta */}
               {filters.transactionType === 'renta' && (
                 <div className="mb-6">
                   <h3 className="text-sm font-medium text-gray-700 mb-2">Características</h3>
