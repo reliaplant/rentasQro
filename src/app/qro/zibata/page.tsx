@@ -232,43 +232,13 @@ export default function ZibataPage() {
   return (
     <div className="min-h-screen bg-white pb-24">
       
-      {/* Mapa interactivo con Suspense y carga diferida */}
-      <div className="pt-2 md:pt-4 mb-6 md:mb-8 bg-gradient-to-b from-[#f5e6d3]/80 to-white">
-        <div className="flex flex-col md:flex-row items-center md:gap-2 px-4 md:px-0">
-          <div className="h-16 md:h-20 mb-2 md:mb-0 relative w-[200px]">
-            <Image
-              src="/assets/logos/zibataLogo.png"
-              alt="Logo Zibatá"
-              width={200}
-              height={96}
-              className="object-contain h-full brightness-[0.1]"
-              priority
-            />
-          </div>
-          <div className="hidden md:block mr-6 text-gray-700 text-xl">|</div>
-          <h2 className="text-lg md:text-xl !text-violet-800">MAPA INTERACTIVO</h2>
-        </div>
-        <div className="overflow-hidden h-[60vh] md:h-[90vh]">
-          <Suspense fallback={
-            <div className="h-full w-full bg-gray-200 animate-pulse flex items-center justify-center">
-              <p className="text-gray-500">Cargando mapa interactivo...</p>
-            </div>
-          }>
-            {!loading && <ZibataMapWrapper height="100%" />}
-          </Suspense>
-        </div>
-      </div>
+
+
 
       <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
-        {/* About Section */}
-        <div className="mb-8 md:mb-12">
-          <h1 className="text-5xl md:text-8xl bg-gradient-to-r !from-black !to-violet-500 !text-transparent !bg-clip-text inline-block">Zibatá</h1>
-          <p className="mt-4 md:mt-8 mb-4 text-lg md:text-2xl text-black">
-            Zibatá se ha convertido en uno de los mejores lugares para vivir en Querétaro, destacando por su calidad de vida, seguridad y comodidades. Este desarrollo cuenta con más de 30 condominios residenciales exclusivos, rodeados de amplias áreas verdes y con un enfoque sustentable, incluyendo su propia planta de tratamiento de agua.
-          </p>
-        </div>
 
-        <div className="relative h-[200px] sm:h-[280px] md:h-[400px] w-full overflow-hidden">
+
+        <div className="relative h-[200px] sm:h-[280px] md:h-[400px] w-full overflow-hidden rounded-xl">
           <Image
             src="/assets/zibata/zibata.jpg"
             alt="Zibatá - Vista aérea"
@@ -278,12 +248,29 @@ export default function ZibataPage() {
             fill
             quality={85}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent flex items-end rounded-2xl">
-            <div className="p-4 md:p-6 max-w-7xl mx-auto w-full">
-              <p className="text-white/90 text-sm md:text-lg">Estilo de vida incomparable en Querétaro</p>
-            </div>
-          </div>
+
         </div>
+
+        {/* About Section */}
+        <div className="mt-12 mb-8 md:mb-12">
+          <h1 className="text-5xl md:text-8xl bg-gradient-to-r !from-black !to-violet-500 !text-transparent !bg-clip-text inline-block">Zibatá</h1>
+          <p className="mt-4 md:mt-8 mb-4 text-lg md:text-2xl text-black">
+            Zibatá se ha convertido en uno de los mejores lugares para vivir en Querétaro, destacando por su calidad de vida, seguridad y comodidades. Este desarrollo cuenta con más de 30 condominios residenciales exclusivos, rodeados de amplias áreas verdes y con un enfoque sustentable, incluyendo su propia planta de tratamiento de agua.
+          </p>
+        </div>
+
+
+
+      <div className="relative w-full h-[600px] md:h-[800px] mt-8">
+        <Image
+          src="/assets/condos/mapaZibataEditado.webp"
+          alt="Mapa interactivo de Zibatá"
+          fill
+          className="object-contain"
+          priority
+          quality={100}
+        />
+      </div>
 
 
         {/* Amenities Section */}
