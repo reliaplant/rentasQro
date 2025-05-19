@@ -125,7 +125,9 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
           <h1 className="text-3xl font-semibold text-gray-900 mt-2">
             {fullTitle.charAt(0).toUpperCase() + fullTitle.slice(1)}
           </h1>
-          <h2 className="mt-2 text-2xl text-gray-600">Modelo: {property.modelo}</h2>
+            {property.modelo && (
+            <h2 className="mt-2 text-2xl text-gray-600">Modelo: {property.modelo}</h2>
+            )}
         </div>
 
         {/* Combined price and features section */}

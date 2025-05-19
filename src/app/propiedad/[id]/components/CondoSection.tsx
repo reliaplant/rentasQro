@@ -96,20 +96,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
         <br />
         <p className="text-gray-700 whitespace-pre-line text-base md:text-base text-sm">{condoData.description}</p>
       </div>
-
-      {/* Zibata Map Section */}
-      {condoData.polygonId && (
-        <div className="mt-12 mb-12">
-            <h3 className="text-lg font-semibold mb-4">
-            <span className="hidden md:inline">Mapa interactivo de Zibata</span>
-            <span className="md:hidden">Mapa de Zibata</span>
-            </h3>
-            <div className="overflow-hidden h-[40vh] md:h-[80vh]">
-            <ZibataMap highlightedPolygonId={condoData.polygonId} />
-            </div>
-        </div>
-      )}
-
+      
       {/* Amenities Section */}
       <div>
         <h3 className="text-lg font-semibold mb-4 ">Amenidades de este lugar</h3>

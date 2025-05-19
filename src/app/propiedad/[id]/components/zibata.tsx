@@ -102,23 +102,23 @@ export default function ZibataInfo() {
         <title>Zibatá | El mejor fraccionamiento para vivir en Querétaro | PIZO MX</title>
         <meta name="description" content="Descubre por qué Zibatá se ha convertido en el mejor lugar para vivir en Querétaro. Amplia oferta de casas y departamentos en exclusivos condominios residenciales." />
         <meta name="keywords" content="Zibatá, fraccionamiento Querétaro, casas en Zibatá, departamentos en Zibatá, bienes raíces Querétaro, vivir en Zibatá" />
-        
+
         {/* OpenGraph tags */}
         <meta property="og:title" content="Zibatá | El mejor fraccionamiento para vivir en Querétaro" />
         <meta property="og:description" content="Descubre por qué Zibatá se ha convertido en el mejor lugar para vivir en Querétaro. Amplia oferta de casas y departamentos en exclusivos condominios residenciales." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://www.pizo.mx/zibata" />
         <meta property="og:image" content="https://www.pizo.mx/assets/zibata/zibata.jpg" />
-        
+
         {/* Twitter tags */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Zibatá | El mejor fraccionamiento para vivir en Querétaro" />
         <meta name="twitter:description" content="Descubre por qué Zibatá se ha convertido en el mejor lugar para vivir en Querétaro. Amplia oferta de casas y departamentos en exclusivos condominios residenciales." />
         <meta name="twitter:image" content="https://www.pizo.mx/assets/zibata/zibata.jpg" />
-        
+
         {/* Canonical URL */}
         <link rel="canonical" href="https://www.pizo.mx/zibata" />
-        
+
         {/* Structured data */}
         <script
           type="application/ld+json"
@@ -166,7 +166,7 @@ export default function ZibataInfo() {
                 <h4 className="font-medium text-sm mb-1">Campo de golf</h4>
                 <p className="text-xs text-gray-500">18 hoyos profesionales</p>
               </div>
-              
+
               <div className="flex flex-col items-center text-center p-3 bg-gray-50 rounded-lg">
                 <div className="w-10 h-10 bg-violet-100 rounded-full flex items-center justify-center mb-2">
                   <Dog className="w-5 h-5 text-violet-600" />
@@ -174,7 +174,7 @@ export default function ZibataInfo() {
                 <h4 className="font-medium text-sm mb-1">Pet-friendly</h4>
                 <p className="text-xs text-gray-500">Espacios para mascotas</p>
               </div>
-              
+
               <div className="flex flex-col items-center text-center p-3 bg-gray-50 rounded-lg">
                 <div className="w-10 h-10 bg-violet-100 rounded-full flex items-center justify-center mb-2">
                   <Globe className="w-5 h-5 text-violet-600" />
@@ -218,7 +218,7 @@ export default function ZibataInfo() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="p-3 border border-gray-100 rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 bg-violet-50 rounded-full flex items-center justify-center flex-shrink-0">
@@ -230,7 +230,7 @@ export default function ZibataInfo() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="p-3 border border-gray-100 rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 bg-violet-50 rounded-full flex items-center justify-center flex-shrink-0">
@@ -242,7 +242,7 @@ export default function ZibataInfo() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="p-3 border border-gray-100 rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 bg-violet-50 rounded-full flex items-center justify-center flex-shrink-0">
@@ -316,7 +316,7 @@ export default function ZibataInfo() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="p-3 border border-gray-100 rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 bg-violet-50 rounded-full flex items-center justify-center flex-shrink-0">
@@ -350,26 +350,27 @@ export default function ZibataInfo() {
           </div>
 
           {/* Map Section */}
-          <div className="mb-8">
-            <h3 className="text-xl font-semibold mb-3 text-gray-800">Mapa del desarrollo</h3>
-              <a href="https://www.google.com/maps/place/76269+Zibat%C3%A1,+Qro./data=!4m2!3m1!1s0x85d35c1cebe1b891:0x93c0abf54cd38ef2?sa=X&ved=1t:242&ictx=111" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="relative w-full aspect-[16/9] rounded-lg overflow-hidden border border-gray-200 block cursor-pointer group">
-              <Image
-                src="/assets/condos/ZibataMapa.png"
-                alt="Mapa de Zibatá"
-                fill
-                className="object-cover transition-all duration-100 group-hover:brightness-75"
-              />
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="text-white flex items-center gap-2 bg-black/50 px-4 py-2 rounded-full">
-                  Ver en Google Maps
-                  <ArrowUpRight size={16} />
-                </span>
-              </div>
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold mb-3 text-gray-800">Mapa del desarrollo</h3>
+              <a href="https://www.google.com/maps/place/76269+Zibat%C3%A1,+Qro./data=!4m2!3m1!1s0x85d35c1cebe1b891:0x93c0abf54cd38ef2?sa=X&ved=1t:242&ictx=111"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative w-full aspect-auto rounded-lg overflow-hidden block cursor-pointer group">
+                <Image
+                  src="/assets/condos/mapaZibataEditado.webp"
+                  alt="Mapa de Zibatá"
+                  width={1920}
+                  height={1080}
+                  className="w-full h-auto transition-all duration-100 group-hover:brightness-75"
+                />
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-white flex items-center gap-2 bg-black/50 px-4 py-2 rounded-full">
+                    Ver en Google Maps
+                    <ArrowUpRight size={16} />
+                  </span>
+                </div>
               </a>
-          </div>
+            </div>
 
           {/* Location Information */}
           <div className="mb-8">
@@ -412,7 +413,7 @@ export default function ZibataInfo() {
                     sizes="(max-width: 768px) 50vw, 40vw"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
-                    <p className="text-white text-xs">{index === 0 ? 'Centro histórico' : 'Aeropuerto Internacional'}</p>
+                    <p className="!text-white text-xs">{index === 0 ? 'Centro histórico' : 'Aeropuerto Internacional'}</p>
                   </div>
                 </div>
               ))}
@@ -422,28 +423,28 @@ export default function ZibataInfo() {
           {/* Quote Section */}
           <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
             <p className="text-gray-600 text-sm italic">
-              "Vivir en Zibatá significa elegir comodidad, seguridad y estilo de vida en un solo lugar, 
+              "Vivir en Zibatá significa elegir comodidad, seguridad y estilo de vida en un solo lugar,
               disfrutando de la mejor mezcla entre naturaleza y desarrollo urbano planificado que Querétaro ofrece."
             </p>
           </div>
 
-            {/* Contact CTA */}
-            <div className="bg-violet-50 border border-violet-100 rounded-lg p-6 text-center">
-              <h3 className="text-xl font-medium mb-2 text-violet-800">¿Te gustaría vivir aquí?</h3>
-              <p className="text-sm text-violet-600 mb-4">Contacta a nuestros agentes para conocer las propiedades disponibles</p>
-              <div className="flex justify-center pt-1">
-                <AdvisorModal
-                  page="CTA propiedad page footer"
-                  rounded="full"
-                  backgroundColor="bg-violet-600"
-                  textColor="text-white"
-                  showIcon={true}
-                  iconName="FaChevronRight"
-                  iconPosition="right"
-                  buttonText="Habla con un asesor" 
-                />
-              </div>
-              </div>
+          {/* Contact CTA */}
+          <div className="bg-violet-50 border border-violet-100 rounded-lg p-6 text-center">
+            <h3 className="text-xl font-medium mb-2 text-violet-800">¿Te gustaría vivir aquí?</h3>
+            <p className="text-sm text-violet-600 mb-4">Contacta a nuestros agentes para conocer las propiedades disponibles</p>
+            <div className="flex justify-center pt-1">
+              <AdvisorModal
+                page="CTA propiedad page footer"
+                rounded="full"
+                backgroundColor="bg-violet-600"
+                textColor="text-white"
+                showIcon={true}
+                iconName="FaChevronRight"
+                iconPosition="right"
+                buttonText="Habla con un asesor"
+              />
+            </div>
+          </div>
 
         </div>
       </div>

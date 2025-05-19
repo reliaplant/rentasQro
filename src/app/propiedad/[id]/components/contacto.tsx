@@ -242,9 +242,7 @@ export default function Contacto({
                   className={`${isFav ? "fill-pink-500 text-pink-500" : ""} hover:fill-pink-500 hover:text-pink-500 hover:scale-125 transition-transform cursor-pointer`} 
                 />
               </button>
-              <button className="flex items-center gap-2 text-sm hover:text-violet-500 transition-colors group">
-              <Share2 size={20} className="hover:text-violet-500 hover:scale-125 transition-transform cursor-pointer" />
-              </button>
+
           </div>
         </div>
 

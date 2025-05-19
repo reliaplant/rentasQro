@@ -188,7 +188,7 @@ export interface negocio{
   fechaDormido?: Timestamp;
   dormidoHasta?: Timestamp | null; // Updated to allow null values
   notas?: string;
-  souurce?: string;
+  source?: string;
   campaign?: string;
   medium?: string;
   origenTexto: string;
