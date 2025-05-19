@@ -91,7 +91,7 @@ function AdminContent() {
           property.propertyType || '',
           property.transactionType || '',
           property.price || 0,
-          `"${(property.zoneName || property.condoName || '').replace(/"/g, '""')}"`,
+          `"${(property.condoName || '').replace(/"/g, '""')}"`,
           property.views || 0,
           property.whatsappClicks || 0,
           property.status || '',
