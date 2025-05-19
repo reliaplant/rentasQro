@@ -347,12 +347,12 @@ export default function Contacto({
               <span className='text-violet-800 text-[10px]'>Asesor inmobiliario</span>
               <span className='text-black text-sm'>{advisorName}</span>
               <div className='mt-0.5 flex flex-row gap-3 items-center'>
-                {isVerified && (
+
                   <span className="bg-violet-100 rounded-full border border-violet-500 flex flex-row items-center gap-1 text-[9px] px-2 text-violet-700 w-fit pl-1.5">
                     <CheckCircle size={9} className="text-violet-700" />
                     Verificado
                   </span>
-                )}
+
                 <div className="flex items-center gap-1.5 text-[10px] text-black">
                   <Star size={12} className="text-black" />
                   4.9/5

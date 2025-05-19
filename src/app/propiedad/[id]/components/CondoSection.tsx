@@ -384,32 +384,44 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
           </div>
         </div>
 
-        {/* Mobile Reviews with Horizontal Scroll */}
-        <div className="md:hidden relative">
-  <div className="flex overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-4 gap-4 scrollbar-hide">
-    {condoData.cachedReviews?.slice(0, 3).map((review) => (
-      <ReviewCard 
-        key={review.time}
-        review={review}
-        className="flex-shrink-0 w-[85vw] snap-center"
-      />
-    ))}
-  </div>
-</div>
+        {/* Filter reviews to only include selected ones */}
+        {(() => {
+          // Filter reviews to only include those with IDs in selectedGoogleReviews
+          const selectedReviews = condoData.cachedReviews?.filter(review => 
+            condoData.selectedGoogleReviews?.includes(review.id || review.time?.toString())
+          ) || [];
 
-        {/* Desktop Reviews Stacked */}
-        <div className="hidden md:grid grid-cols-1 gap-4">
-          {condoData.cachedReviews?.slice(0, 3).map((review) => (
-            <ReviewCard 
-              key={review.time}
-              review={review}
-            />
-          ))}
-        </div>
+          return (
+            <>
+              {/* Mobile Reviews with Horizontal Scroll */}
+              <div className="md:hidden relative">
+                <div className="flex overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-4 gap-4 scrollbar-hide">
+                  {selectedReviews.map((review) => (
+                    <ReviewCard 
+                      key={review.time}
+                      review={review}
+                      className="flex-shrink-0 w-[85vw] snap-center"
+                    />
+                  ))}
+                </div>
+              </div>
 
-        {(!condoData.cachedReviews || condoData.cachedReviews.length === 0) && (
-          <p className="text-gray-500 italic">No hay reseñas disponibles</p>
-        )}
+              {/* Desktop Reviews Stacked */}
+              <div className="hidden md:grid grid-cols-1 gap-4">
+                {selectedReviews.map((review) => (
+                  <ReviewCard 
+                    key={review.time}
+                    review={review}
+                  />
+                ))}
+              </div>
+
+              {(!selectedReviews || selectedReviews.length === 0) && (
+                <p className="text-gray-500 italic">No hay reseñas seleccionadas disponibles</p>
+              )}
+            </>
+          );
+        })()}
       </div>
 
       

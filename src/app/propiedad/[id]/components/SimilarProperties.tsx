@@ -170,7 +170,7 @@ export default function SimilarProperties({
     } else {
       // MXN formatting
       if (priceValue < 1000000) {
-        return `${(priceValue / 1000).toFixed(priceValue % 1000 === 0 ? 0 : 1)}K`;
+        return `${(priceValue / 1000).toFixed(priceValue % 1000 === 0 ? 0 : 1)} K`;
       } else {
         return `${(priceValue / 1000000).toFixed(1)} MDP`;
       }

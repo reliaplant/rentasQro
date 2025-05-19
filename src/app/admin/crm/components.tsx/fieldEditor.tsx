@@ -148,17 +148,32 @@ export default function FieldEditor({ negocio, onClose, isCreating = false }: Fi
 
   const handleSelectProperty = (property: PropertyData) => {
     setSelectedProperty(property);
+    
+    // Ensure transactionType is one of the allowed values
+    let transactionType: 'renta' | 'venta' | 'ventaRenta' = 'venta'; // Default
+    
+    // Convert the string transaction type to the union type
+    if (property.transactionType === 'renta') {
+      transactionType = 'renta';
+    } else if (property.transactionType === 'venta') {
+      transactionType = 'venta';
+    } else if (property.transactionType === 'ventaRenta') {
+      transactionType = 'ventaRenta';
+    }
+    
+    // Now update the form with the proper type
     setFormData(prev => ({
       ...prev,
       propiedadId: property.id || '',
       propertyType: property.propertyType,
       condoName: property.condoName,
-      transactionType: property.transactionType,
+      transactionType: transactionType, // Use the typed variable
       price: property.price,
       comision: property.comision || prev.comision || 5,
       asesorAliado: property.asesorAliado || prev.asesorAliado || '',
-      porcentajePizo: property.porcentajePizo || prev.porcentajePizo || 50 // Ensure a default value
+      porcentajePizo: property.porcentajePizo || prev.porcentajePizo || 50
     }));
+    
     setSearchTerm(`${property.condoName} - ${property.propertyType}`);
     setIsDropdownOpen(false);
   };

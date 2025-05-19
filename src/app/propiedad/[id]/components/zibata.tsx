@@ -126,7 +126,7 @@ export default function ZibataInfo() {
         />
       </Head>
 
-      <div className="bg-white ">
+      <div className="bg-white p-4 md:p-0">
         {/* Hero Section */}
         <div className="relative h-[280px] md:h-[400px] w-full overflow-hidden rounded-xl">
           <Image
@@ -138,7 +138,7 @@ export default function ZibataInfo() {
           />
         </div>
 
-        <div className="p-5 md:p-6">
+        <div className="mt-4">
           {/* About Section */}
           <div className="mb-8">
             <h3 className="text-xl font-semibold mb-3 text-gray-800">Acerca de Zibatá</h3>
@@ -269,7 +269,7 @@ export default function ZibataInfo() {
                     sizes="(max-width: 768px) 50vw, 40vw"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
-                    <p className="text-white text-xs">
+                    <p className="!text-white text-xs">
                       {index === 0 ? "Plaza Centro Zibatá" : "Paseo Zibatá"}
                     </p>
                   </div>
@@ -292,7 +292,7 @@ export default function ZibataInfo() {
                     sizes="(max-width: 768px) 50vw, 40vw"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
-                    <p className="text-white text-xs">
+                    <p className="!text-white text-xs">
                       {index === 0 ? "Campo de Golf" : "Canchas de Padel"}
                     </p>
                   </div>
@@ -342,7 +342,7 @@ export default function ZibataInfo() {
                     sizes="(max-width: 768px) 50vw, 40vw"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
-                    <p className="text-white text-xs">{index === 0 ? 'MomTots' : 'Universidad Anáhuac'}</p>
+                    <p className="!text-white text-xs">{index === 0 ? 'MomTots' : 'Universidad Anáhuac'}</p>
                   </div>
                 </div>
               ))}
