@@ -187,7 +187,8 @@ function EditPropertyContent() {
       const dataToSubmit = { 
         ...formData, 
         advisor: selectedAdvisor,
-        status: 'publicada' as const,
+        // Use the selected status instead of hardcoding 'publicada'
+        status: formData.status || 'borrador',
         publicationDate: formData.publicationDate || Timestamp.now(), // Ensure publication date exists
         createdAt: formData.createdAt || Timestamp.now(), // Set creation date for new properties
         views: formData.views || 0,
@@ -266,7 +267,7 @@ function EditPropertyContent() {
       <div className="mb-8 p-4 bg-violet-50 rounded-lg border border-violet-200">
         <h2 className="text-lg font-medium mb-3">Asignar Asesor</h2>
         <div className="flex flex-wrap gap-4">
-          <div className="w-full">
+          <div className="w-full md:w-1/2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Asesor asignado:
             </label>
@@ -287,6 +288,31 @@ function EditPropertyContent() {
                 Debe seleccionar un asesor antes de publicar la propiedad
               </p>
             )}
+          </div>
+          
+          {/* Status selector */}
+          <div className="w-full md:w-1/2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Estatus de la propiedad:
+            </label>
+            <select
+              value={formData?.status || 'borrador'}
+              onChange={(e) => handleFormChange({ status: e.target.value as PropertyData['status'] })}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+            >
+              <option value="borrador">Borrador</option>
+              <option value="publicada">Publicada</option>
+              <option value="en_cierre">En cierre</option>
+              <option value="vendida">Vendida</option>
+              <option value="descartada">Descartada</option>
+            </select>
+            <p className="mt-1 text-xs text-gray-500">
+              {formData?.status === 'borrador' && "La propiedad no aparecerá en el sitio web"}
+              {formData?.status === 'publicada' && "La propiedad está visible para todos los usuarios"}
+              {formData?.status === 'en_cierre' && "La propiedad está en proceso de cierre"}
+              {formData?.status === 'vendida' && "La propiedad se marcará como vendida y no estará disponible"}
+              {formData?.status === 'descartada' && "La propiedad ha sido descartada y no estará disponible"}
+            </p>
           </div>
         </div>
       </div>

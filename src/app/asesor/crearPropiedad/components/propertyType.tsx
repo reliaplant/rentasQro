@@ -44,13 +44,13 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
   const [imagePreview, setImagePreview] = useState<string | null>(data.propertyCondoNumberPhoto || null);
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  // Define property types with images
+  // Define property types with images (remove 'preventa' from here)
   const propertyTypes = [
     { id: 'casa', label: 'Casa', icon: '🏠' },
     { id: 'departamento', label: 'Departamento', icon: '🏢' },
     { id: 'terreno', label: 'Terreno', icon: '🏞️' },
     { id: 'local', label: 'Local Comercial', icon: '🏪' },
-    { id: 'preventa', label: 'Preventa', icon: '🏗️' },
+    // Removed preventa from here
     // { id: 'oficina', label: 'Oficina', icon: '🏢' },
     // { id: 'bodega', label: 'Bodega', icon: '🏭' },
   ];
@@ -535,6 +535,46 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
           ))}
         </div>
       </div>
+      
+      {/* Add Availability Selection - only show for compra */}
+      {data.transactionType === 'venta' && (
+        <div>
+          <h3 className="text-lg font-medium mb-4">Disponibilidad</h3>
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className={`cursor-pointer p-4 rounded-lg border-2 ${
+                !data.preventa
+                  ? 'border-blue-500 bg-blue-50' 
+                  : 'border-gray-200 hover:border-blue-300'
+              }`}
+              onClick={() => onChange({ preventa: false })}
+            >
+              <div className="flex flex-col items-center justify-center space-y-2">
+                <span className="text-4xl">🔑</span>
+                <span className="font-medium">Inmediata</span>
+              </div>
+            </motion.div>
+            
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className={`cursor-pointer p-4 rounded-lg border-2 ${
+                data.preventa
+                  ? 'border-blue-500 bg-blue-50' 
+                  : 'border-gray-200 hover:border-blue-300'
+              }`}
+              onClick={() => onChange({ preventa: true })}
+            >
+              <div className="flex flex-col items-center justify-center space-y-2">
+                <span className="text-4xl">🏗️</span>
+                <span className="font-medium">Preventa</span>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      )}
       
       {/* Price Input */}
       <div>
