@@ -146,6 +146,18 @@ const Explorador = () => {
         logFilterStep('preventa', filtered.length);
       }
 
+      // Apply availability filter using both preventa and preventaFilterActive
+      if (filters.preventaFilterActive) {
+        if (filters.preventa) {
+          console.log(`Explorador: Filtering for preventa properties`);
+          filtered = filtered.filter(property => property.preventa === true);
+        } else {
+          console.log(`Explorador: Filtering for immediate properties`);
+          filtered = filtered.filter(property => property.preventa !== true);
+        }
+        logFilterStep('availability', filtered.length);
+      }
+
       // Filtrar por recámaras
       if (filters.bedrooms !== null) {
         filtered = filtered.filter(property => {
@@ -232,6 +244,7 @@ const Explorador = () => {
     filters.propertyType,
     filters.selectedCondo,
     filters.preventa, // Use preventa instead of availability
+    filters.preventaFilterActive, // Add the new dependency
     properties,
     convertMXNtoUSD
   ]);

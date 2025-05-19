@@ -7,7 +7,7 @@ import type { ZoneData } from '../shared/interfaces';
 // Update this line to use a much higher value
 export const MAX_PRICE = 1000000000; // 1 billion
 
-// Define types for filters - replace availability with preventa boolean
+// Define types for filters - add preventaFilterActive to track explicit filtering
 export interface FilterState {
   transactionType: 'renta' | 'compra' | '';
   selectedZone: string;
@@ -20,7 +20,8 @@ export interface FilterState {
   currency: 'MXN' | 'USD'; 
   propertyType: string;
   selectedCondo: string;
-  preventa: boolean; // Replace availability with a boolean flag
+  preventa: boolean; // True for preventa properties, false for immediate
+  preventaFilterActive: boolean; // New field: true when we're explicitly filtering by preventa
 }
 
 // Define filter action interface
@@ -55,6 +56,7 @@ const defaultFilters: FilterState = {
   propertyType: '', // Empty string means all property types
   selectedCondo: '', // Initialize with empty string
   preventa: false, // Default to false (not preventa)
+  preventaFilterActive: false, // Default to false (no explicit filter)
 };
 
 // Create the context
@@ -114,32 +116,8 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
   const checkURLForParams = useCallback(() => {
     let updated = false;
 
-    // Check for preventa first, before handling transaction type
-    const preventa = searchParams?.get('preventa');
-    if (preventa === 'true' && !filters.preventa) {
-      console.log(`Setting preventa to true from URL`);
-      dispatch({
-        type: 'UPDATE_FILTER',
-        payload: { 
-          key: 'preventa',
-          value: true
-        },
-      });
-      updated = true;
-    } else if (preventa === null && filters.preventa) {
-      // If preventa param is not in URL but filter state has it true, set to false
-      console.log(`Clearing preventa filter as it's not in URL`);
-      dispatch({
-        type: 'UPDATE_FILTER',
-        payload: { 
-          key: 'preventa',
-          value: false
-        },
-      });
-      updated = true;
-    }
-
-    // Check for transaction type
+    // Only handle URL parameters for initial page load or explicit navigation,
+    // don't reset filters just because a parameter isn't in the URL
     const transactionType = searchParams?.get('t');
     if ((transactionType === 'renta' || transactionType === 'compra') && 
         transactionType !== filters.transactionType) {
@@ -161,6 +139,20 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
         payload: { 
           key: 'transactionType',
           value: transactionType
+        },
+      });
+      updated = true;
+    }
+    
+    // Check for preventa parameter - only set it if explicitly present
+    const preventa = searchParams?.get('preventa');
+    if (preventa === 'true' && !filters.preventa) {
+      console.log(`Setting preventa to true from URL`);
+      dispatch({
+        type: 'UPDATE_FILTER',
+        payload: { 
+          key: 'preventa',
+          value: true
         },
       });
       updated = true;
@@ -233,16 +225,23 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
 
   // Add effect to ensure preventa is false when transaction type is renta
   useEffect(() => {
+    // Only force reset preventa if transaction type is renta and 
+    // preventa was previously set to true
     if (filters.transactionType === 'renta' && filters.preventa) {
-      dispatch({
-        type: 'UPDATE_FILTER',
-        payload: { 
-          key: 'preventa',
-          value: false
-        },
-      });
+      console.log('FilterContext: Forcing preventa to false because transaction type is renta');
+      
+      // Don't dispatch immediately to avoid race conditions
+      setTimeout(() => {
+        dispatch({
+          type: 'UPDATE_FILTER',
+          payload: { 
+            key: 'preventa',
+            value: false
+          },
+        });
+      }, 0);
     }
-  }, [filters.transactionType, filters.preventa]);
+  }, [filters.transactionType]); // Only run when transaction type changes, not when preventa changes
 
   // Add debug logging for filter updates
   const updateFilter = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {

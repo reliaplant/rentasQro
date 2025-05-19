@@ -72,7 +72,7 @@ export default function Menu() {
     }
   }, [searchParams, currentTransactionType, updateFilter]);
 
-  // Simplified handlers that don't cause loops
+  // Simplified handlers that don't cause redirections
   const handleRentClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     console.log('Menu: Setting transaction type to renta and clearing filters');
@@ -86,8 +86,12 @@ export default function Menu() {
     updateFilter('preventa', false);
     
     setIsMobileMenuOpen(false);
-    router.push('/explorar?t=renta');
-  }, [updateFilter, router, resetFilters]);
+    
+    // Remove the navigation that was causing issues
+    if (pathname !== '/explorar') {
+      router.push('/explorar');
+    }
+  }, [updateFilter, router, resetFilters, pathname]);
 
   const handleBuyClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -98,11 +102,15 @@ export default function Menu() {
     
     // Then set only the transaction type, explicitly ensure preventa is false
     updateFilter('transactionType', 'compra');
-    updateFilter('preventa', false); // Explicitly ensure preventa is false
+    updateFilter('preventa', false);
     
     setIsMobileMenuOpen(false);
-    router.push('/explorar?t=compra');
-  }, [updateFilter, router, resetFilters]);
+    
+    // Remove the navigation that was causing issues
+    if (pathname !== '/explorar') {
+      router.push('/explorar');
+    }
+  }, [updateFilter, router, resetFilters, pathname]);
 
   // Handler for Preventa click - updated to handle the boolean preventa flag
   const handlePreventaClick = useCallback((e: React.MouseEvent) => {
@@ -117,8 +125,12 @@ export default function Menu() {
     updateFilter('preventa', true);
     
     setIsMobileMenuOpen(false);
-    router.push('/explorar?preventa=true&t=compra');
-  }, [updateFilter, router, resetFilters]);
+    
+    // Remove the navigation that was causing issues
+    if (pathname !== '/explorar') {
+      router.push('/explorar');
+    }
+  }, [updateFilter, router, resetFilters, pathname]);
 
   // Update isActive function to properly check for the preventa flag
   const isActive = useCallback((path: string) => {
@@ -194,7 +206,7 @@ export default function Menu() {
           {/* Desktop Navigation with improved styling approach */}
           <nav className="hidden md:flex -mb-px space-x-8">
             <Link
-              href="/explorar?t=compra"
+              href="/explorar"
               onClick={handleBuyClick}
               className={`whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer ${
                 isActive('/comprar') 
@@ -205,7 +217,7 @@ export default function Menu() {
               Comprar
             </Link>
             <Link
-              href="/explorar?t=renta"
+              href="/explorar"
               onClick={handleRentClick}
               className={`whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer ${
                 isActive('/rentar') 
@@ -217,7 +229,7 @@ export default function Menu() {
             </Link>
 
             <Link
-              href="/explorar?preventa=true&t=compra"
+              href="/explorar"
               onClick={handlePreventaClick}
               className={`${
                 isActive('/preventa')
@@ -323,7 +335,7 @@ export default function Menu() {
               Explorar
             </Link>
             <Link
-              href="/explorar?t=compra"
+              href="/explorar"
               onClick={handleBuyClick}
               className={`flex items-center px-4 py-3 rounded-lg text-base font-medium 
                 ${isActive('/comprar')
@@ -334,7 +346,7 @@ export default function Menu() {
               Comprar
             </Link>
             <Link
-              href="/explorar?t=renta"
+              href="/explorar"
               onClick={handleRentClick}
               className={`flex items-center px-4 py-3 rounded-lg text-base font-medium 
                 ${isActive('/rentar')
@@ -346,7 +358,7 @@ export default function Menu() {
             </Link>
 
             <Link
-              href="/explorar?preventa=true&t=compra"
+              href="/explorar"
               onClick={handlePreventaClick}
               className={`flex items-center px-4 py-3 rounded-lg text-base font-medium ${isActive('/preventa')
                   ? 'bg-violet-50 text-violet-700'
