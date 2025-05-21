@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { getProperty, getAdvisorProfile, getAdvisorById, getZoneById, getCondoById } from '@/app/shared/firebase';
 import { ZoneData, CondoData, PropertyData } from '@/app/shared/interfaces';
 import PropertyClient from './PropertyClient';
+import { getOrderedAmenities } from '@/app/constants/amenities';
 
 
 // Define AdvisorData type here since it's not exported from the interfaces
@@ -241,6 +242,22 @@ export default async function PropertyPage({ params }: { params: { id: string } 
       ${condoData?.name ? `en ${condoData.name}` : ''} 
       ${zoneData?.name ? `| ${zoneData.name}` : ''}`;
     
+    // When processing the condo data, use getOrderedAmenities
+    if (condoData && condoData.amenities) {
+      // Sort the amenities by priority for display in the UI
+      const orderedAmenities = getOrderedAmenities(condoData.amenities);
+      
+      // We can't directly modify the condo object, so we can create a processed version
+      const processedCondo = {
+        ...condoData,
+        orderedAmenities
+      };
+      
+      // Pass the processed condo to CondoSection
+      // Note: depending on your implementation, you might need to adjust how
+      // this is passed to maintain compatibility with existing code
+    }
+
     return (
       <>
         {/* Add structured data for SEO */}

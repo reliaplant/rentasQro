@@ -26,7 +26,7 @@ export default function PropertiesSection({ properties, condoName }: PropertiesS
           </p>
           <Link 
             href="/qro/buscar" 
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors duration-200"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors duration-200 "
           >
             Explora otras propiedades
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -219,7 +219,7 @@ export default function PropertiesSection({ properties, condoName }: PropertiesS
   };
 
   return (
-    <div className="px-4 md:px-0">
+    <div className="">
 
       {/* Sección de Propiedades en Venta */}
       <PropertyRow 

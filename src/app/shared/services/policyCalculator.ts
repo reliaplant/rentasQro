@@ -63,7 +63,7 @@ const POLICY_PERCENTAGES = {
  * @param type - Policy type ('kanun' or 'elemental')
  * @returns The policy cost
  */
-export function calculatePolicyCost(rent: number, type: 'kanun' | 'elemental' = 'elemental'): number {
+export function calculatePolicyCost(rent: number, type: 'kanun' | 'elemental' = 'kanun'): number {
   // Input validation
   if (rent <= 0) {
     throw new Error('Rent amount must be greater than zero');
@@ -100,7 +100,7 @@ export function calculatePolicyCost(rent: number, type: 'kanun' | 'elemental' = 
  */
 export function calculateDiscountedPolicyCost(
   rent: number, 
-  type: 'kanun' | 'elemental' = 'elemental',
+  type: 'kanun' | 'elemental' = 'kanun',
   discountPercent: number = 35
 ): number {
   const originalCost = calculatePolicyCost(rent, type);

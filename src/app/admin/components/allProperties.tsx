@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Eye, MessageSquare, ChevronDown, ChevronUp, UserCheck, PlusCircle, Percent, UserPlus, RefreshCw } from 'lucide-react';
+import { Eye, MessageSquare, ChevronDown, ChevronUp, UserCheck, PlusCircle, Percent, UserPlus, RefreshCw, Download } from 'lucide-react';
 import Link from 'next/link';
 import { 
   getProperties, 
@@ -154,6 +154,67 @@ export default function AllProperties() {
     }
   };
 
+  // Function to download properties with metrics
+  const downloadPropertiesMetrics = async () => {
+    try {
+      // Fetch all properties with metrics
+      const properties = await getProperties();
+      
+      // Convert to CSV
+      const csvRows = [];
+      
+      // Add header row
+      csvRows.push([
+        'ID', 
+        'Título', 
+        'Tipo de Propiedad', 
+        'Tipo de Transacción', 
+        'Precio', 
+        'Ubicación', 
+        'Vistas', 
+        'Clicks WhatsApp', 
+        'Estado',
+        'Fecha de Publicación'
+      ].join(','));
+      
+      // Add data rows
+      for (const property of properties) {
+        const row = [
+          property.id || '',
+          `"${(property.title || '').replace(/"/g, '""')}"`, // Escape quotes in CSV
+          property.propertyType || '',
+          property.transactionType || '',
+          property.price || 0,
+          `"${(property.condoName || '').replace(/"/g, '""')}"`,
+          property.views || 0,
+          property.whatsappClicks || 0,
+          property.status || '',
+          property.publicationDate ? new Date(property.publicationDate.seconds * 1000).toLocaleDateString() : ''
+        ];
+        
+        csvRows.push(row.join(','));
+      }
+      
+      // Create CSV content
+      const csvContent = csvRows.join('\n');
+      
+      // Create and trigger download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `propiedades-metricas-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+    } catch (error) {
+      console.error('Error downloading properties:', error);
+      alert('Error al descargar las propiedades');
+    }
+  };
+
   return (
     <div className="overflow-x-auto">
       <div className="flex justify-between items-center mb-4">
@@ -171,10 +232,18 @@ export default function AllProperties() {
         
         <div className="flex items-center gap-3">
           <button
+            onClick={downloadPropertiesMetrics}
+            className="inline-flex items-center gap-2 border border-green-600 text-green-600 hover:bg-green-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            <span>Descargar Métricas</span>
+          </button>
+          
+          <button
             onClick={handleUpdatePropertyCounts}
             disabled={updatingCounts}
-            className={`inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              updatingCounts ? 'opacity-70 cursor-not-allowed' : ''
+            className={`inline-flex items-center gap-2 border border-indigo-600 text-indigo-600 hover:bg-indigo-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              updatingCounts ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
             <RefreshCw className={`w-4 h-4 ${updatingCounts ? 'animate-spin' : ''}`} />
@@ -183,9 +252,9 @@ export default function AllProperties() {
           
           <Link
             href="/admin/editarPropiedad?id=new"
-            className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            className="inline-flex items-center gap-2 border border-violet-600 text-violet-600 hover:bg-violet-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
           >
-            <PlusCircle className="w-[18px] h-[18px]" />
+            <PlusCircle className="w-4 h-4" />
             <span>Crear Nueva Propiedad</span>
           </Link>
         </div>
@@ -244,25 +313,38 @@ export default function AllProperties() {
                   </div>
                   <div className="ml-4">
                     <div className="text-sm font-medium text-gray-900">
-                      {property.propertyType}, {property.condoName}, #{property.propertyCondoNumber}
+                      {property.propertyType}, {property.condoName}{property.modelo ? `, ${property.modelo}` : ''}, #{property.propertyCondoNumber}
                     </div>
                     <div className="text-sm text-gray-900">Zibata</div>
                     <div className="text-xs text-gray-500 font-semibold">ID: {(property.id ?? '').slice(0, 5)}</div>
-                    {/* Add edit button */}
-                    <a 
-                      href={`/admin/editarPropiedad?id=${property.id}`}
-                      className="mt-1 inline-flex items-center px-2 py-1 text-xs text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-md font-medium"
-                    >
-                      <svg 
-                        className="w-3 h-3 mr-1" 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
+                    
+                    {/* Control buttons */}
+                    <div className="mt-1 flex gap-2">
+                      <a 
+                        href={`/admin/editarPropiedad?id=${property.id}`}
+                        className="inline-flex items-center px-2 py-1 text-xs text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-md font-medium"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                      </svg>
-                      Editar
-                    </a>
+                        <svg 
+                          className="w-3 h-3 mr-1" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                        Editar
+                      </a>
+                      
+                      <a 
+                        href={`/propiedad/${property.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-2 py-1 text-xs text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-md font-medium"
+                      >
+                        <Eye className="w-3 h-3 mr-1" />
+                        Ver
+                      </a>
+                    </div>
                   </div>
                 </div>
               </td>
@@ -297,26 +379,7 @@ export default function AllProperties() {
               </td>
               
               <td className="px-6 py-4">
-                <div className="flex items-center gap-2">
-                  <UserCheck size={16} className={property.advisor ? "text-green-500" : "text-gray-400"} />
-                  
-                  {updatingAdvisor === property.id ? (
-                    <span className="text-xs text-blue-500">Actualizando...</span>
-                  ) : (
-                    <select 
-                      className="text-sm border border-gray-200 rounded px-2 py-1 bg-white w-full max-w-[200px]"
-                      value={property.advisor || ''}
-                      onChange={(e) => handleAdvisorChange(property.id, e.target.value)}
-                    >
-                      <option value="">Seleccionar asesor</option>
-                      {allAdvisorsList.map(advisor => (
-                        <option key={advisor.id} value={advisor.id}>
-                          {advisor.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </div>
+
                 {property.advisor && (
                   <div className="text-xs text-gray-500 mt-1">
                     {getAdvisorName(property.advisor)}

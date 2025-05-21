@@ -39,7 +39,7 @@ a {
 }
 
 a:hover {
-  color: oklch(0.491 0.27 292.581);
+  /* color: oklch(0.491 0.27 292.581); */
 }
 
 .input1, .select1, .textArea1 {

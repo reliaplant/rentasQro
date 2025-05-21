@@ -6,6 +6,26 @@ import { ArrowUpRight } from 'lucide-react';
 import { condoAmenities } from '@/app/constants/amenities';
 import GaleriaPropiedad from '@/app/propiedad/[id]/components/galeriaPropiedad';
 
+// Priority order of amenities (most important to least important)
+const amenityPriorityOrder = [
+  'pool',         // 🏊‍♂️ Alberca
+  'gym',          // 💪 Gimnasio
+  'security',     // 👮 Vigilancia
+  'eventRoom',    // 🎉 Salón de eventos
+  'grill',        // 🔥 Área de asadores
+  'playground',   // 🎡 Parque infantil
+  'greenAreas',   // 🌳 Áreas verdes
+  'general',      // 🏠 Área general
+  'padelCourt',   // 🎾 Cancha de pádel
+  'basketballCourt', // 🏀 Cancha de basket
+  'businessCenter', // 💼 Business Center
+  'playRoom',     // 🏓 Ludoteca
+  'sauna',        // ♨️ Sauna
+  'firePit',      // 🔥 Fogatero
+  'yogaArea',     // 🧘 Zona de yoga
+  'wineCellar'    // 🍷 Cavas
+];
+
 interface GalleryProps {
   name: string;
   imageUrls?: string[];
@@ -121,12 +141,35 @@ export default function Gallery({ name, imageUrls, amenities, imageAmenityTags }
     const category = amenity?.label || 'General';
     
     if (!acc[category]) acc[category] = [];
-    acc[category].push({ img, index });
+    acc[category].push({ img, index, amenityId });
     return acc;
-  }, {} as Record<string, { img: string; index: number }[]>);
+  }, {} as Record<string, { img: string; index: number; amenityId?: string }[]>);
 
   // Debug the final grouping result
   console.log('Grouped by category:', Object.keys(groupedImages || {}));
+
+  // Function to sort categories by amenity priority
+  const sortCategoriesByPriority = (a: string, b: string) => {
+    // Find the amenity IDs corresponding to these categories
+    const getAmenityIdFromCategory = (category: string) => {
+      const foundAmenity = condoAmenities.find(amenity => amenity.label === category);
+      return foundAmenity?.id || 'general';
+    };
+
+    const aId = getAmenityIdFromCategory(a);
+    const bId = getAmenityIdFromCategory(b);
+
+    // Get their positions in the priority array
+    const aPosition = amenityPriorityOrder.indexOf(aId);
+    const bPosition = amenityPriorityOrder.indexOf(bId);
+
+    // If not found, put at the end
+    const aPriority = aPosition === -1 ? 999 : aPosition;
+    const bPriority = bPosition === -1 ? 999 : bPosition;
+
+    // Sort by priority
+    return aPriority - bPriority;
+  };
 
   const ImageItem = ({ img, index, isWide = false }: { img: string; index: number; isWide?: boolean }) => (
     <div 
@@ -242,8 +285,8 @@ export default function Gallery({ name, imageUrls, amenities, imageAmenityTags }
   };
 
   return (
-    <div className="mt-8 md:mt-12 mb-8 md:mb-12  border-t pt-6 border-gray-200">
-      <div className="flex items-center justify-between mb-4 md:mb-6 px-4 md:px-0">
+    <div className="mt-8 md:mt-12 mb-8 md:mb-12 border-t pt-6 border-gray-200">
+      <div className="flex items-center justify-between mb-4 md:mb-6">
         <h3 className="text-base md:text-lg font-semibold">Galería de {name}</h3>
         {validImageUrls && validImageUrls.length > 1 && (
           <button 
@@ -260,22 +303,26 @@ export default function Gallery({ name, imageUrls, amenities, imageAmenityTags }
       </div>
 
       <div className="space-y-4 md:space-y-2">
-        {groupedImages && Object.entries(groupedImages).map(([category, images]) => (
-          <div key={category} className="flex flex-col md:flex-row gap-2">
-            {/* Category Label - Mobile optimized */}
-            <div className="w-full md:w-96 md:flex-shrink-0 ">
-              <div className="bg-white  rounded-lg">
-                <h4 className="font-medium text-lg md:text-xl text-gray-900">{category}</h4>
-                <p className="text-xs md:text-sm text-gray-500 mt-1">{images.length} fotos</p>
-              </div>
-            </div>
+        {groupedImages && 
+          Object.entries(groupedImages)
+            .sort(([catA, _], [catB, __]) => sortCategoriesByPriority(catA, catB))
+            .map(([category, images]) => (
+              <div key={category} className="flex flex-col md:flex-row gap-2">
+                {/* Category Label - Mobile optimized */}
+                <div className="w-full md:w-96 md:flex-shrink-0">
+                  <div className="bg-white rounded-lg">
+                    <h4 className="font-medium text-lg md:text-xl text-gray-900">{category}</h4>
+                    <p className="text-xs md:text-sm text-gray-500 mt-1">{images.length} fotos</p>
+                  </div>
+                </div>
 
-            {/* Photos Grid */}
-            <div className="flex-grow px-4 md:px-0 mt-2 md:mt-0">
-              {renderPhotoGrid(images)}
-            </div>
-          </div>
-        ))}
+                {/* Photos Grid */}
+                <div className="flex-grow mt-2 md:mt-0">
+                  {renderPhotoGrid(images)}
+                </div>
+              </div>
+            ))
+        }
       </div>
 
       <GaleriaPropiedad

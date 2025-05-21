@@ -110,11 +110,27 @@ export default function Contacto({
   };
   
   // Determine if it's a rental property based on price (simple heuristic)
-  const isRental = price > 0 && price < 20000;
+  const isRental = transactionType === 'renta' || (price > 0 && price < 20000);
   
   // Calculate policy costs using the service (only for rentals)
-  const legalPolicyPrice = isRental ? calculatePolicyCost(price, 'elemental') : 0;
-  const discountedPolicyPrice = isRental ? calculateDiscountedPolicyCost(price, 'elemental', 35) : 0;
+  // Use try/catch to handle potential errors in calculation
+  let legalPolicyPrice = 0;
+  let discountedPolicyPrice = 0;
+  const discountPercent = 15; // Changed from 35% to 15%
+  
+  try {
+    if (isRental) {
+      legalPolicyPrice = calculatePolicyCost(price, 'kanun');
+      discountedPolicyPrice = calculateDiscountedPolicyCost(price, 'kanun', discountPercent);
+      
+      // Add debug logging to verify calculations
+      console.log('Rent amount:', price);
+      console.log('Policy price (original):', legalPolicyPrice);
+      console.log('Policy price (discounted):', discountedPolicyPrice);
+    }
+  } catch (error) {
+    console.error('Error calculating policy prices:', error);
+  }
 
   const handleWhatsAppClick = async () => {
     try {
@@ -292,22 +308,22 @@ export default function Contacto({
             <div className='border-t border-gray-200 pt-3'>
               <p className='mb-2'>Requisitos</p>
               <p className="text-xs text-gray-500">- Contrato anual</p>
-              <p className="text-xs text-gray-500">- 1 més de deposito</p>
+              <p className="text-xs text-gray-500">- 1 més de depósito</p>
               <div className="flex items-center gap-2">
                 <p className="text-xs text-gray-500">- Póliza jurídica</p>
                 <div className="flex items-center gap-1">
                   <p className="text-xs font-semibold text-gray-500">
                     ${selectedCurrency === 'USD' 
                       ? convertMXNtoUSD(discountedPolicyPrice).toLocaleString(undefined, {maximumFractionDigits: 0}) 
-                      : discountedPolicyPrice.toLocaleString()}
+                      : Math.round(discountedPolicyPrice).toLocaleString()}
                   </p>
                   <p className="text-xs text-gray-400 line-through">
                     ${selectedCurrency === 'USD'
                       ? convertMXNtoUSD(legalPolicyPrice).toLocaleString(undefined, {maximumFractionDigits: 0})
-                      : legalPolicyPrice.toLocaleString()}
+                      : Math.round(legalPolicyPrice).toLocaleString()}
                   </p>
                   <span className="text-xs font-medium text-violet-800 bg-violet-50 px-1 py-0.5 rounded">
-                    -35%
+                    -{discountPercent}%
                   </span>
                 </div>
               </div>
@@ -323,43 +339,40 @@ export default function Contacto({
           )}
         </div>
 
-        {/* Advisor Info */}
-        <div className="bg-gradient-to-l from-violet-50 to-violet-100 p-2 flex items-start gap-3 mb-6 rounded-xl">
-          {/* Avatar */}
-          <div className="relative">
-            <div className="w-14 h-14 rounded-full bg-gray-100 overflow-hidden relative flex-shrink-0">
-              {advisorPhoto ? (
+        {/* Advisor Info - Redesigned with 3 columns */}
+        <div className="bg-gradient-to-l from-violet-50 to-violet-100 p-2 flex items-center gap-3 mb-6 rounded-xl">
+          {/* Column 1: Avatar */}
+          <div className="relative flex-shrink-0">
+            <div className="w-12 h-12 rounded-full bg-gray-100 overflow-hidden relative">
+                {advisorPhoto ? (
                 <Image
                   src={advisorPhoto}
                   alt={advisorName}
                   fill
-                  className="object-cover"
+                  className="object-cover ring-2 ring-violet-500"
                 />
-              ) : (
-                <div className="w-full h-full bg-[#F5E6D3] text-[#D2B48C] grid place-items-center">
+                ) : (
+                <div className="w-full h-full bg-[#F5E6D3] text-[#D2B48C] grid place-items-center rounded-full ring-2 ring-violet-500">
                   {advisorName[0]}
                 </div>
-              )}
+                )}
             </div>
           </div>
-          <div>
+          
+          {/* Column 2: Advisor Info */}
+          <div className="flex-1">
             <div className="flex flex-col">
-              <span className='text-violet-800 text-[10px]'>Asesor inmobiliario</span>
-              <span className='text-black text-sm'>{advisorName}</span>
-              <div className='mt-0.5 flex flex-row gap-3 items-center'>
-
-                  <span className="bg-violet-100 rounded-full border border-violet-500 flex flex-row items-center gap-1 text-[9px] px-2 text-violet-700 w-fit pl-1.5">
-                    <CheckCircle size={9} className="text-violet-700" />
-                    Verificado
-                  </span>
-
-                <div className="flex items-center gap-1.5 text-[10px] text-black">
-                  <Star size={12} className="text-black" />
-                  4.9/5
-                </div>
-
-              </div>
+              <span className='text-violet-800 text-[12px]'>Asesor PIZO</span>
+              <span className='text-black text-sm font-medium'>{advisorName}</span>
             </div>
+          </div>
+          
+          {/* Column 3: Verification Badge */}
+          <div className="flex-shrink-0">
+            <span className="bg-blue-500 rounded-full border border-blue-500 flex items-center gap-1 text-[9px] px-2 mr-4 py-0.5 text-white whitespace-nowrap">
+              <CheckCircle size={9} className="text-white" />
+              Verificado
+            </span>
           </div>
         </div>
 

@@ -35,7 +35,7 @@ export async function generateMetadata(props: any): Promise<Metadata> {
     if (!condo) return defaultMetadata();
 
     return {
-      title: `${condo.name} en ${zone.name} - Rentas Querétaro`,
+      title: `Propiedades en venta y renta en ${condo.name}, ${zone.name}`,
       description: condo.description ||
         `Encuentra propiedades en ${condo.name}, ubicado en ${zone.name}, Querétaro.`
     };
@@ -56,14 +56,14 @@ export async function generateStaticParams() {
   try {
     // For Zibata, we use a fixed zoneid
     const zoneid = 'zibata';
-    
+
     // Get the zone
     const zone = await getZoneByName(zoneid);
     if (!zone || !zone.id) return [];
-    
+
     // Get all condos in the zone
     const condos = await getCondosByZone(zone.id);
-    
+
     // Generate params for each condo
     return condos.map(condo => ({
       condoid: condo.name.toLowerCase().replace(/\s+/g, '-')
@@ -149,49 +149,31 @@ export default async function CondoDetailPage(props: any) {
           totalRatings={condo.totalRatings}
         />
 
-<div className="flex items-center gap-2 mb-8 mt-6 px-4 md:px-0">
-          {/* <h3 className="text-lg font-semibold">Precios de renta y venta</h3> */}
+
+        <div className='w-full px-4 sm:px-[5vw] py-8 lg:py-16'>
+
+
+          <PropertiesSection
+            properties={properties}
+            condoName={condo.name}
+          />
+
+
+
+
+
+          <div className='mt-24 '></div>
+          <Gallery
+            name={condo.name}
+            imageUrls={condo.imageUrls}
+            amenities={condo.amenities}
+            imageAmenityTags={condo.imageAmenityTags}
+          />
+
+
+
         </div>
-        {/* Price Information */}
-        {/* <div className="grid md:grid-cols-2 gap-6 mb-8 px-4 md:px-0">
-          <PriceBar
-            minPrice={condo.rentPriceMin}
-            avgPrice={condo.rentPriceAvg}
-            maxPrice={condo.rentPriceMax}
-            type="rent"
-          />
-          <PriceBar
-            minPrice={condo.salePriceMin}
-            avgPrice={condo.salePriceAvg}
-            maxPrice={condo.salePriceMax}
-            type="sale"
-          />
-        </div> */}
 
-<div className='px-[5vw]'>
-
-
- <PropertiesSection 
-          properties={properties} 
-          condoName={condo.name}
-        />
-
-
-        
-       
-
-        <div className='mt-24 '></div>
-        <Gallery
-          name={condo.name}
-          imageUrls={condo.imageUrls}
-          amenities={condo.amenities}
-          imageAmenityTags={condo.imageAmenityTags}
-        />
-
-       
-
-</div>
-       
 
       </div>
     );

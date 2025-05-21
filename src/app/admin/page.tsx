@@ -9,8 +9,9 @@ import ListaAdvisors from './advisors/listaAdvisors';
 import DesarrolladorasPage from './desarrolladoras/page';
 import BlogManager from './components/BlogManager';
 import ReferidosPage from './promotores/page';
+import CRMPage from './crm/page';
 
-type AdminTab = 'properties' | 'zones' | 'admins' | 'advisors' | 'promotores' | 'desarrolladoras' | 'blog';
+type AdminTab = 'properties' | 'zones' | 'admins' | 'advisors' | 'promotores' | 'desarrolladoras' | 'blog' | 'crm';
 
 // Simple loading component
 const AdminLoading = () => (
@@ -36,7 +37,7 @@ function AdminContent() {
   // Check for tab in URL query parameter
   useEffect(() => {
     const tabFromUrl = searchParams?.get('tab');
-    if (tabFromUrl && ['properties', 'zones', 'admins', 'advisors', 'promotores', 'desarrolladoras', 'blog'].includes(tabFromUrl)) {
+    if (tabFromUrl && ['properties', 'zones', 'admins', 'advisors', 'promotores', 'desarrolladoras', 'blog', 'crm'].includes(tabFromUrl)) {
       setActiveTab(tabFromUrl as AdminTab);
     }
   }, [searchParams]);
@@ -58,68 +59,6 @@ function AdminContent() {
 
     checkIfAdmin();
   }, []);
-
-  // Function to download properties with metrics
-  const downloadPropertiesMetrics = async () => {
-    try {
-      // Fetch all properties with metrics
-      const { getProperties } = await import('@/app/shared/firebase');
-      const properties = await getProperties();
-      
-      // Convert to CSV
-      const csvRows = [];
-      
-      // Add header row
-      csvRows.push([
-        'ID', 
-        'Título', 
-        'Tipo de Propiedad', 
-        'Tipo de Transacción', 
-        'Precio', 
-        'Ubicación', 
-        'Vistas', 
-        'Clicks WhatsApp', 
-        'Estado',
-        'Fecha de Publicación'
-      ].join(','));
-      
-      // Add data rows
-      for (const property of properties) {
-        const row = [
-          property.id || '',
-          `"${(property.title || '').replace(/"/g, '""')}"`, // Escape quotes in CSV
-          property.propertyType || '',
-          property.transactionType || '',
-          property.price || 0,
-          `"${(property.condoName || '').replace(/"/g, '""')}"`,
-          property.views || 0,
-          property.whatsappClicks || 0,
-          property.status || '',
-          property.publicationDate ? new Date(property.publicationDate.seconds * 1000).toLocaleDateString() : ''
-        ];
-        
-        csvRows.push(row.join(','));
-      }
-      
-      // Create CSV content
-      const csvContent = csvRows.join('\n');
-      
-      // Create and trigger download
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', `propiedades-metricas-${new Date().toISOString().split('T')[0]}.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-    } catch (error) {
-      console.error('Error downloading properties:', error);
-      alert('Error al descargar las propiedades');
-    }
-  };
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
@@ -227,18 +166,16 @@ function AdminContent() {
             >
               Blog
             </button>
+            <button
+              onClick={() => setActiveTab('crm')}
+              className={`${activeTab === 'crm'
+                ? 'border-[#6981d3] text-[#6981d3]'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-3 px-1 pt-4 border-b-3 font-medium text-sm cursor-pointer`}
+            >
+              CRM
+            </button>
           </nav>
-        </div>
-        <div className="ml-auto mr-6">
-          <button
-            onClick={downloadPropertiesMetrics}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            Descargar Métricas
-          </button>
         </div>
       </div>
       <div className="">
@@ -248,9 +185,10 @@ function AdminContent() {
           {activeTab === 'zones' && <Zones />}
           {activeTab === 'admins' && <ListaAdmins />}
           {activeTab === 'advisors' && <ListaAdvisors />}
-            {activeTab === 'promotores' && <ReferidosPage />}
+          {activeTab === 'promotores' && <ReferidosPage />}
           {activeTab === 'desarrolladoras' && <DesarrolladorasPage />}
           {activeTab === 'blog' && <BlogManager />}
+          {activeTab === 'crm' && <CRMPage />}
         </div>
       </div>
     </div>

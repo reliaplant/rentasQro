@@ -1,9 +1,12 @@
 import Image from 'next/image';
 import { Star, MapPin, Shield, X, CheckCircle, WashingMachine, ArrowUpRight, ArrowUpRightIcon } from 'lucide-react';
 import { CondoData } from '@/app/shared/interfaces';
-import { condoAmenities } from '@/app/constants/amenities';
+import { condoAmenities, sortAmenitiesByPriority, getOrderedAmenities } from '@/app/constants/amenities';
 // import Reviews from './reviews';
-import { CheckmarkFilled, CloseFilled, Misuse, WordCloud, Education, Building, Sprout, Tree, Box, Temperature, Fire, Restaurant } from '@carbon/icons-react';
+import { 
+  CheckmarkFilled, CloseFilled, Misuse, WordCloud, Education, Building, 
+  Sprout, Tree, Box, Temperature, Fire, Restaurant, Basketball
+} from '@carbon/icons-react';
 import { PiXFill } from 'react-icons/pi';
 import ZibataMap from '@/app/components/ZibataMap';
 import GaleriaPropiedad from './galeriaPropiedad';
@@ -13,11 +16,92 @@ interface CondoSectionProps {
   condoData: CondoData | null;
 }
 
+// Simplified function to get the amenity icon directly from the constants
+const getAmenityIcon = (amenityId: string) => {
+  // Find the amenity in the constants
+  const amenity = condoAmenities.find(a => a.id === amenityId);
+  if (!amenity) return null;
+
+  // Return the icon directly from the constant
+  return (
+    <span className="text-gray-600">{amenity.icon}</span>
+  );
+};
+
 export default function CondoSection({ condoData }: CondoSectionProps) {
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [initialIndex, setInitialIndex] = useState(0);
 
   if (!condoData) return null;
+
+  // Get ordered amenities for the gallery
+  const organizedImages = () => {
+    if (!condoData.imageUrls || condoData.imageUrls.length === 0) {
+      return [];
+    }
+
+    if (!condoData.amenities || condoData.amenities.length === 0) {
+      return condoData.imageUrls;
+    }
+
+    // Get amenities sorted by priority
+    const sortedAmenities = sortAmenitiesByPriority(condoData.amenities);
+    
+    // Map of images to their amenities (if available)
+    const imageAmenityMap: Record<string, string> = {};
+    
+    if (condoData.imageAmenityTags) {
+      // Map all explicitly tagged images
+      for (const [imgUrl, amenityId] of Object.entries(condoData.imageAmenityTags)) {
+        const amenityIdString = Array.isArray(amenityId) ? amenityId[0] : amenityId;
+        imageAmenityMap[imgUrl] = amenityIdString;
+      }
+    }
+    
+    // Create an ordered list of images based on amenity priority
+    const orderedImages: string[] = [];
+    
+    // Add explicitly tagged images in priority order
+    sortedAmenities.forEach(amenityId => {
+      const matchingImages = Object.entries(imageAmenityMap)
+        .filter(([_, tagAmenityId]) => tagAmenityId === amenityId)
+        .map(([imgUrl]) => imgUrl);
+      
+      orderedImages.push(...matchingImages);
+    });
+    
+    // Add remaining images that don't have explicit tags
+    const untaggedImages = condoData.imageUrls.filter(img => !imageAmenityMap[img]);
+    orderedImages.push(...untaggedImages);
+    
+    // Ensure we're not duplicating images and maintain original ones if we're missing any
+    const uniqueOrderedImages = [...new Set(orderedImages)];
+    const missingImages = condoData.imageUrls.filter(img => !uniqueOrderedImages.includes(img));
+    
+    return [...uniqueOrderedImages, ...missingImages];
+  };
+
+  // Function to get amenity for an image
+  const getImageAmenity = (imgUrl: string, index: number) => {
+    // First check if there's an explicit tag
+    if (condoData.imageAmenityTags && imgUrl in condoData.imageAmenityTags) {
+      const amenityId = condoData.imageAmenityTags[imgUrl];
+      const amenityIdString = Array.isArray(amenityId) ? amenityId[0] : amenityId;
+      return condoAmenities.find(a => a.id === amenityIdString);
+    } 
+    
+    // If no explicit tag, assign based on priority ordered amenities
+    if (condoData.amenities && condoData.amenities.length > 0) {
+      const sortedAmenities = sortAmenitiesByPriority(condoData.amenities);
+      const amenityId = sortedAmenities[index % sortedAmenities.length];
+      return condoAmenities.find(a => a.id === amenityId);
+    }
+    
+    return null;
+  };
+
+  // Get the organized images
+  const images = organizedImages();
 
   return (
     <div className="max-w-7xl">
@@ -102,31 +186,21 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
         <h3 className="text-lg font-semibold mb-4 ">Amenidades de este lugar</h3>
 
         <div className="grid grid-cols-2 gap-2">
-          {/* Included Amenities */}
+          {/* Included Amenities - Now using sorted amenities */}
           <div className="rounded-xl p-4 bg-gray-50">
             <h4 className="text-base font-bold mb-3 text-black flex items-center gap-2">
               <CheckmarkFilled size={16} className="text-green-600" />
               Incluye
             </h4>
             <div className="space-y-2">
-              {(condoData.amenities || []).map((amenityId) => {
+              {condoData.amenities && sortAmenitiesByPriority(condoData.amenities).map((amenityId) => {
                 const amenityDetails = condoAmenities.find(a => a.id === amenityId);
                 if (!amenityDetails) return null;
 
                 return (
                   <div key={amenityId} className="flex items-center gap-2">
                     <div className="">
-                      {amenityDetails.label === 'General' && <Building size={16} className="text-gray-600" />}
-                      {amenityDetails.label === 'Alberca' && <WashingMachine size={16} className="text-gray-600" />}
-                      {amenityDetails.label === 'Gimnasio' && <Education size={16} className="text-gray-600" />}
-                      {amenityDetails.label === 'Salón de eventos' && <Building size={16} className="text-gray-600" />}
-                      {amenityDetails.label === 'Área de asadores' && <Fire size={16} className="text-gray-600" />}
-                      {amenityDetails.label === 'Sauna' && <Temperature size={16} className="text-gray-600" />}
-                      {amenityDetails.label === 'Business Center' && <Box size={16} className="text-gray-600" />}
-                      {amenityDetails.label === 'Parque infantil' && <Sprout size={16} className="text-gray-600" />}
-                      {amenityDetails.label === 'Ludoteca' && <Tree size={16} className="text-gray-600" />}
-                      {amenityDetails.label === 'Vigilancia' && <Shield size={16} className="text-gray-600" />}
-                      {amenityDetails.label === 'Areas verdes' && <Sprout size={16} className="text-gray-600" />}
+                      {getAmenityIcon(amenityId)}
                     </div>
                     <span className="text-sm md:text-sm text-xs text-gray-700 font-medium">
                       {amenityDetails.label}
@@ -141,7 +215,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
             </div>
           </div>
 
-          {/* Not Included Amenities */}
+          {/* Not Included Amenities - Sort these by priority too */}
           <div className="bg-gray-50 rounded-xl p-4 ">
             <h4 className="font-bold mb-3  flex items-center gap-2">
               <Misuse size={16} className="text-red-700" />
@@ -151,20 +225,11 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
             <div className="space-y-2">
               {condoAmenities
                 .filter(amenity => !condoData.amenities?.includes(amenity.id))
+                .sort((a, b) => a.priority - b.priority)
                 .map((amenityDetails) => (
                   <div key={amenityDetails.id} className="flex items-center gap-2">
                     <div className="">
-                      {amenityDetails.label === 'General' && <Building size={16} className="text-gray-600" />}
-                      {amenityDetails.label === 'Alberca' && <WashingMachine size={16} className="text-gray-600" />}
-                      {amenityDetails.label === 'Gimnasio' && <Education size={16} className="text-gray-600" />}
-                      {amenityDetails.label === 'Salón de eventos' && <Building size={16} className="text-gray-600" />}
-                      {amenityDetails.label === 'Área de asadores' && <Fire size={16} className="text-gray-600" />}
-                      {amenityDetails.label === 'Sauna' && <Temperature size={16} className="text-gray-600" />}
-                      {amenityDetails.label === 'Business Center' && <Box size={16} className="text-gray-600" />}
-                      {amenityDetails.label === 'Parque infantil' && <Sprout size={16} className="text-gray-600" />}
-                      {amenityDetails.label === 'Ludoteca' && <Tree size={16} className="text-gray-600" />}
-                      {amenityDetails.label === 'Vigilancia' && <Shield size={16} className="text-gray-600" />}
-                      {amenityDetails.label === 'Areas verdes' && <Sprout size={16} className="text-gray-600" />}
+                      {getAmenityIcon(amenityDetails.id)}
                     </div>
                     <span className="text-sm md:text-sm text-xs text-gray-700 font-medium">
                       {amenityDetails.label}
@@ -201,40 +266,26 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
         </div>
 
         <div className="grid grid-cols-2 gap-3 rounded-lg overflow-hidden">
-          {(condoData.imageUrls || []).slice(0, 4).map((img, index) => {
-            // Look for matching amenity by checking imageAmenityTags if available
-            let amenity = null;
-            
-            // Get matching amenity from imageAmenityTags if available
-            if (condoData.imageAmenityTags && img in condoData.imageAmenityTags) {
-              const amenityId = condoData.imageAmenityTags[img];
-              // Handle both string and string[] types for amenityId
-              const amenityIdString = Array.isArray(amenityId) ? amenityId[0] : amenityId;
-              amenity = condoAmenities.find(a => a.id === amenityIdString);
-            } 
-            // Fallback to array index matching if imageAmenityTags not available
-            else if (condoData.amenities && condoData.amenities[index]) {
-              const amenityId = condoData.amenities[index];
-              amenity = condoAmenities.find(a => a.id === amenityId);
-            }
+          {images.slice(0, 4).map((img, index) => {
+            const amenity = getImageAmenity(img, index);
 
             return (
               <div 
                 key={index} 
                 className="relative cursor-pointer"
                 onClick={() => {
-                  setInitialIndex(index);
+                  setInitialIndex(images.indexOf(img));
                   setIsGalleryOpen(true);
                 }}
               >
                 <div className="aspect-[16/10.5] relative group">
                   <Image
                     src={img || '/placeholder-image.png'}
-                    alt={`${condoData.name} vista ${index + 1}`}
+                    alt={`${condoData.name} ${amenity ? amenity.label : `vista ${index + 1}`}`}
                     fill
                     className="object-cover rounded-xl transition-all duration-200 group-hover:brightness-75"
                   />
-                  {/* Improved amenity label with better positioning and styling */}
+                  {/* Amenity label */}
                   {amenity && (
                     <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3 z-10">
                       <span className="bg-black/80 text-white px-2.5 py-1 md:px-3 md:py-1 rounded-full text-[10px] md:text-xs font-medium border border-white/10 shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
@@ -261,7 +312,7 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
       <GaleriaPropiedad
         isOpen={isGalleryOpen}
         onClose={() => setIsGalleryOpen(false)}
-        images={condoData.imageUrls || []}
+        images={images}
         initialIndex={initialIndex}
       />
 
