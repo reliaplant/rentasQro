@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { negocio } from '@/app/shared/interfaces';
 import { getNegocios } from '@/app/shared/firebase';
 import { Timestamp } from 'firebase/firestore'; // Import Timestamp directly from firebase/firestore
-import Filters from './components.tsx/filter';
-import KPIs from './components.tsx/kpis';
-import Pipeline from './components.tsx/pipeline';
-import FieldEditor from './components.tsx/fieldEditor';
+import Filters from './components/filter';
+import KPIs from './components/kpis';
+import Pipeline from './components/pipeline';
+import FieldEditor from './components/fieldEditor';
 
 export default function CRMPage() {
   const [negocios, setNegocios] = useState<negocio[]>([]);

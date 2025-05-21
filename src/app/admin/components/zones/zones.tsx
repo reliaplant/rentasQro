@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Edit2, ChevronDown, ChevronRight, Eye } from 'lucide-react';
 import { getZones, getCondosByZone, updateCondoQualityLevel } from '@/app/shared/firebase';
 import { ZoneData, CondoData } from '@/app/shared/interfaces';
-import EditZone from '@/app/admin/zones/editZone';
+import EditZone from '@/app/admin/components/zones/editZone';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 

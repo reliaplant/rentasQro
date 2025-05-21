@@ -9,6 +9,7 @@ import "./globals.css";
 import { FilterProvider } from './context/FilterContext';
 import { UTMParamsProvider } from './providers/UTMParamsProvider';
 import Script from 'next/script';
+import { Suspense } from 'react';
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -123,16 +124,17 @@ export default function RootLayout({
       <body className={`${poppins.className} ${geistMono.variable} min-h-screen flex flex-col antialiased`}>
         {/* Google Analytics */}
         {/* <GoogleAnalytics /> */}
-
-        <UTMParamsProvider>
-          <FilterProvider>
-            <Menu />
-            <main className="flex-grow">
-              {children}
-            </main>
-            <Footer />
-          </FilterProvider>
-        </UTMParamsProvider>
+        <Suspense>
+          <UTMParamsProvider>
+            <FilterProvider>
+              <Menu />
+              <main className="flex-grow">
+                {children}
+              </main>
+              <Footer />
+            </FilterProvider>
+          </UTMParamsProvider>
+        </Suspense>
       </body>
     </html>);
 }

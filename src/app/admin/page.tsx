@@ -3,12 +3,12 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import AllProperties from './components/allProperties';
-import Zones from './zones/zones';
+import Zones from './components/zones/zones';
 import ListaAdmins from './admins/listaAdmins';
 import ListaAdvisors from './advisors/listaAdvisors';
-import DesarrolladorasPage from './desarrolladoras/page';
-import BlogManager from './components/BlogManager';
-import ReferidosPage from './promotores/page';
+import DesarrolladorasPage from './components/derrolladoras';
+import BlogManager from './blog-editor/components/BlogManager';
+import ReferidosPage from './components/promotores';
 import CRMPage from './crm/page';
 
 type AdminTab = 'properties' | 'zones' | 'admins' | 'advisors' | 'promotores' | 'desarrolladoras' | 'blog' | 'crm';

@@ -30,6 +30,6 @@
     ".next/types/**/*.ts",
     "src/types/**/*.d.ts",
     "./src/types/*.d.ts"
-  ],
+, "src/app/admin/crm/components"  ],
   "exclude": ["node_modules"]
 }
