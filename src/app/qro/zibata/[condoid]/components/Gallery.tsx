@@ -150,8 +150,7 @@ export default function Gallery({ name, imageUrls, amenities, imageAmenityTags }
               return updated;
             });
           }}
-          placeholder="blur"
-          blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+          
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -243,7 +242,7 @@ export default function Gallery({ name, imageUrls, amenities, imageAmenityTags }
   };
 
   return (
-    <div className="mt-8 md:mt-12 mb-8 md:mb-12 px-4 md:px-6 -mx-4 md:mx-0 border-t pt-6 border-gray-200">
+    <div className="mt-8 md:mt-12 mb-8 md:mb-12  border-t pt-6 border-gray-200">
       <div className="flex items-center justify-between mb-4 md:mb-6 px-4 md:px-0">
         <h3 className="text-base md:text-lg font-semibold">Galería de {name}</h3>
         {validImageUrls && validImageUrls.length > 1 && (
@@ -264,8 +263,8 @@ export default function Gallery({ name, imageUrls, amenities, imageAmenityTags }
         {groupedImages && Object.entries(groupedImages).map(([category, images]) => (
           <div key={category} className="flex flex-col md:flex-row gap-2">
             {/* Category Label - Mobile optimized */}
-            <div className="w-full md:w-64 md:flex-shrink-0 px-4 md:px-0">
-              <div className="bg-white p-3 md:p-4 rounded-lg">
+            <div className="w-full md:w-96 md:flex-shrink-0 ">
+              <div className="bg-white  rounded-lg">
                 <h4 className="font-medium text-lg md:text-xl text-gray-900">{category}</h4>
                 <p className="text-xs md:text-sm text-gray-500 mt-1">{images.length} fotos</p>
               </div>

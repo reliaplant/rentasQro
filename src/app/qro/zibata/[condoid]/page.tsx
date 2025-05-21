@@ -133,7 +133,7 @@ export default async function CondoDetailPage(props: any) {
     } = condo;
 
     return (
-      <div className="max-w-5xl mt-0 md:mt-24 mx-auto md:px-4 pb-48">
+      <div className="">
         <Header
           name={name}
           coverImage={portada || ''}
@@ -143,18 +143,17 @@ export default async function CondoDetailPage(props: any) {
           desarrolladoraName={desarrolladoraName}
           desarrolladoraDescripcion={desarrolladoraDescripcion}
           desarrolladoraLogoURL={desarrolladoraLogoURL}
+          googlePlaceId={condo.googlePlaceId ?? undefined}
+          formattedAddress={condo.placeDetails?.formatted_address}
+          googleRating={condo.googleRating}
+          totalRatings={condo.totalRatings}
         />
 
-        {/* Amenities Section */}
-        <div className='px-4 md:px-0'>
-        <AmenitiesSection amenities={condo.amenities || []} />
-        </div>
-
-        <div className="flex items-center gap-2 mb-8 mt-24 px-4 md:px-0">
-          <h3 className="text-lg font-semibold">Precios de renta y venta</h3>
+<div className="flex items-center gap-2 mb-8 mt-6 px-4 md:px-0">
+          {/* <h3 className="text-lg font-semibold">Precios de renta y venta</h3> */}
         </div>
         {/* Price Information */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8 px-4 md:px-0">
+        {/* <div className="grid md:grid-cols-2 gap-6 mb-8 px-4 md:px-0">
           <PriceBar
             minPrice={condo.rentPriceMin}
             avgPrice={condo.rentPriceAvg}
@@ -167,24 +166,21 @@ export default async function CondoDetailPage(props: any) {
             maxPrice={condo.salePriceMax}
             type="sale"
           />
-        </div>
+        </div> */}
 
-        {/* Map showing the condo location */}
-        <div className="mt-24  px-4 md:px-0">
-          <h3 className="text-lg font-semibold mb-3">Ubicación en Zibatá</h3>
-          <p className="text-sm text-gray-500 mt-2">
-            Mapa indicativo de la ubicación del condominio
-          </p>
-            <div className="mt-10 w-full h-[300px] md:h-156 rounded-lg overflow-hidden">
-            <ZibataMapWrapper
-              highlightedPolygonId={polygonId}
-              height="100%"
-            />
-            </div>
-        </div>
+<div className='px-[5vw]'>
+
+
+ <PropertiesSection 
+          properties={properties} 
+          condoName={condo.name}
+        />
+
+
+        
+       
 
         <div className='mt-24 '></div>
-        {/* Gallery Section */}
         <Gallery
           name={condo.name}
           imageUrls={condo.imageUrls}
@@ -192,43 +188,11 @@ export default async function CondoDetailPage(props: any) {
           imageAmenityTags={condo.imageAmenityTags}
         />
 
-        <div className='mt-24 px-4 md:px-0'></div>
+       
 
-        {/* Google Maps Section */}
-        <GoogleMap
-          googlePlaceId={condo.googlePlaceId ?? undefined}
-          formattedAddress={condo.placeDetails?.formatted_address}
-        />
+</div>
+       
 
-        <div className='mt-24 px-4 md:px-0'></div>
-
-        {/* Street View Section */}
-        <StreetView
-          streetViewImage={condo.streetViewImage}
-          streetViewLink={condo.streetViewLink}
-          name={condo.name}
-        />
-
-        <div className='mt-24'></div>
-
-        {/* Reviews Section */}
-        <Reviews
-          condoName={condo.name}
-          googleRating={condo.googleRating}
-          totalRatings={condo.totalRatings}
-          googlePlaceId={condo.googlePlaceId ?? undefined}
-          cachedReviews={condo.cachedReviews}
-          selectedGoogleReviews={condo.selectedGoogleReviews} // Add this prop
-          manualReviews={condo.manualReviews} // Add manual reviews
-        />
-
-        <div className='mt-24'></div>
-
-        {/* Properties Section */}
-        <PropertiesSection 
-          properties={properties} 
-          condoName={condo.name}
-        />
       </div>
     );
 
