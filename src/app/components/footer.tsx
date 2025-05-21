@@ -75,6 +75,11 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link href="/legal/programa-referidos" className="text-xs md:text-sm text-gray-500 hover:text-violet-600">
+                  Programa de Referidos
+                </Link>
+              </li>
+              <li>
                 <Link href="/login" className="text-xs md:text-sm text-gray-500 hover:text-violet-600">
                   Asesores
                 </Link>
@@ -87,21 +92,12 @@ const Footer = () => {
             <h3 className="text-xs md:text-sm font-semibold text-gray-900 uppercase tracking-wider">Contacto</h3>
             <ul className="space-y-1.5 md:space-y-3">
               <li className="flex items-start">
-                <FaPhone className="mt-0.5 mr-2 text-gray-400 w-3 h-3 md:w-4 md:h-4"/>
-                <a href="tel:+524428549775" className="text-xs md:text-sm text-gray-500 hover:text-violet-600">
-                  +52 442 854 9775
-                </a>
-              </li>
-              <li className="flex items-start">
                 <FaEnvelope className="mt-0.5 mr-2 text-gray-400 w-3 h-3 md:w-4 md:h-4"/>
                 <a href="mailto:info@pizo.mx" className="text-xs md:text-sm text-gray-500 hover:text-violet-600">
                   info@pizo.mx
                 </a>
               </li>
-              <li className="flex items-start">
-                <FaMapMarkerAlt className="mt-0.5 mr-2 text-gray-400 w-3 h-3 md:w-4 md:h-4"/>
-                <span className="text-xs md:text-sm text-gray-500">Blvd. Bernardo Quintana 555, Querétaro, Qro.</span>
-              </li>
+
             </ul>
           </div>
 
@@ -128,6 +124,9 @@ const Footer = () => {
               </Link>
               <Link href="/legal/tyc" className="text-xs md:text-sm text-gray-400 hover:text-violet-600">
                 Términos y Condiciones
+              </Link>
+              <Link href="/legal/politica-cookies" className="text-xs md:text-sm text-gray-400 hover:text-violet-600">
+                Política de Cookies
               </Link>
             </div>
           </div>
