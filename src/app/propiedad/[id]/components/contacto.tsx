@@ -49,7 +49,7 @@ export default function Contacto({
   zoneName = ''
 }: ContactoProps) {
   // Add logging for debugging
-  console.log("Contacto component - Advisor data:", advisor);
+  console.log("Contacto component - Advisor data:");
   
   // Create a ref for the component
   const contactRef = useRef<HTMLDivElement>(null) as RefObject<HTMLDivElement>;
@@ -77,11 +77,10 @@ export default function Contacto({
           const filters = JSON.parse(filtersJson);
           if (filters && (filters.currency === 'USD' || filters.currency === 'MXN')) {
             setSelectedCurrency(filters.currency);
-            console.log('Setting currency from localStorage:', filters.currency);
           }
         }
       } catch (error) {
-        console.error('Error reading currency from localStorage:', error);
+        console.error('Error reading currency from localStorage:');
       }
     }
   }, [propertyId, isFavorite]);
@@ -97,7 +96,7 @@ export default function Contacto({
       filters.currency = currency;
       localStorage.setItem('propertyFilters', JSON.stringify(filters));
     } catch (error) {
-      console.error('Error updating currency in localStorage:', error);
+      console.error('Error updating currency in localStorage:');
     }
   };
   
@@ -123,20 +122,17 @@ export default function Contacto({
       legalPolicyPrice = calculatePolicyCost(price, 'kanun');
       discountedPolicyPrice = calculateDiscountedPolicyCost(price, 'kanun', discountPercent);
       
-      // Add debug logging to verify calculations
-      console.log('Rent amount:', price);
-      console.log('Policy price (original):', legalPolicyPrice);
-      console.log('Policy price (discounted):', discountedPolicyPrice);
+
     }
   } catch (error) {
-    console.error('Error calculating policy prices:', error);
+    console.error('Error calculating policy prices:');
   }
 
   const handleWhatsAppClick = async () => {
     try {
       await incrementWhatsappClicks(propertyId);
     } catch (error) {
-      console.error('Error al registrar clic:', error);
+      console.error('Error al registrar clic:');
     }
   };
 

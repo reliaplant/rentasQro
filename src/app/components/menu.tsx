@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { FaHeart, FaBars, FaTimes } from 'react-icons/fa';
 import { useFavorites } from '@/app/hooks/useFavorites';
-import { useFilters } from '../context/FilterContext';
 import AdvisorModal from '../components/AdvisorModal';
 import PropertyListingModal from './PropertyListingModal';
 
@@ -44,10 +43,8 @@ export default function Menu() {
   const [isPropertyListingModalOpen, setIsPropertyListingModalOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const { favorites } = useFavorites();
-  const { filters, updateFilter, resetFilters } = useFilters();
 
   const router = useRouter();
-  const currentTransactionType = filters.transactionType;
 
   // Create memoized callbacks for modal handlers
   const openPropertyListingModal = useCallback(() => setIsPropertyListingModalOpen(true), []);
@@ -63,113 +60,63 @@ export default function Menu() {
   useEffect(() => {
     if (initialRenderRef.current) {
       const transactionParam = searchParams?.get('t');
-      if ((transactionParam === 'renta' || transactionParam === 'compra') && 
-          transactionParam !== currentTransactionType) {
-        console.log(`Menu: Initial sync to URL param: ${transactionParam}`);
-        updateFilter('transactionType', transactionParam);
+      if ((transactionParam === 'renta' || transactionParam === 'compra')) {
+        console.log(`Menu: Initial transaction type from URL (no filter update): ${transactionParam}`);
+        // No filter update logic here
       }
       initialRenderRef.current = false;
     }
-  }, [searchParams, currentTransactionType, updateFilter]);
+  }, [searchParams]);
 
-  // Simplified handlers that don't cause redirections
+  // Simplified handlers that only navigate
   const handleRentClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    console.log('Menu: Setting transaction type to renta and clearing filters');
-    
-    // Reset all filters first
-    resetFilters(); 
-    
-    // Then set only the transaction type
-    updateFilter('transactionType', 'renta');
-    // Explicitly ensure preventa is false for renta
-    updateFilter('preventa', false);
-    
+    console.log('Menu: Navigating for Renta (no filter update)');
     setIsMobileMenuOpen(false);
-    
-    // Remove the navigation that was causing issues
-    if (pathname !== '/explorar') {
-      router.push('/explorar');
-    }
-  }, [updateFilter, router, resetFilters, pathname]);
+    // Navigate with query parameter, /explorar page can use this if needed
+    router.push('/explorar?t=renta&preventa=false');
+  }, [router]);
 
   const handleBuyClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    console.log('Menu: Setting transaction type to compra and clearing filters');
-    
-    // Reset all filters first
-    resetFilters();
-    
-    // Then set only the transaction type, explicitly ensure preventa is false
-    updateFilter('transactionType', 'compra');
-    updateFilter('preventa', false);
-    
+    console.log('Menu: Navigating for Compra (no filter update)');
     setIsMobileMenuOpen(false);
-    
-    // Remove the navigation that was causing issues
-    if (pathname !== '/explorar') {
-      router.push('/explorar');
-    }
-  }, [updateFilter, router, resetFilters, pathname]);
+    // Navigate with query parameter
+    router.push('/explorar?t=compra&preventa=false');
+  }, [router]);
 
-  // Handler for Preventa click - updated to handle the boolean preventa flag
   const handlePreventaClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    console.log('Menu: Setting preventa filter to true and transaction to compra');
-    
-    // Reset all filters first
-    resetFilters(); 
-    
-    // Then set only what we need - this should be done with a custom filter for preventa
-    updateFilter('transactionType', 'compra');
-    updateFilter('preventa', true);
-    
+    console.log('Menu: Navigating for Preventa (no filter update)');
     setIsMobileMenuOpen(false);
-    
-    // Remove the navigation that was causing issues
-    if (pathname !== '/explorar') {
-      router.push('/explorar');
-    }
-  }, [updateFilter, router, resetFilters, pathname]);
+    // Navigate with query parameters
+    router.push('/explorar?t=compra&preventa=true');
+  }, [router]);
 
-  // Update isActive function to properly check for the preventa flag
+  // Update isActive function to rely solely on URL parameters
   const isActive = useCallback((path: string) => {
-    // Get URL parameter directly to avoid dependency on state
     const urlTransactionType = searchParams?.get('t');
-    const urlPreventa = searchParams?.get('preventa');
+    const urlPreventa = searchParams?.get('preventa') === 'true'; // Ensure boolean comparison
     
     if (path === '/' && pathname === '/') return true;
 
-    // For Preventa link, only consider it active when preventa is true
     if (path === '/preventa') {
-      return pathname === '/explorar' && 
-             ((urlPreventa === 'true') || 
-             (filters.preventa === true));
+      return pathname === '/explorar' && urlPreventa && urlTransactionType === 'compra';
     }
 
-    // For rent/buy links, check if we're not in preventa mode
-    const isPreventaActive = urlPreventa === 'true' || filters.preventa === true;
-
-    // For Rent Tab - don't show as active if preventa is active
     if (path === '/rentar') {
-      return pathname === '/explorar' && 
-             !isPreventaActive &&
-             ((urlTransactionType === 'renta') || 
-             (!urlTransactionType && filters.transactionType === 'renta'));
+      return pathname === '/explorar' && !urlPreventa && urlTransactionType === 'renta';
     }
     
-    // For Buy Tab - don't show as active if preventa is active
     if (path === '/comprar') {
-      return pathname === '/explorar' && 
-             !isPreventaActive &&
-             ((urlTransactionType === 'compra') || 
-             (!urlTransactionType && filters.transactionType === 'compra'));
+      return pathname === '/explorar' && !urlPreventa && urlTransactionType === 'compra';
     }
 
+    // For other paths, just check if the pathname starts with the path
     if (path !== '/' && pathname?.startsWith(path)) return true;
     
     return false;
-  }, [pathname, searchParams, filters.transactionType, filters.preventa]);
+  }, [pathname, searchParams]);
 
   return (
     <nav className="bg-white z-[9999] shadow-sm sticky top-0">
@@ -206,7 +153,7 @@ export default function Menu() {
           {/* Desktop Navigation with improved styling approach */}
           <nav className="hidden md:flex -mb-px space-x-8">
             <Link
-              href="/explorar"
+              href="/explorar?t=compra&preventa=false" // Updated href
               onClick={handleBuyClick}
               className={`whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer ${
                 isActive('/comprar') 
@@ -217,7 +164,7 @@ export default function Menu() {
               Comprar
             </Link>
             <Link
-              href="/explorar"
+              href="/explorar?t=renta&preventa=false" // Updated href
               onClick={handleRentClick}
               className={`whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer ${
                 isActive('/rentar') 
@@ -229,7 +176,7 @@ export default function Menu() {
             </Link>
 
             <Link
-              href="/explorar"
+              href="/explorar?t=compra&preventa=true" // Updated href
               onClick={handlePreventaClick}
               className={`${
                 isActive('/preventa')
@@ -242,8 +189,7 @@ export default function Menu() {
             <Link
               href="/qro/zibata"
               onClick={() => {
-                // Clear preventa filter when navigating away
-                updateFilter('propertyType', '');
+                // No filter update logic
               }}
               className={`${pathname?.startsWith('/qro/zibata')
                   ? 'border-violet-800 text-violet-800'
@@ -255,8 +201,7 @@ export default function Menu() {
             <Link
               href="/blog"
               onClick={() => {
-                // Clear preventa filter when navigating away
-                updateFilter('propertyType', '');
+                // No filter update logic
               }}
               className={`${pathname?.startsWith('/blog')
                   ? 'border-violet-800 text-violet-800'
@@ -286,8 +231,7 @@ export default function Menu() {
           <Link
             href="/favoritos"
             onClick={() => {
-              // Clear preventa filter when navigating away
-              updateFilter('propertyType', '');
+              // No filter update logic
             }}
             className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-full transition-colors relative ${favorites.length > 0
                 ? 'text-violet-800 bg-violet-50 hover:bg-violet-100'
@@ -306,8 +250,7 @@ export default function Menu() {
           <button
             onClick={() => {
               openPropertyListingModal();
-              // Clear preventa filter when using modal
-              updateFilter('propertyType', '');
+              // No filter update logic
             }}
             className="text-sm font-medium text-gray-700 hover:text-violet-800 cursor-pointer"
           >
@@ -328,14 +271,15 @@ export default function Menu() {
               href="/explorar"
               onClick={() => {
                 setIsMobileMenuOpen(false);
-                resetFilters(); // Reset all filters when clicking "Explorar"
+                // Navigate to explorar, potentially clearing query params or setting defaults
+                router.push('/explorar'); 
               }}
               className="flex items-center px-4 py-3 rounded-lg text-base font-medium bg-violet-600 text-white hover:bg-violet-700"
             >
               Explorar
             </Link>
             <Link
-              href="/explorar"
+              href="/explorar?t=compra&preventa=false" // Updated href
               onClick={handleBuyClick}
               className={`flex items-center px-4 py-3 rounded-lg text-base font-medium 
                 ${isActive('/comprar')
@@ -346,7 +290,7 @@ export default function Menu() {
               Comprar
             </Link>
             <Link
-              href="/explorar"
+              href="/explorar?t=renta&preventa=false" // Updated href
               onClick={handleRentClick}
               className={`flex items-center px-4 py-3 rounded-lg text-base font-medium 
                 ${isActive('/rentar')
@@ -358,7 +302,7 @@ export default function Menu() {
             </Link>
 
             <Link
-              href="/explorar"
+              href="/explorar?t=compra&preventa=true" // Updated href
               onClick={handlePreventaClick}
               className={`flex items-center px-4 py-3 rounded-lg text-base font-medium ${isActive('/preventa')
                   ? 'bg-violet-50 text-violet-700'
@@ -371,8 +315,7 @@ export default function Menu() {
               href="/qro/zibata"
               onClick={() => {
                 setIsMobileMenuOpen(false);
-                // Clear preventa filter when navigating away
-                updateFilter('propertyType', '');
+                // No filter update logic
               }}
               className={`flex items-center px-4 py-3 rounded-lg text-base font-medium ${pathname?.startsWith('/qro/zibata')
                   ? 'bg-violet-50 text-violet-700'
@@ -386,8 +329,7 @@ export default function Menu() {
               href="/favoritos"
               onClick={() => {
                 setIsMobileMenuOpen(false);
-                // Clear preventa filter when navigating away
-                updateFilter('propertyType', '');
+                // No filter update logic
               }}
               className="flex items-center px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-50"
             >
@@ -404,8 +346,7 @@ export default function Menu() {
               onClick={() => {
                 openPropertyListingModal();
                 setIsMobileMenuOpen(false);
-                // Clear preventa filter when using modal
-                updateFilter('propertyType', '');
+                // No filter update logic
               }}
               className="flex w-full items-center px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-50"
             >

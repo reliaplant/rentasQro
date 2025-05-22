@@ -46,7 +46,7 @@ export default function SimilarProperties({
           }
         }
       } catch (error) {
-        console.error('Error reading currency from localStorage:', error);
+        console.error('Error reading currency from localStorage:');
       }
     };
 
@@ -65,7 +65,6 @@ export default function SimilarProperties({
 
     async function fetchSimilarProperties() {
       try {
-        console.log("SIMILAR: Starting fetch for similar properties");
 
         const similarProps = await getSimilarProperties({
           currentPropertyId,
@@ -77,8 +76,7 @@ export default function SimilarProperties({
           maxResults: 4 // Updated to match the renamed parameter
         });
 
-        console.log("SIMILAR: Got properties:", similarProps.length);
-        console.log("SIMILAR: Property IDs:", similarProps.map(p => p.id).join(', '));
+
 
         // Only update state if component is still mounted
         if (!isMounted) return;
@@ -93,7 +91,7 @@ export default function SimilarProperties({
                 zoneMap[prop.zone] = zoneData.name;
               }
             } catch (err) {
-              console.error("Error fetching zone:", err);
+              console.error("Error fetching zone:");
             }
           }
         }
@@ -101,16 +99,13 @@ export default function SimilarProperties({
         if (!isMounted) return;
         setZoneNames(zoneMap);
         setProperties(similarProps);
-        console.log("SIMILAR: State updated with properties:", similarProps.length);
       } catch (error) {
-        console.error("SIMILAR: Error in similar properties:", error);
+        console.error("SIMILAR: Error in similar properties:");
         if (isMounted) {
-          console.log("SIMILAR: Setting empty properties due to error");
           setProperties([]);
         }
       } finally {
         if (isMounted) {
-          console.log("SIMILAR: Setting loading to false");
           setLoading(false);
         }
       }
@@ -126,7 +121,7 @@ export default function SimilarProperties({
 
   // Don't show anything while loading
   if (loading) {
-    console.log("SIMILAR: Rendering loading state");
+ 
     return (
       <div className="bg-white p-6 rounded-lg shadow-sm">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Propiedades similares</h3>
@@ -143,13 +138,11 @@ export default function SimilarProperties({
     );
   }
 
-  // Log the actual number of properties we're about to render
-  console.log("SIMILAR: About to render", properties.length, "properties");
-  console.log("SIMILAR: Property IDs to render:", properties.map(p => p.id));
+
 
   // Hide completely if no properties found
   if (properties.length === 0) {
-    console.log("SIMILAR: No properties to render, returning null");
+
     return null;
   }
 

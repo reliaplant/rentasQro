@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import FilterExplorador from '@/app/components/filterExplorador';
 import Explorador from '@/app/components/explorador';
 import QueretaroRentaFiltersInitializer from './QueretaroRentaFiltersInitializer';
+import { FilterProvider } from '@/app/context/FilterContext';
 
 // Metadata for SEO
 export const metadata: Metadata = {
@@ -32,12 +33,15 @@ export default function QueretaroRentaPage() {
                 </div>
             </div>
 
-            {/* Client component to initialize filters */}
-            <QueretaroRentaFiltersInitializer />
 
-            {/* Filter and explorer components */}
-            <FilterExplorador />
-            <Explorador />
+            <FilterProvider>
+                {/* Client component to initialize filters */}
+                <QueretaroRentaFiltersInitializer />
+                {/* Filter and explorer components */}
+                <FilterExplorador />
+                <Explorador />
+            </FilterProvider>
         </main>
     );
 }
+ 

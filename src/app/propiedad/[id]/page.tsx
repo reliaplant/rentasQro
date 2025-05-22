@@ -18,38 +18,39 @@ interface AdvisorData {
 }
 
 // Generate dynamic metadata for SEO
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: any }): Promise<Metadata> {
+  const id  = params.id as string; // CORRECTED: Removed await. params is an object, not a Promise.
   try {
-    const propertyData = await getProperty(params.id);
-    
+    const propertyData = await getProperty(id); // Usa la variable 'id'
+
     if (!propertyData) {
       return {
         title: 'Propiedad no encontrada | PIZO MX',
         description: 'Lo sentimos, esta propiedad ya no está disponible.',
       };
     }
-    
+
     // Get zone and condo information if available
     let zoneData = null;
     let condoData = null;
-    
+
     if (propertyData.zone) {
       zoneData = await getZoneById(propertyData.zone);
     }
-    
+
     if (propertyData.condo) {
       condoData = await getCondoById(propertyData.condo);
     }
-    
+
     // Create a descriptive title and description
     const propertyType = propertyData.propertyType || 'Propiedad';
     const transactionType = propertyData.transactionType === 'renta' ? 'en renta' : 'en venta';
     const location = zoneData?.name || 'Querétaro';
     const condoName = condoData?.name ? ` en ${condoData.name}` : '';
-    
+
     return {
       title: `${propertyType.charAt(0).toUpperCase() + propertyType.slice(1)} ${transactionType}${condoName} | ${location} | PIZO MX`,
-      description: propertyData.descripcion || 
+      description: propertyData.descripcion ||
         `${propertyType.charAt(0).toUpperCase() + propertyType.slice(1)} ${transactionType} con ${propertyData.bedrooms || 0} recámaras, 
         ${propertyData.bathrooms || 0} baños, ${propertyData.construccionM2 || 0}m² de construcción. 
         Ubicado en ${location}${condoName}.`,
@@ -57,16 +58,16 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
         inmobiliaria, ${propertyData.bedrooms || 0} recámaras, ${propertyData.bathrooms || 0} baños`,
       openGraph: {
         title: `${propertyType.charAt(0).toUpperCase() + propertyType.slice(1)} ${transactionType}${condoName} | ${location}`,
-        description: propertyData.descripcion || 
+        description: propertyData.descripcion ||
           `${propertyType.charAt(0).toUpperCase() + propertyType.slice(1)} ${transactionType} con ${propertyData.bedrooms || 0} recámaras, 
           ${propertyData.bathrooms || 0} baños, ${propertyData.construccionM2 || 0}m² de construcción. 
           Ubicado en ${location}${condoName}.`,
-        url: `https://www.pizo.mx/propiedad/${params.id}`,
+        url: `https://www.pizo.mx/propiedad/${id}`, // Use id
         type: 'website',
         images: [
           {
-            url: propertyData.imageUrls && propertyData.imageUrls.length > 0 
-              ? propertyData.imageUrls[0] 
+            url: propertyData.imageUrls && propertyData.imageUrls.length > 0
+              ? propertyData.imageUrls[0]
               : 'https://www.pizo.mx/og-image.jpg',
             width: 1200,
             height: 630,
@@ -75,7 +76,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
         ],
       },
       alternates: {
-        canonical: `https://www.pizo.mx/propiedad/${params.id}`,
+        canonical: `https://www.pizo.mx/propiedad/${id}`, // Use id
       }
     };
   } catch (error) {
@@ -95,7 +96,7 @@ function generateStructuredData(property: PropertyData, advisor: AdvisorData | n
     zoneData?.name,
     'Querétaro, México'
   ].filter(Boolean).join(', ');
-  
+
   return {
     "@context": "https://schema.org",
     "@type": "RealEstateListing",
@@ -145,23 +146,23 @@ function generateStructuredData(property: PropertyData, advisor: AdvisorData | n
 // Helper function to serialize Firestore timestamps or Date objects to ISO strings
 function serializeTimestamps(obj: any): any {
   if (!obj) return obj;
-  
+
   // Handle array case
   if (Array.isArray(obj)) {
     return obj.map(item => serializeTimestamps(item));
   }
-  
+
   // Handle objects
   if (typeof obj === 'object') {
     // Check if it's a Firestore Timestamp or Date object
     if (obj.seconds !== undefined && obj.nanoseconds !== undefined) {
       return new Date(obj.seconds * 1000).toISOString();
     }
-    
+
     if (obj instanceof Date) {
       return obj.toISOString();
     }
-    
+
     // Process regular objects recursively
     const result: any = {};
     for (const [key, value] of Object.entries(obj)) {
@@ -169,16 +170,21 @@ function serializeTimestamps(obj: any): any {
     }
     return result;
   }
-  
+
   // Return primitives as is
   return obj;
 }
 
 // Server component - fetches data server-side
-export default async function PropertyPage({ params }: { params: { id: string } }) {
+export default async function PropertyPage({ 
+  params 
+}: { 
+  params: any
+}) {
+  const id = params.id as string;
   try {
-    const propertyData = await getProperty(params.id);
-    
+    const propertyData = await getProperty(id);
+
     if (!propertyData) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-white">
@@ -189,19 +195,19 @@ export default async function PropertyPage({ params }: { params: { id: string } 
         </div>
       );
     }
-    
+
     // Get advisor data
     let advisorData = null;
     if (propertyData.advisor) {
       // Try getting advisor by direct document ID first
       advisorData = await getAdvisorById(propertyData.advisor);
-      
+
       if (!advisorData) {
         // Fall back to profile lookup
         advisorData = await getAdvisorProfile(propertyData.advisor);
       }
     }
-    
+
     // Use default advisor if none found
     if (!advisorData) {
       advisorData = {
@@ -214,45 +220,45 @@ export default async function PropertyPage({ params }: { params: { id: string } 
         verified: true
       };
     }
-    
+
     // Get location data
     let zoneData = null;
     let condoData = null;
-    
+
     if (propertyData.zone) {
       zoneData = await getZoneById(propertyData.zone);
     }
-    
+
     if (propertyData.condo) {
       condoData = await getCondoById(propertyData.condo);
     }
-    
+
     // Serialize all data to ensure it's safe to pass to client components
     const serializedPropertyData = serializeTimestamps(propertyData);
     const serializedAdvisorData = serializeTimestamps(advisorData);
     const serializedZoneData = serializeTimestamps(zoneData);
     const serializedCondoData = serializeTimestamps(condoData);
-    
+
     // Generate structured data (using original data before serialization)
     const structuredData = generateStructuredData(propertyData, advisorData, zoneData, condoData);
-    
+
     // Create property title
     const propertyTitle = `${propertyData.propertyType?.charAt(0).toUpperCase() + propertyData.propertyType?.slice(1) || 'Propiedad'} 
       ${propertyData.transactionType === 'renta' ? 'en renta' : 'en venta'} 
       ${condoData?.name ? `en ${condoData.name}` : ''} 
       ${zoneData?.name ? `| ${zoneData.name}` : ''}`;
-    
+
     // When processing the condo data, use getOrderedAmenities
     if (condoData && condoData.amenities) {
       // Sort the amenities by priority for display in the UI
       const orderedAmenities = getOrderedAmenities(condoData.amenities);
-      
+
       // We can't directly modify the condo object, so we can create a processed version
       const processedCondo = {
         ...condoData,
         orderedAmenities
       };
-      
+
       // Pass the processed condo to CondoSection
       // Note: depending on your implementation, you might need to adjust how
       // this is passed to maintain compatibility with existing code
@@ -261,15 +267,15 @@ export default async function PropertyPage({ params }: { params: { id: string } 
     return (
       <>
         {/* Add structured data for SEO */}
-        <script 
-          type="application/ld+json" 
+        <script
+          type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        
+
         <div className="bg-white min-h-screen">
           {/* Hidden title for SEO */}
           <h1 className="sr-only">{propertyTitle}</h1>
-          
+
           {/* Client component with all the interactive functionality */}
           <PropertyClient
             property={serializedPropertyData}
@@ -282,7 +288,7 @@ export default async function PropertyPage({ params }: { params: { id: string } 
       </>
     );
   } catch (error) {
-    console.error("Error fetching property data:", error);
+    console.error("Error fetching property data:")
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">

@@ -168,19 +168,15 @@ export const addProperty = async (propertyData: PropertyData): Promise<string> =
 
 export const getProperties = async (): Promise<PropertyData[]> => {
   try {
-    console.log("Fetching properties from Firebase...");
     const querySnapshot = await getDocs(collection(db, "properties"));
     const properties: PropertyData[] = [];
     
-    console.log(`Found ${querySnapshot.size} documents in collection`);
     
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      console.log(`Property ${doc.id}:`, data);
       properties.push({ id: doc.id, ...data } as PropertyData);
     });
     
-    console.log(`Returning ${properties.length} properties`);
     return properties;
   } catch (error) {
     console.error("Error fetching properties: ", error);
@@ -317,7 +313,6 @@ export const incrementPropertyViews = async (propertyId: string): Promise<void> 
 
 export const incrementWhatsappClicks = async (propertyId: string): Promise<void> => {
   try {
-    console.log('Incrementing WhatsApp clicks for property:', propertyId);
     const propertyRef = doc(db, "properties", propertyId);
     await updateDoc(propertyRef, {
       whatsappClicks: increment(1)
@@ -396,21 +391,16 @@ export const addCondo = async (
     let logoUrl: string | undefined;
     
     if (imageFiles && imageFiles.length > 0) {
-      console.log(`Subiendo ${imageFiles.length} imágenes`);
       imageUrls = await uploadCondoImagesInternal(imageFiles);
-      console.log('URLs de imágenes subidas:', imageUrls);
     }
     
     if (logoFile) {
-      console.log('Subiendo logo');
       logoUrl = await uploadCondoLogo(logoFile);
-      console.log('URL de logo:', logoUrl);
     }
 
     // Extract portada from condoData explicitly if it's a data URL
     let portadaUrl = condoData.portada;
     if (portadaUrl && portadaUrl.startsWith('data:image')) {
-      console.log('Portada is a data URL, uploading to storage...');
       // Convert data URL to Blob and upload
       const response = await fetch(portadaUrl);
       const blob = await response.blob();
@@ -418,7 +408,6 @@ export const addCondo = async (
       const storageRef = ref(storage, `condominiums/portadas/${Date.now()}-portada.jpg`);
       await uploadBytes(storageRef, portadaFile);
       portadaUrl = await getDownloadURL(storageRef);
-      console.log('Portada uploaded, URL:', portadaUrl);
     }
 
     // Preparar datos a guardar - ensure all fields are included
@@ -446,10 +435,8 @@ export const addCondo = async (
       createdAt: Timestamp.now()
     };
     
-    console.log('Guardando en Firestore:', dataToSave);
     
     const docRef = await addDoc(collection(db, "condominiums"), dataToSave);
-    console.log('Condominio creado con ID:', docRef.id);
     
     // Update the zone document to include this condo in its condos array
     try {
@@ -472,7 +459,6 @@ export const addCondo = async (
           }]
         });
         
-        console.log('Condominio agregado al resumen de la zona:', condoData.zoneId);
       } else {
         console.error('La zona no existe:', condoData.zoneId);
       }
@@ -613,7 +599,6 @@ export const updateCondo = async (
               );
               
               await updateDoc(oldZoneRef, { condos: updatedCondos });
-              console.log(`Condominio removido de la zona anterior: ${oldZoneId}`);
             }
             
             // Add to new zone
@@ -634,7 +619,6 @@ export const updateCondo = async (
                 }]
               });
               
-              console.log(`Condominio añadido a la nueva zona: ${newZoneId}`);
             }
           } else {
             // Just update in current zone
@@ -670,7 +654,6 @@ export const updateCondo = async (
               }
               
               await updateDoc(zoneRef, { condos: updatedCondos });
-              console.log(`Información del condominio actualizada en la zona: ${newZoneId}`);
             }
           }
         }
@@ -686,15 +669,13 @@ export const updateCondo = async (
 
 export const getZoneById = async (id: string): Promise<ZoneData | null> => {
   try {
-    console.log('Fetching zone:', id);
+
     const docRef = doc(db, "zones", id);
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
-      console.log('Zone data:', docSnap.data());
       return { id: docSnap.id, ...docSnap.data() } as ZoneData;
     }
-    console.log('Zone not found');
     return null;
   } catch (error) {
     console.error("Error fetching zone:", error);
@@ -704,18 +685,16 @@ export const getZoneById = async (id: string): Promise<ZoneData | null> => {
 
 export const getCondoById = async (id: string): Promise<CondoData | null> => {
   try {
-    console.log('Fetching condo:', id);
     const docRef = doc(db, "condominiums", id);
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
-      console.log('Condo data:', docSnap.data());
+ 
       return { id: docSnap.id, ...docSnap.data() } as CondoData;
     }
-    console.log('Condo not found');
     return null;
   } catch (error) {
-    console.error("Error fetching condo:", error);
+    console.error("Error fetching condo:");
     return null;
   }
 };
@@ -730,7 +709,7 @@ export const updateCondoReviews = async (condoId: string): Promise<void> => {
       throw new Error('No Google Place ID found');
     }
 
-    console.log('Fetching reviews for place:', condoData.googlePlaceId);
+
 
     const response = await fetch(`/api/google-reviews?placeId=${condoData.googlePlaceId}`);
     
@@ -739,7 +718,6 @@ export const updateCondoReviews = async (condoId: string): Promise<void> => {
     }
 
     const data = await response.json();
-    console.log('API response received');
 
     if (!data.result) {
       throw new Error('Invalid API response format');
@@ -799,7 +777,7 @@ export const updateCondoReviews = async (condoId: string): Promise<void> => {
       updatedData.placeDetails.photos = result.placeDetails.photos;
     }
 
-    console.log('Updating document with:', updatedData);
+    
     await updateDoc(condoRef, {
       ...updatedData,
       selectedGoogleReviews: condoData.selectedGoogleReviews || [] // Preserve existing selections
@@ -824,19 +802,16 @@ export const checkIfUserExists = async (email: string): Promise<boolean> => {
 // Enhanced function to check if a user is an admin
 export const checkIfUserIsAdmin = async (userId: string): Promise<boolean> => {
   try {
-    console.log(`[ROLE CHECK] Checking if user ${userId} is an admin...`);
     
     // First check if there's a direct document with this ID
     const adminDocRef = doc(db, 'admins', userId);
     const adminDoc = await getDoc(adminDocRef);
     
     if (adminDoc.exists()) {
-      console.log(`[ROLE CHECK] Found admin document for ${userId} with direct ID match`);
       return true;
     }
     
     // If not found by ID, try querying by userId field
-    console.log(`[ROLE CHECK] No direct admin document, checking by userId field...`);
     const adminsQuery = query(
       collection(db, 'admins'),
       where('userId', '==', userId)
@@ -845,13 +820,12 @@ export const checkIfUserIsAdmin = async (userId: string): Promise<boolean> => {
     const querySnapshot = await getDocs(adminsQuery);
     const isAdmin = !querySnapshot.empty;
     
-    console.log(`[ROLE CHECK] Admin query returned ${querySnapshot.size} results for userId ${userId}`);
+  
     
     // Also check in users collection for isAdmin flag
     try {
       const userDoc = await getDoc(doc(db, 'users', userId));
       if (userDoc.exists() && userDoc.data().isAdmin) {
-        console.log(`[ROLE CHECK] User document has isAdmin=true flag for ${userId}`);
         return true;
       }
     } catch (userDocError) {
@@ -868,7 +842,6 @@ export const checkIfUserIsAdmin = async (userId: string): Promise<boolean> => {
 // Function to create an admin user
 export const createAdminUser = async (userId: string, email: string, name: string): Promise<void> => {
   try {
-    console.log(`Creating admin user for ${userId}`);
     
     // Create admin record
     await setDoc(doc(db, 'admins', userId), {
@@ -884,7 +857,6 @@ export const createAdminUser = async (userId: string, email: string, name: strin
       isAdmin: true
     });
     
-    console.log(`Admin user created successfully for ${userId}`);
   } catch (error) {
     console.error('Error creating admin user:', error);
     throw error;
@@ -894,46 +866,37 @@ export const createAdminUser = async (userId: string, email: string, name: strin
 // Enhanced function to check if a user is an advisor
 export async function checkIfUserIsAdvisor(uid: string): Promise<boolean> {
   try {
-    console.log(`[ROLE CHECK] Checking if user ${uid} is an advisor...`);
     
     // First check in the users collection if they have isAdvisor flag
     try {
       const userDoc = await getDoc(doc(db, 'users', uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        console.log(`[ROLE CHECK] User document exists for ${uid}:`, userData);
         if (userData.isAdvisor) {
-          console.log(`[ROLE CHECK] Found isAdvisor=true flag in user document for ${uid}`);
           return true;
         }
       } else {
-        console.log(`[ROLE CHECK] No user document found for ${uid}`);
       }
     } catch (userDocError) {
       console.error('[ROLE CHECK] Error checking user document for advisor flag:', userDocError);
     }
     
     // Also check the advisors collection
-    console.log(`[ROLE CHECK] Checking advisors collection for ${uid}...`);
     const advisorsQuery = query(
       collection(db, 'advisors'),
       where('userId', '==', uid)
     );
     
     const advisorsSnapshot = await getDocs(advisorsQuery);
-    console.log(`[ROLE CHECK] Found ${advisorsSnapshot.size} advisor documents for ${uid}`);
     
     if (!advisorsSnapshot.empty) {
       const advisorDoc = advisorsSnapshot.docs[0];
-      console.log(`[ROLE CHECK] Advisor document:`, advisorDoc.data());
       
       // Check if the advisor is active
       const status = advisorDoc.data().status;
       if (status === 'active') {
-        console.log(`[ROLE CHECK] Advisor is active for ${uid}`);
         return true;
       } else {
-        console.log(`[ROLE CHECK] Advisor exists but status=${status} for ${uid}`);
       }
     }
     
@@ -968,41 +931,33 @@ export async function getAdvisorData(userId: string) {
     return null;
   }
   
-  console.log(`[ADVISOR DATA] Starting comprehensive search for advisor data with userId: ${userId}`);
   
   try {
     // APPROACH 1: Query by userId field in advisors collection
-    console.log(`[ADVISOR DATA] Approach 1: Querying advisors collection with userId: ${userId}`);
     const advisorsQuery = query(collection(db, "advisors"), where("userId", "==", userId));
     const advisorsSnapshot = await getDocs(advisorsQuery);
     
-    console.log(`[ADVISOR DATA] Found ${advisorsSnapshot.size} documents by userId field`);
     
     if (!advisorsSnapshot.empty) {
       const advisorDoc = advisorsSnapshot.docs[0];
       const advisorData = advisorDoc.data();
-      console.log(`[ADVISOR DATA] Found advisor by userId field. Data:`, advisorData);
       return { id: advisorDoc.id, ...advisorData };
     }
     
     // APPROACH 2: Try direct document lookup
-    console.log(`[ADVISOR DATA] Approach 2: Direct document lookup with ID: ${userId}`);
     const directDocRef = doc(db, "advisors", userId);
     const directDocSnap = await getDoc(directDocRef);
     
     if (directDocSnap.exists()) {
       const directData = directDocSnap.data();
-      console.log(`[ADVISOR DATA] Found advisor by direct document ID. Data:`, directData);
       return { id: userId, ...directData };
     }
     
     // APPROACH 3: Check if there's any document that might contain this ID
-    console.log(`[ADVISOR DATA] Approach 3: Checking all advisors for any match`);
     const allAdvisorsSnapshot = await getDocs(collection(db, "advisors"));
     
     for (const doc of allAdvisorsSnapshot.docs) {
       const data = doc.data();
-      console.log(`[ADVISOR DATA] Checking document ${doc.id}:`, data);
       
       // Check if any field in this document could match our userId
       if (
@@ -1011,13 +966,11 @@ export async function getAdvisorData(userId: string) {
         data.uid === userId ||
         (data.email && data.email === userId)
       ) {
-        console.log(`[ADVISOR DATA] Found potential match in document ${doc.id}`);
         return { id: doc.id, ...data };
       }
     }
     
     // If we get here, no advisor was found
-    console.log(`[ADVISOR DATA] ⚠️ NO ADVISOR DATA FOUND after exhaustive search for userId: ${userId}`);
     return null;
   } catch (error) {
     console.error("[ADVISOR DATA] Error fetching advisor data:", error);
@@ -1028,22 +981,21 @@ export async function getAdvisorData(userId: string) {
 // New function to get advisor by document ID
 export const getAdvisorById = async (advisorId: string): Promise<AdvisorData | null> => {
   try {
-    console.log(`[ADVISOR LOOKUP] Looking up advisor with document ID: ${advisorId}`);
+  
     const advisorRef = doc(db, "advisors", advisorId);
     const advisorDoc = await getDoc(advisorRef);
     
     if (advisorDoc.exists()) {
-      console.log(`[ADVISOR LOOKUP] Found advisor document:`, advisorDoc.data());
       return {
         id: advisorDoc.id,
         ...advisorDoc.data()
       } as AdvisorData;
     }
     
-    console.log(`[ADVISOR LOOKUP] No advisor found with document ID: ${advisorId}`);
+
     return null;
   } catch (error) {
-    console.error(`[ADVISOR LOOKUP] Error fetching advisor by ID:`, error);
+    console.error(`[ADVISOR LOOKUP] Error fetching advisor by ID:`);
     return null;
   }
 };
@@ -1069,15 +1021,12 @@ export async function getSimilarProperties({
   maxResults = 4  // Renamed parameter
 }: SimilarPropertiesParams): Promise<PropertyData[]> {
   try {
-    console.log(`SIMILAR QUERY: Starting search for properties similar to ${currentPropertyId}`);
-    console.log(`SIMILAR QUERY: Filters - type: ${propertyType}, transaction: ${transactionType}, zone: ${zone}`);
     
     let finalProperties: PropertyData[] = [];
     
     // STEP 1: Try to find properties with same condo (most similar)
     if (condo) {
       try {
-        console.log(`SIMILAR QUERY: Trying to find properties in same condo: ${condo}`);
         const condoQuery = query(
           collection(db, 'properties'),
           where('condo', '==', condo),
@@ -1085,7 +1034,6 @@ export async function getSimilarProperties({
         );
         
         const condoSnapshot = await getDocs(condoQuery);
-        console.log(`SIMILAR QUERY: Found ${condoSnapshot.size} properties in same condo`);
         
         const condoProperties = condoSnapshot.docs
           .map(doc => ({ id: doc.id, ...doc.data() } as PropertyData))
@@ -1100,7 +1048,6 @@ export async function getSimilarProperties({
     // STEP 2: Try to find properties with same zone
     if (finalProperties.length < maxResults && zone) {  // Fixed reference
       try {
-        console.log(`SIMILAR QUERY: Trying to find properties in same zone: ${zone}`);
         const zoneQuery = query(
           collection(db, 'properties'),
           where('zone', '==', zone),
@@ -1108,7 +1055,6 @@ export async function getSimilarProperties({
         );
         
         const zoneSnapshot = await getDocs(zoneQuery);
-        console.log(`SIMILAR QUERY: Found ${zoneSnapshot.size} properties in same zone`);
         
         const zoneProperties = zoneSnapshot.docs
           .map(doc => ({ id: doc.id, ...doc.data() } as PropertyData))
@@ -1126,7 +1072,6 @@ export async function getSimilarProperties({
     // STEP 3: Try to find properties with same property type and transaction type
     if (finalProperties.length < maxResults) {  // Fixed reference
       try {
-        console.log(`SIMILAR QUERY: Trying to find properties with type: ${propertyType}, transaction: ${transactionType}`);
         const typeQuery = query(
           collection(db, 'properties'),
           where('propertyType', '==', propertyType),
@@ -1134,7 +1079,6 @@ export async function getSimilarProperties({
         );
         
         const typeSnapshot = await getDocs(typeQuery);
-        console.log(`SIMILAR QUERY: Found ${typeSnapshot.size} properties with same type`);
         
         const typeProperties = typeSnapshot.docs
           .map(doc => ({ id: doc.id, ...doc.data() } as PropertyData))
@@ -1153,14 +1097,12 @@ export async function getSimilarProperties({
     // STEP 4: Last resort - get any properties
     if (finalProperties.length < maxResults) {  // Fixed reference
       try {
-        console.log('SIMILAR QUERY: Getting any properties as fallback');
         const anyQuery = query(
           collection(db, 'properties'),
           limit(maxResults * 3)  // Using Firebase's limit() function
         );
         
         const anySnapshot = await getDocs(anyQuery);
-        console.log(`SIMILAR QUERY: Found ${anySnapshot.size} total properties`);
         
         const anyProperties = anySnapshot.docs
           .map(doc => ({ id: doc.id, ...doc.data() } as PropertyData))
@@ -1178,13 +1120,10 @@ export async function getSimilarProperties({
     // STEP 5: Take only the properties we need for our grid
     finalProperties = finalProperties.slice(0, maxResults);  // Fixed reference
     
-    console.log(`SIMILAR QUERY: Final count: ${finalProperties.length} properties`);
-    console.log('SIMILAR QUERY: Property IDs:', finalProperties.map(p => p.id).join(', '));
     
     // STEP 6: Add dummy properties if we don't have enough
     if (finalProperties.length < maxResults) {  // Fixed reference
       const dummiesNeeded = maxResults - finalProperties.length;  // Fixed reference
-      console.log(`SIMILAR QUERY: Adding ${dummiesNeeded} dummy properties`);
       
       for (let i = 0; i < dummiesNeeded; i++) {
         finalProperties.push({
@@ -1279,7 +1218,6 @@ export async function getZoneByName(zoneName: string): Promise<ZoneData | null> 
 // Function to get properties by condo ID
 export const getPropertiesByCondo = async (condoId: string): Promise<PropertyData[]> => {
   try {
-    console.log(`Fetching properties for condo ID: ${condoId}`);
     const q = query(
       collection(db, "properties"),
       where("condo", "==", condoId),
@@ -1287,7 +1225,6 @@ export const getPropertiesByCondo = async (condoId: string): Promise<PropertyDat
     );
     
     const querySnapshot = await getDocs(q);
-    console.log(`Found ${querySnapshot.size} properties for condo ${condoId}`);
     
     const properties: PropertyData[] = [];
     querySnapshot.forEach((doc) => {
@@ -1569,12 +1506,10 @@ export const updateCondoQualityLevel = async (
   qualityLevel: 'high' | 'medium' | 'low'
 ): Promise<void> => {
   try {
-    console.log(`Updating condo ${condoId} quality level to ${qualityLevel}`);
     const condoRef = doc(db, "condominiums", condoId);
     await updateDoc(condoRef, {
       qualityLevel: qualityLevel
     });
-    console.log('Quality level updated successfully');
   } catch (error) {
     console.error('Error updating condo quality level:', error);
     throw error;
@@ -1744,7 +1679,6 @@ const BLOG_INDEX_DOC = 'blogIndex';
 // Create or update the blog index
 export async function updateBlogIndex(): Promise<void> {
   try {
-    console.log('Updating blog index...');
     
     // Get all blog posts
     const posts = await getAllBlogPosts();
@@ -1772,7 +1706,6 @@ export async function updateBlogIndex(): Promise<void> {
     // Save to Firestore
     await setDoc(doc(db, 'blogMeta', BLOG_INDEX_DOC), indexData);
     
-    console.log(`Blog index updated with ${Object.keys(slugToIdMap).length} posts`);
     return;
   } catch (error) {
     console.error('Error updating blog index:', error);
@@ -1804,7 +1737,6 @@ export async function getBlogPostBySlugWithIndex(slug: string): Promise<BlogPost
     }
     
     // Fallback: if the index doesn't exist or the slug isn't in the index
-    console.log('Blog index lookup failed, falling back to full search');
     const posts = await getAllBlogPosts();
     
     // Try to find by slug
@@ -1823,7 +1755,6 @@ export async function getBlogPostBySlugWithIndex(slug: string): Promise<BlogPost
 // Function to get condo summaries for a specific zone
 export const getZoneCondos = async (zoneId: string): Promise<resumenCondo[]> => {
   try {
-    console.log(`Fetching condos from zone document: ${zoneId}`);
     const zoneRef = doc(db, "zones", zoneId);
     const zoneDoc = await getDoc(zoneRef);
     
@@ -1831,10 +1762,8 @@ export const getZoneCondos = async (zoneId: string): Promise<resumenCondo[]> => 
       const zoneData = zoneDoc.data();
       // Check if there's a condos array in the zone document
       if (zoneData.condos && Array.isArray(zoneData.condos)) {
-        console.log(`Found ${zoneData.condos.length} condos in zone`);
         return zoneData.condos;
       } else {
-        console.log(`No condos array found in zone ${zoneId}`);
         return [];
       }
     }
@@ -1850,7 +1779,6 @@ export const getZoneCondos = async (zoneId: string): Promise<resumenCondo[]> => 
 // Function to update property counts for all zones and condos
 export const updatePropertyCountsForAllZones = async (): Promise<void> => {
   try {
-    console.log('Starting to update property counts in zones...');
     
     // Step 1: Get all published properties
     const propertiesRef = collection(db, "properties");
@@ -1865,7 +1793,6 @@ export const updatePropertyCountsForAllZones = async (): Promise<void> => {
       ...doc.data()
     })) as PropertyData[];
     
-    console.log(`Found ${properties.length} published properties`);
     
     // Step 2: Group properties by condo
     const condoMap: { [condoId: string]: {
@@ -1915,11 +1842,11 @@ export const updatePropertyCountsForAllZones = async (): Promise<void> => {
         };
       }
       
-      // Create a property summary
+      // Create a property summary with typed transactionType
       const propSummary = {
         id: property.id!,
         price: property.price || 0,
-        transactionType: property.transactionType || 'venta',
+        transactionType: (property.transactionType || 'venta') as 'venta' | 'renta' | 'ventaRenta',
         bedrooms: property.bedrooms || 0,
         bathrooms: property.bathrooms || 0,
         parkingSpots: property.parkingSpots || 0,
@@ -2016,7 +1943,6 @@ export const updatePropertyCountsForAllZones = async (): Promise<void> => {
         const zoneDoc = await getDoc(zoneRef);
         
         if (!zoneDoc.exists()) {
-          console.log(`Zone ${zoneId} not found, skipping`);
           return;
         }
         
@@ -2066,14 +1992,12 @@ export const updatePropertyCountsForAllZones = async (): Promise<void> => {
           lastUpdated: Timestamp.now()
         });
         
-        console.log(`Updated zone ${zoneId} with property counts for ${Object.keys(zoneData.condos).length} condos`);
       } catch (error) {
         console.error(`Error updating zone ${zoneId}:`, error);
       }
     });
     
     await Promise.all(updatePromises);
-    console.log('Successfully updated all zones with property counts and price ranges');
     
   } catch (error) {
     console.error('Error updating property counts:', error);
@@ -2095,14 +2019,12 @@ export const getNegocios = async (filters: {
   showDormant?: boolean;
 } = {}): Promise<negocio[]> => {
   try {
-    console.log("Fetching all negocios");
     
     // Simplified query - just get all negocios sorted by creation date
     // This avoids the need for composite indexes
     const q = query(collection(db, "negocios"), orderBy("fechaCreacion", "desc"));
     
     const querySnapshot = await getDocs(q);
-    console.log(`Query returned ${querySnapshot.docs.length} documents`);
     
     // Convert to array of negocio objects
     let negocios = querySnapshot.docs.map(doc => ({
@@ -2137,7 +2059,6 @@ export const getNegocios = async (filters: {
         const dormantUntil = negocio.dormidoHasta.toDate();
         return dormantUntil <= now;
       });
-      console.log(`After filtering dormant leads: ${negocios.length} leads remaining`);
     }
     
     return negocios;

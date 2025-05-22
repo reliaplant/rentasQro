@@ -448,14 +448,6 @@ export default function ZiquaPage() {
               Ubicación estratégica dentro de la ciudad planeada Zibatá
             </p>
           </div>
-
-          <div className="w-full h-[500px] rounded-xl overflow-hidden">
-            <ZibataMapWrapper 
-              highlightedPolygonId="ZIQUA" 
-              height="100%"
-              className="w-full h-full"
-            />
-          </div>
           
           <div className="mt-6 text-center">
             <Link 

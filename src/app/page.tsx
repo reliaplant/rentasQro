@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 
 // Importar HomeBanner con prioridad alta
 import HomeBanner from './components/HomeBanner';
+import { FilterProvider } from './context/FilterContext';
 
 // Esqueletos de carga
 const FilterSkeleton = () => (
@@ -47,7 +48,7 @@ const PropertyCardSkeleton = () => (
 // Cargar componentes con dynamic import para carga diferida
 const FilterExplorador = dynamic(
   () => import('./components/filterExplorador'),
-  { 
+  {
     loading: () => <FilterSkeleton />,
     ssr: false
   }
@@ -55,7 +56,7 @@ const FilterExplorador = dynamic(
 
 const Explorador = dynamic(
   () => import('./components/explorador'),
-  { 
+  {
     loading: () => <ExploradorSkeleton />,
     ssr: false
   }
@@ -77,21 +78,16 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      {/* Banner con mayor prioridad usando Suspense para mostrar fallback mientras carga */}
-      <Suspense fallback={
-        <div className="w-full h-[500px] bg-gradient-to-tr from-purple-300 to-amber-200 animate-pulse flex items-center justify-center">
-          <div className="text-lg text-white font-medium">Cargando...</div>
-        </div>
-      }>
+      <main className="min-h-screen bg-gray-50">
+        {/* Banner con mayor prioridad usando Suspense para mostrar fallback mientras carga */}
         <HomeBanner />
-      </Suspense>
-      
-      {/* Filtros con carga diferida */}
-      <FilterExplorador />
-      
-      {/* Explorador con carga diferida */}
-      <Explorador />
-    </main>
+        <FilterProvider>
+          {/* Filtros con carga diferida */}
+          <FilterExplorador />
+          {/* Explorador con carga diferida */}
+          <Explorador />
+        </FilterProvider>
+      </main>
+
   );
 }

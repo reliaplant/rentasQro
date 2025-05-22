@@ -10,7 +10,7 @@ interface PropertyReviewProps {
 
 export default function PropertyReview({ data, onChange }: PropertyReviewProps) {
   // Helper function to format transaction type
-  const getTransactionTypeLabel = (type: 'renta' | 'venta' | 'ventaRenta'): string => {
+  const getTransactionTypeLabel = (type: string) => {
     switch (type) {
       case 'renta':
         return 'Renta';

@@ -121,20 +121,20 @@ export default function RootLayout({
         </Script>
 
       </head>
+      <Suspense>
       <body className={`${poppins.className} ${geistMono.variable} min-h-screen flex flex-col antialiased`}>
         {/* Google Analytics */}
         {/* <GoogleAnalytics /> */}
-        <Suspense>
-          <UTMParamsProvider>
-            <FilterProvider>
-              <Menu />
-              <main className="flex-grow">
-                {children}
-              </main>
-              <Footer />
-            </FilterProvider>
-          </UTMParamsProvider>
-        </Suspense>
+
+          <Suspense>
+            <Menu />
+          </Suspense>
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Footer />
       </body>
+      </Suspense>
+
     </html>);
 }

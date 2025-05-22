@@ -2,9 +2,19 @@
 const nextConfig = {
   // Images configuration for optimization
   images: {
-    domains: [
-      'firebasestorage.googleapis.com', 
-      'lh3.googleusercontent.com', // Add Google user profile photos
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'firebasestorage.googleapis.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048], // Customize breakpoints
     imageSizes: [16, 32, 64, 96, 128, 256, 384], // Smaller image sizes
@@ -12,7 +22,10 @@ const nextConfig = {
     minimumCacheTTL: 60, // Cache optimized images
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    
+    //contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+
+  
   },
   
   // Move outputFileTracingExcludes from experimental to root level
@@ -24,17 +37,16 @@ const nextConfig = {
   // Remove cssModules (use the built-in CSS Modules support instead)
   
   // Set experimental features if needed
-  experimental: {
-    optimizeCss: true,
-  },
+  // experimental: {
+  //   optimizeCss: true,
+  // },
   
   // Other valid Next.js configuration options
   reactStrictMode: true,
   
-  typescript: {
-    // Solo para desarrollo, ignorar errores de TypeScript para la compilación en producción
-    ignoreBuildErrors: process.env.NODE_ENV === 'production',
-  },
+  // typescript: {
+  //   ignoreBuildErrors: process.env.NODE_ENV === 'production',
+  // },
 }
 
 module.exports = nextConfig

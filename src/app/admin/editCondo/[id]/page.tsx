@@ -57,7 +57,7 @@ export default function EditCondoPage() {
             }
           }
         } catch (error) {
-          console.error('Error fetching condo:', error);
+          console.error('Error fetching condo:');
           setError('Error al cargar el condominio');
         }
       }
