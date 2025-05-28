@@ -1,16 +1,22 @@
 import { PropertyData, ZoneData, CondoData } from '@/app/shared/interfaces';
-import { 
-  BiDoorOpen, 
-  BiBath, 
-  BiCar, 
-  BiHome, 
-  BiBuildings, 
-  BiMoney, 
+import {
+  BiDoorOpen,
+  BiBath,
+  BiCar,
+  BiHome,
+  BiBuildings,
+  BiMoney,
   BiKey,
-  BiMap
+  BiMap,
+  BiBed
 } from 'react-icons/bi';
 import { useEffect, useState } from 'react';
 import { useExchangeRate } from '@/app/hooks/useExchangeRate';
+
+// Helper function to generate slug from condo name (defined locally to avoid importing firebase)
+const generateCondoSlug = (name: string): string => {
+  return name?.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || '';
+};
 
 interface PropertyHeaderProps {
   property: PropertyData;
@@ -22,18 +28,18 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
   // Currency state and conversion hook
   const [selectedCurrency, setSelectedCurrency] = useState<'MXN' | 'USD'>('MXN');
   const { exchangeRate, convertMXNtoUSD } = useExchangeRate();
-  
+
   // Load currency preference from localStorage - add a refresh interval to catch changes from other components
   useEffect(() => {
     // Initial load
     loadCurrencyFromLocalStorage();
-    
+
     // Set up a lightweight polling to detect changes from other components
     const intervalId = setInterval(loadCurrencyFromLocalStorage, 500);
-    
+
     // Cleanup
     return () => clearInterval(intervalId);
-    
+
     function loadCurrencyFromLocalStorage() {
       try {
         if (typeof window !== 'undefined') {
@@ -56,14 +62,14 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
       }
     }
   }, []);
-  
+
   // Format property details
   const isRental = ['renta', 'ventaRenta'].includes(property.transactionType);
-  const propertyTypeFormatted = 
-    property.propertyType === 'casa' ? 'Casa' : 
-    property.propertyType === 'depa' ? 'Depa' : 
-    property.propertyType;
-    
+  const propertyTypeFormatted =
+    property.propertyType === 'casa' ? 'Casa' :
+      property.propertyType === 'depa' ? 'Depa' :
+        property.propertyType;
+
   // Get the price in the selected currency
   const getDisplayPrice = () => {
     if (selectedCurrency === 'USD') {
@@ -71,51 +77,65 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
     }
     return property.price;
   };
-  
+
   // Format price as currency based on selected currency
   const formattedPrice = new Intl.NumberFormat('es-MX', {
     style: 'currency',
     currency: selectedCurrency,
     maximumFractionDigits: 0,
   }).format(getDisplayPrice()).replace(selectedCurrency, '').trim();
-  
+
   // Get property type icon
   const PropertyTypeIcon = property.propertyType === 'casa' ? BiHome : BiBuildings;
 
   // Create a more descriptive title
-  const fullTitle = `${propertyTypeFormatted} en ${
-    property.preventa ? 'Preventa' : 
-    isRental ? 'Renta' : 'Venta'
-  }${
-    condoData?.name ? ` en ${condoData.name}` : ''
-  }${zoneData?.name ? `, ${zoneData.name}` : ''}`;
+  const fullTitle = `${propertyTypeFormatted} en ${property.preventa ? 'Preventa' :
+      isRental ? 'Renta' : 'Venta'
+    }${condoData?.name ? ` en ${condoData.name}` : ''
+    }${zoneData?.name ? `, ${zoneData.name}` : ''}`;
 
   return (
     <div className="max-w-4xl">
-      {/* Location breadcrumb */}
-      <div className="flex items-center text-sm text-gray-500 mb-4">
-        <BiMap className="mr-2" />
-        <span className="hover:text-gray-700 cursor-pointer">Querétaro</span>
-        {zoneData?.name && (
-          <>
-        <span className="mx-2">›</span>
-        <span className="hover:text-gray-700 cursor-pointer">{zoneData.name}</span>
-          </>
-        )}
-        {condoData?.name && (
-          <>
-        <span className="mx-2">›</span>
-        <span className="hover:text-gray-700 cursor-pointer">{condoData.name}</span>
-          </>
-        )}
-        <span className={`inline-block ml-2 px-3 py-1 rounded-full text-xs font-medium ${
-        property.preventa ? 'ml-4 bg-orange-50 border border-orange-500 text-orange-600' :
-        isRental ? 'ml-4 bg-violet-50 border border-violet-500 text-violet-600' : 
-        'border border-green-600 bg-green-50 text-green-600'
-          }`}>
-        {property.preventa ? 'En preventa' : isRental ? 'En renta' : 'En venta'}
-          </span>
-          
+      {/* Location breadcrumb with responsive transaction type chip */}
+      <div className="flex flex-col md:flex-row md:items-center">
+        {/* Breadcrumb part */}
+        <div className="flex items-center text-sm text-gray-500 mb-3 md:mb-0">
+          <BiMap className="mr-2" />
+          <a href="/explorar" className="hover:text-gray-700 cursor-pointer">Querétaro</a>
+          {zoneData?.name && (
+            <>
+              <span className="mx-2">›</span>
+              <a href="/explorar" className="hover:text-gray-700 cursor-pointer">{zoneData.name}</a>
+            </>
+          )}
+          {condoData?.name && (
+            <>
+              <span className="mx-2">›</span>
+              <a 
+                href={`/qro/${zoneData?.name?.toLowerCase() || 'zibata'}/${generateCondoSlug(condoData.name)}`} 
+                className="hover:text-gray-700 cursor-pointer"
+              >
+                {condoData.name}
+              </a>
+            </>
+          )}
+        </div>
+        
+        {/* Transaction type chip - styled for both mobile and desktop */}
+        <span className={`
+          inline-block rounded-full text-xs font-medium 
+          md:ml-2 
+          self-start md:self-auto
+          px-3 py-1
+          ${property.preventa 
+            ? 'bg-orange-50 border border-orange-500 text-orange-600' 
+            : isRental 
+              ? 'bg-violet-50 border border-violet-500 text-violet-600' 
+              : 'border border-green-600 bg-green-50 text-green-600'
+          }`}
+        >
+          {property.preventa ? 'En preventa' : isRental ? 'En renta' : 'En venta'}
+        </span>
       </div>
 
       {/* Main property info */}
@@ -125,9 +145,9 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
           <h1 className="text-3xl font-semibold text-gray-900 mt-2">
             {fullTitle.charAt(0).toUpperCase() + fullTitle.slice(1)}
           </h1>
-            {property.modelo && (
+          {property.modelo && (
             <h2 className="mt-2 text-2xl text-gray-600">Modelo: {property.modelo}</h2>
-            )}
+          )}
         </div>
 
         {/* Combined price and features section */}
@@ -138,7 +158,7 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
               <span className="block text-sm text-gray-500 mb-1">
                 Precio {isRental ? 'mensual' : 'de venta'}
               </span>
-              
+
               {/* Currency toggle - Only visible on mobile */}
               <div className="md:hidden flex bg-white rounded-full p-0.5 border border-gray-200">
                 {['MXN', 'USD'].map((curr) => (
@@ -168,7 +188,7 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
                 ))}
               </div>
             </div>
-            
+
             <div className="flex items-baseline">
               <span className="text-3xl font-medium text-gray-900">{formattedPrice}</span>
               <span className="text-gray-500 ml-1">
@@ -187,46 +207,24 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
                   <div className="p-2 bg-white rounded-lg shadow-sm">
                     <BiMap className="text-gray-600 text-xl" />
                   </div>
-                  <div>
+                  <div className='flex row items-center'>
                     <span className="block text-xl font-light">{property.terrenoM2 || 0}</span>
-                    <span className="text-sm text-gray-500 hidden sm:block">m² de terreno</span>
-                    <span className="text-sm text-gray-500 sm:hidden">m² terreno</span>
+                    <span className="text-sm text-gray-500 ml-2 hidden sm:block">m² de terreno</span>
+                    <span className="text-sm text-gray-500 ml-2 sm:hidden">m² terreno</span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-white rounded-lg shadow-sm">
-                    <BiHome className="text-gray-600 text-xl" />
-                  </div>
-                  <div>
-                    <span className="block text-xl font-light">{property.construccionM2 || 0}</span>
-                    <span className="text-sm text-gray-500 hidden sm:block">m² de construcción</span>
-                    <span className="text-sm text-gray-500 sm:hidden">m² constr.</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-white rounded-lg shadow-sm">
-                    <BiCar className="text-gray-600 text-xl" />
-                  </div>
-                  <div>
-                    <span className="block text-xl font-light">{property.parkingSpots || 0}</span>
-                    <span className="text-sm text-gray-500 hidden sm.block">Estacionamiento</span>
-                    <span className="text-sm text-gray-500 sm.hidden">Est.</span>
-                  </div>
-                </div>
               </>
             ) : (
               // Display for other property types (casa, departamento, etc.)
               <>
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-white rounded-lg shadow-sm">
-                    <BiDoorOpen className="text-gray-600 text-xl" />
+                    <BiBed className="text-gray-600 text-xl" />
                   </div>
-                  <div>
-                    <span className="block text-xl font-light">{property.bedrooms}</span>
-                    <span className="text-sm text-gray-500 hidden sm.block">Habitaciones</span>
-                    <span className="text-sm text-gray-500 sm.hidden">Hab.</span>
+                  <div className="flex items-center">
+                    <span className="text-xl font-light">{property.bedrooms}</span>
+                    <span className="text-sm text-gray-500 ml-2 hidden  sm:block">Habitaciones</span>
                   </div>
                 </div>
 
@@ -234,10 +232,9 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
                   <div className="p-2 bg-white rounded-lg shadow-sm">
                     <BiBath className="text-gray-600 text-xl" />
                   </div>
-                  <div>
-                    <span className="block text-xl font-light">{property.bathrooms}</span>
-                    <span className="text-sm text-gray-500 hidden sm.block">Baños</span>
-                    <span className="text-sm text-gray-500 sm.hidden">Bañ.</span>
+                  <div className="flex items-center">
+                    <span className="text-xl font-light">{property.bathrooms}</span>
+                    <span className="text-sm text-gray-500 ml-2 hidden  sm:block">Baños</span>
                   </div>
                 </div>
 
@@ -245,10 +242,9 @@ export default function PropertyHeader({ property, zoneData, condoData }: Proper
                   <div className="p-2 bg-white rounded-lg shadow-sm">
                     <BiCar className="text-gray-600 text-xl" />
                   </div>
-                  <div>
-                    <span className="block text-xl font-light">{property.parkingSpots}</span>
-                    <span className="text-sm text-gray-500 hidden sm.block">Estacionamiento</span>
-                    <span className="text-sm text-gray-500 sm.hidden">Est.</span>
+                  <div className="flex items-center">
+                    <span className="text-xl font-light">{property.parkingSpots}</span>
+                    <span className="text-sm text-gray-500 ml-2 hidden  sm:block">Estacionamiento</span>
                   </div>
                 </div>
               </>

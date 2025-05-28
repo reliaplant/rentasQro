@@ -30,6 +30,7 @@ interface ContactoProps {
   transactionType?: string;
   condoName?: string;
   zoneName?: string;
+  preventa?: boolean; // Add this prop to check if property is in preventa
 }
 
 export default function Contacto({
@@ -46,7 +47,8 @@ export default function Contacto({
   imageUrl = '',
   transactionType = '',
   condoName = '',
-  zoneName = ''
+  zoneName = '',
+  preventa = false // Default to false
 }: ContactoProps) {
   // Add logging for debugging
   console.log("Contacto component - Advisor data:");
@@ -240,6 +242,14 @@ export default function Contacto({
         />
       </Head>
       <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-lg" ref={contactRef}>
+        {/* Preventa Banner - Shown only for preventa properties */}
+        {preventa && (
+          <div className="bg-violet-600 text-white text-center text-xl font-medium py-1.5 px-3 -mx-6 -mt-6 mb-4 rounded-t-xl">
+
+          Oferta de preventa
+          </div>
+        )}
+        
         {/* Stats Bar */}
         <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
           <span>{getPublicationTime(publicationDate)}</span>
@@ -261,6 +271,7 @@ export default function Contacto({
         {/* Prices */}
         <div className="space-y-4 mb-6">
           <div>
+            {/* Standard price heading - always show this instead of conditional rendering */}
             <p className="text-sm text-gray-500">
               {isRental ? 'Renta mensual' : 'Precio de venta'}
             </p>

@@ -18,9 +18,16 @@ const propertyTypes: PropertyType[] = [
   { id: 'terreno', label: 'Terreno' }
 ];
 
-const MobileSearchHeader = () => {
+// Updated to accept isOpen and onClose props
+interface MobileSearchHeaderProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+const MobileSearchHeader = ({ isOpen = false, onClose }: MobileSearchHeaderProps) => {
   const { filters, updateFilter, resetFilters } = useFilters();
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(isOpen);
+  const [menuIsVisible, setMenuIsVisible] = useState(true);
   const router = useRouter();
   
   // For price range inputs
@@ -162,36 +169,43 @@ const MobileSearchHeader = () => {
     updateFilter('priceRange', [min, max]);
   };
 
+  // Track the menu's visibility by checking its transform
+  useEffect(() => {
+    const checkMenuVisibility = () => {
+      const menuElement = document.querySelector('nav');
+      if (menuElement) {
+        const style = window.getComputedStyle(menuElement);
+        const transform = style.getPropertyValue('transform');
+        const isHidden = transform.includes('matrix') && transform.includes('-');
+        setMenuIsVisible(!isHidden);
+      }
+    };
+
+    // Check visibility on scroll events
+    window.addEventListener('scroll', checkMenuVisibility);
+    
+    // Initial check
+    checkMenuVisibility();
+    
+    return () => {
+      window.removeEventListener('scroll', checkMenuVisibility);
+    };
+  }, []);
+
+  // Update isFilterModalOpen when isOpen prop changes
+  useEffect(() => {
+    setIsFilterModalOpen(isOpen);
+  }, [isOpen]);
+
+  // Handle modal close
+  const handleClose = () => {
+    setIsFilterModalOpen(false);
+    if (onClose) onClose();
+  };
+
   return (
     <>
-      <div className="md:hidden sticky top-16 z-40 pt-3 px-4">
-        <div className="bg-white shadow-sm rounded-xl mx-auto px-4 py-2.5">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <h2 className="text-base font-semibold text-gray-900 line-clamp-1">
-                Inmuebles en Querétaro
-              </h2>
-              <p className="text-xs text-gray-500 mt-0.5">
-                {transactionText} · {filtersText}
-              </p>
-            </div>
-            <button 
-              aria-label="Filtros"
-              onClick={() => setIsFilterModalOpen(true)}
-              className="ml-3 p-2.5 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors relative"
-            >
-              <FaSlidersH className="w-4 h-4 text-gray-700" />
-              {appliedFiltersCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-violet-600 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                  {appliedFiltersCount}
-                </span>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Fullscreen filter modal with organized sections */}
+      {/* We only want the modal part, not the header */}
       {isFilterModalOpen && (
         <div className="fixed inset-0 bg-white z-[9999] md:hidden">
           <div className="flex flex-col h-full">
@@ -199,7 +213,7 @@ const MobileSearchHeader = () => {
             <div className="p-4 border-b border-gray-200 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Filtros</h2>
               <button 
-                onClick={() => setIsFilterModalOpen(false)} 
+                onClick={handleClose} 
                 className="p-2 hover:bg-gray-100 rounded-full"
                 aria-label="Cerrar modal"
               >
@@ -483,7 +497,7 @@ const MobileSearchHeader = () => {
                       updateFilter('preventa', localPreventa);
                       updateFilter('preventaFilterActive', isPreventaFilterActive);
                     }
-                    setIsFilterModalOpen(false);
+                    handleClose();
                   }}
                   className="flex-1 py-3 text-sm font-medium bg-violet-600 text-white rounded-lg hover:bg-violet-700"
                 >

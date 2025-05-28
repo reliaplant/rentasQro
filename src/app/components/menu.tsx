@@ -43,8 +43,83 @@ export default function Menu() {
   const [isPropertyListingModalOpen, setIsPropertyListingModalOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const { favorites } = useFavorites();
-
   const router = useRouter();
+
+  // Add state for tracking menu visibility on scroll
+  const [isNavVisible, setIsNavVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [isScrollingUp, setIsScrollingUp] = useState(true);
+  const [isAtPageTop, setIsAtPageTop] = useState(true);
+  const [isMobileView, setIsMobileView] = useState(false);
+  
+  // Check if we're on mobile view on mount and on window resize
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobileView(window.innerWidth < 768); // 768px is the md breakpoint in Tailwind
+    };
+    
+    // Initial check
+    checkIsMobile();
+    
+    // Listen for resize events
+    window.addEventListener('resize', checkIsMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkIsMobile);
+    };
+  }, []);
+  
+  // Handle scroll events for hiding/showing the navbar - only on mobile
+  useEffect(() => {
+    const handleScroll = () => {
+      // Skip scroll handling on desktop
+      if (!isMobileView) {
+        setIsNavVisible(true);
+        return;
+      }
+      
+      const currentScrollY = window.scrollY;
+      
+      // Check if we're at the top of the page
+      const atTop = currentScrollY < 10;
+      setIsAtPageTop(atTop);
+      
+      // Always show navbar when at the top of the page
+      if (atTop) {
+        setIsNavVisible(true);
+        setLastScrollY(currentScrollY);
+        return;
+      }
+
+      // Determine scroll direction
+      const isScrollingDown = currentScrollY > lastScrollY;
+      setIsScrollingUp(!isScrollingDown);
+      
+      // Add some threshold to avoid flickering
+      const scrollDifference = Math.abs(currentScrollY - lastScrollY);
+      if (scrollDifference > 5) {
+        // Hide on scroll down, show on scroll up - ONLY on mobile
+        setIsNavVisible(!isScrollingDown);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    // Add scroll event listener
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [lastScrollY, isMobileView]); // Added isMobileView as dependency
+
+  // Handle mobile menu close when nav hides
+  useEffect(() => {
+    if (!isNavVisible) {
+      setIsMobileMenuOpen(false);
+    }
+  }, [isNavVisible]);
 
   // Create memoized callbacks for modal handlers
   const openPropertyListingModal = useCallback(() => setIsPropertyListingModalOpen(true), []);
@@ -68,29 +143,24 @@ export default function Menu() {
     }
   }, [searchParams]);
 
-  // Simplified handlers that only navigate
-  const handleRentClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    console.log('Menu: Navigating for Renta (no filter update)');
+  // Simplified handlers with direct navigation - no need for preventDefault
+  const handleRentClick = useCallback(() => {
+    console.log('Menu: Navigating to Renta page');
     setIsMobileMenuOpen(false);
-    // Navigate with query parameter, /explorar page can use this if needed
-    router.push('/explorar?t=renta&preventa=false');
+    // Use replace instead of push for a cleaner navigation experience
+    router.replace('/explorar?t=renta&preventa=false');
   }, [router]);
 
-  const handleBuyClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    console.log('Menu: Navigating for Compra (no filter update)');
+  const handleBuyClick = useCallback(() => {
+    console.log('Menu: Navigating to Compra page');
     setIsMobileMenuOpen(false);
-    // Navigate with query parameter
-    router.push('/explorar?t=compra&preventa=false');
+    router.replace('/explorar?t=compra&preventa=false');
   }, [router]);
 
-  const handlePreventaClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    console.log('Menu: Navigating for Preventa (no filter update)');
+  const handlePreventaClick = useCallback(() => {
+    console.log('Menu: Navigating to Preventa page');
     setIsMobileMenuOpen(false);
-    // Navigate with query parameters
-    router.push('/explorar?t=compra&preventa=true');
+    router.replace('/explorar?t=compra&preventa=true');
   }, [router]);
 
   // Update isActive function to rely solely on URL parameters
@@ -118,169 +188,194 @@ export default function Menu() {
     return false;
   }, [pathname, searchParams]);
 
+  // Updated handlers to use hard navigation with page reload
+  const handleTabClick = useCallback((url: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log('Menu: Hard navigating to', url);
+    setIsMobileMenuOpen(false);
+    // Use window.location for a hard reload/navigation
+    window.location.href = url;
+  }, []);
+
   return (
-    <nav className="bg-white z-[9999] shadow-sm sticky top-0">
-      <div className="px-4 md:px-[5vw] flex flex-row items-center justify-between h-16">
-        {/* Left side with logo and navigation */}
-        <div className="flex flex-row gap-2 md:gap-5 items-center">
-          <div className="cursor-pointer">
-            <Link href="/" className="flex items-center">
-              <img
-                src="/assets/logos/logoPizo.svg"
-                alt="Rentas Queretaro Logo"
-                className="h-7 md:h-8 w-auto hover:opacity-80"
-              />
-            </Link>
-          </div>
-          <div className="block">
-            <Link href="/">
-              <span className='font-semibold text-xl md:text-2xl mr-4 md:mr-12 cursor-pointer !text-black'>pizo</span>
-            </Link>
-          </div>
+    <>
+      <nav className={`
+        bg-white shadow-sm fixed top-0 left-0 right-0 z-[9999]
+        transition-transform duration-300 ease-in-out
+        ${!isNavVisible && isMobileView ? '-translate-y-full' : 'translate-y-0'}
+        ${isAtPageTop ? 'shadow-none' : 'shadow-md'}
+      `}>
+        <div className="px-4 md:px-[5vw] flex flex-row items-center justify-between h-16">
+          {/* Left side with logo and navigation */}
+          <div className="flex flex-row gap-2 md:gap-5 items-center">
+            <div className="cursor-pointer">
+              <Link href="/" className="flex items-center">
+                <img
+                  src="/assets/logos/logoPizo.svg"
+                  alt="Rentas Queretaro Logo"
+                  className="h-7 md:h-8 w-auto hover:opacity-80"
+                />
+              </Link>
+            </div>
+            <div className="block">
+              <Link href="/">
+                <span className='font-semibold text-xl md:text-2xl mr-4 md:mr-12 cursor-pointer !text-black'>pizo</span>
+              </Link>
+            </div>
 
-          {/* Mobile Explorar button - always visible */}
-          <Link
-            href="/explorar"
-            className="md:hidden flex items-center px-4 py-2 rounded-full text-sm font-semibold 
-            bg-gradient-to-r from-violet-600 to-indigo-600 text-white 
-            shadow-lg shadow-violet-200 
-            active:scale-95 transform transition-all
-            hover:from-violet-700 hover:to-indigo-700"
-          >
-            Explorar
-          </Link>
-
-          {/* Desktop Navigation with improved styling approach */}
-          <nav className="hidden md:flex -mb-px space-x-8">
+            {/* Mobile Explorar button - always visible */}
             <Link
-              href="/explorar?t=compra&preventa=false" // Updated href
-              onClick={handleBuyClick}
-              className={`whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer ${
-                isActive('/comprar') 
-                  ? 'border-violet-800 text-violet-800' 
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+              href="/explorar"
+              className="md:hidden flex items-center px-4 py-2 rounded-full text-sm font-semibold 
+              bg-gradient-to-r from-violet-600 to-indigo-600 text-white 
+              shadow-lg shadow-violet-200 
+              active:scale-95 transform transition-all
+              hover:from-violet-700 hover:to-indigo-700"
             >
-              Comprar
-            </Link>
-            <Link
-              href="/explorar?t=renta&preventa=false" // Updated href
-              onClick={handleRentClick}
-              className={`whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer ${
-                isActive('/rentar') 
-                  ? 'border-violet-800 text-violet-800' 
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Rentar
+              Explorar
             </Link>
 
-            <Link
-              href="/explorar?t=compra&preventa=true" // Updated href
-              onClick={handlePreventaClick}
-              className={`${
-                isActive('/preventa')
-                  ? 'border-violet-800 text-violet-800'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
-            >
-              Preventa
-            </Link>
-            <Link
-              href="/qro/zibata"
-              onClick={() => {
-                // No filter update logic
-              }}
-              className={`${pathname?.startsWith('/qro/zibata')
-                  ? 'border-violet-800 text-violet-800'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            {/* Desktop Navigation with improved styling approach */}
+            <nav className="hidden md:flex -mb-px space-x-8">
+              <Link
+                href="/explorar?t=compra&preventa=false" // Updated href
+                onClick={(e) => handleTabClick('/explorar?t=compra&preventa=false', e)}
+                className={`whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer ${
+                  isActive('/comprar') 
+                    ? 'border-violet-800 text-violet-800' 
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Comprar
+              </Link>
+              <Link
+                href="/explorar?t=renta&preventa=false" // Updated href
+                onClick={(e) => handleTabClick('/explorar?t=renta&preventa=false', e)}
+                className={`whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer ${
+                  isActive('/rentar') 
+                    ? 'border-violet-800 text-violet-800' 
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Rentar
+              </Link>
+
+              <Link
+                href="/explorar?t=compra&preventa=true" // Updated href
+                onClick={(e) => handleTabClick('/explorar?t=compra&preventa=true', e)}
+                className={`${
+                  isActive('/preventa')
+                    ? 'border-violet-800 text-violet-800'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
-            >
-              Zibatá
-            </Link>
-            <Link
-              href="/blog"
-              onClick={() => {
-                // No filter update logic
-              }}
-              className={`${pathname?.startsWith('/blog')
-                  ? 'border-violet-800 text-violet-800'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
-            >
-              Blog
-            </Link>
-          </nav>
-        </div>
+              >
+                Preventa
+              </Link>
+              <Link
+                href="/qro/zibata"
+                onClick={() => {
+                  // No filter update logic
+                }}
+                className={`${pathname?.startsWith('/qro/zibata')
+                    ? 'border-violet-800 text-violet-800'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+              >
+                Zibatá
+              </Link>
+              <Link
+                href="/blog"
+                onClick={() => {
+                  // No filter update logic
+                }}
+                className={`${pathname?.startsWith('/blog')
+                    ? 'border-violet-800 text-violet-800'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap py-3 h-16 pt-5.5 px-1 border-b-3 font-medium text-sm cursor-pointer`}
+              >
+                Blog
+              </Link>
+            </nav>
+          </div>
 
-        {/* Mobile menu toggle button */}
-        <button
-          className="md:hidden p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 mobile-menu-button"
-          onClick={toggleMobileMenu}
-          aria-label="Toggle menu"
-        >
-          {isMobileMenuOpen ? (
-            <FaTimes className="h-6 w-6" />
-          ) : (
-            <FaBars className="h-6 w-6" />
-          )}
-        </button>
-
-        {/* Right side - Desktop */}
-        <div className="hidden md:flex items-center space-x-4">
-          <Link
-            href="/favoritos"
-            onClick={() => {
-              // No filter update logic
-            }}
-            className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-full transition-colors relative ${favorites.length > 0
-                ? 'text-violet-800 bg-violet-50 hover:bg-violet-100'
-                : 'text-gray-500 bg-gray-50 hover:bg-gray-100'
-              }`}
-          >
-            <FaHeart className={`w-3.5 h-3.5 mr-2 ${favorites.length > 0 ? 'text-red-500' : 'text-gray-400'
-              }`} />
-            Favoritos
-            {favorites.length > 0 && (
-              <span className="ml-1 bg-violet-200 text-violet-900 px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">
-                {favorites.length}
-              </span>
-            )}
-          </Link>
+          {/* Mobile menu toggle button */}
           <button
-            onClick={() => {
-              openPropertyListingModal();
-              // No filter update logic
-            }}
-            className="text-sm font-medium text-gray-700 hover:text-violet-800 cursor-pointer"
+            className="md:hidden p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 mobile-menu-button"
+            onClick={toggleMobileMenu}
+            aria-label="Toggle menu"
           >
-            Publica tu propiedad
+            {isMobileMenuOpen ? (
+              <FaTimes className="h-6 w-6" />
+            ) : (
+              <FaBars className="h-6 w-6" />
+            )}
           </button>
-          <AdvisorModal />
-        </div>
-      </div>
 
-      {/* Mobile menu with same isActive logic */}
+          {/* Right side - Desktop */}
+          <div className="hidden md:flex items-center space-x-4">
+            <Link
+              href="/favoritos"
+              onClick={() => {
+                // No filter update logic
+              }}
+              className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-full transition-colors relative ${favorites.length > 0
+                  ? 'text-violet-800 bg-violet-50 hover:bg-violet-100'
+                  : 'text-gray-500 bg-gray-50 hover:bg-gray-100'
+                }`}
+            >
+              <FaHeart className={`w-3.5 h-3.5 mr-2 ${favorites.length > 0 ? 'text-red-500' : 'text-gray-400'
+                }`} />
+              Favoritos
+              {favorites.length > 0 && (
+                <span className="ml-1 bg-violet-200 text-violet-900 px-1.5 py-0.5 rounded-full text-xs min-w-[20px] text-center">
+                  {favorites.length}
+                </span>
+              )}
+            </Link>
+            <button
+              onClick={() => {
+                openPropertyListingModal();
+                // No filter update logic
+              }}
+              className="text-sm font-medium text-gray-700 hover:text-violet-800 cursor-pointer"
+            >
+              Publica tu propiedad
+            </button>
+            <AdvisorModal />
+          </div>
+        </div>
+
+        {/* Use the extracted modal component */}
+        <MenuModals
+          isPropertyListingModalOpen={isPropertyListingModalOpen}
+          closePropertyListingModal={closePropertyListingModal}
+        />
+      </nav>
+
+      {/* Add a spacer div that's the same height as the menu but only on desktop */}
+      <div className="hidden md:block h-16"></div>
+
+      {/* Mobile menu moved outside the nav element so it's independent */}
       {isMobileMenuOpen && (
         <div
           ref={mobileMenuRef}
-          className="md:hidden bg-white border-t border-gray-100 shadow-lg fixed inset-0 top-16 z-30 overflow-y-auto"
+          className="md:hidden bg-white border-t border-gray-100 shadow-lg fixed inset-0 z-[9990] overflow-y-auto"
+          style={{ 
+            top: '64px', // Height of the nav bar
+            height: 'calc(100vh - 64px)'
+          }}
         >
           <div className="p-4 space-y-3">
             <Link
               href="/explorar"
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                // Navigate to explorar, potentially clearing query params or setting defaults
-                router.push('/explorar'); 
-              }}
+              onClick={(e) => handleTabClick('/explorar', e)}
               className="flex items-center px-4 py-3 rounded-lg text-base font-medium bg-violet-600 text-white hover:bg-violet-700"
             >
               Explorar
             </Link>
             <Link
               href="/explorar?t=compra&preventa=false" // Updated href
-              onClick={handleBuyClick}
+              onClick={(e) => handleTabClick('/explorar?t=compra&preventa=false', e)}
               className={`flex items-center px-4 py-3 rounded-lg text-base font-medium 
                 ${isActive('/comprar')
                   ? 'bg-violet-50 text-violet-700'
@@ -291,7 +386,7 @@ export default function Menu() {
             </Link>
             <Link
               href="/explorar?t=renta&preventa=false" // Updated href
-              onClick={handleRentClick}
+              onClick={(e) => handleTabClick('/explorar?t=renta&preventa=false', e)}
               className={`flex items-center px-4 py-3 rounded-lg text-base font-medium 
                 ${isActive('/rentar')
                   ? 'bg-violet-50 text-violet-700'
@@ -303,7 +398,7 @@ export default function Menu() {
 
             <Link
               href="/explorar?t=compra&preventa=true" // Updated href
-              onClick={handlePreventaClick}
+              onClick={(e) => handleTabClick('/explorar?t=compra&preventa=true', e)}
               className={`flex items-center px-4 py-3 rounded-lg text-base font-medium ${isActive('/preventa')
                   ? 'bg-violet-50 text-violet-700'
                   : 'text-gray-700 hover:bg-gray-50'
@@ -358,12 +453,6 @@ export default function Menu() {
           </div>
         </div>
       )}
-
-      {/* Use the extracted modal component */}
-      <MenuModals
-        isPropertyListingModalOpen={isPropertyListingModalOpen}
-        closePropertyListingModal={closePropertyListingModal}
-      />
-    </nav>
+    </>
   );
 }

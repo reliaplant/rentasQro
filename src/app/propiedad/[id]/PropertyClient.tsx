@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ZoneData, CondoData, PropertyData } from '@/app/shared/interfaces';
 import FotosPropiedad from './components/fotosPropiedad';
 import Contacto from './components/contacto';
@@ -83,15 +83,22 @@ export default function PropertyClient({
 
   return (
     <div className="bg-white min-h-screen md:px-0 pb-36">
-      {/* Menu component */}
+
       <MenuPropiedad
         property={compatibleProperty}
         zoneData={zoneData}
         condoData={condoData}
       />
 
+
+      {property.preventa && (
+        <div className="md:hidden sticky top-0 translate-y-0 z-40 bg-violet-600 text-white text-center font-medium py-2 shadow-md">
+          OFERTA DE PREVENTA
+        </div>
+      )}
+
       {/* Main content */}
-      <div className="max-w-7xl mx-auto px-0 md:px-4 mt-0 md:mt-24">
+      <div className={`max-w-7xl mx-auto px-0 md:px-4 mt-0 md:mt-24 ${property.preventa ? 'pt-0' : ''}`}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-16">
           {/* Left column - Property information */}
           <div className="lg:col-span-2 md:space-y-12 space-y-0">
@@ -162,6 +169,7 @@ export default function PropertyClient({
               {/* Contact section */}
               <div className='hidden md:block'>
                 <Contacto
+                  preventa={property.preventa || false}
                   price={property.price}
                   advisor={{
                     name: advisor?.name || '',

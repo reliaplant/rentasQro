@@ -122,19 +122,34 @@ export default function RootLayout({
 
       </head>
       <Suspense>
-      <body className={`${poppins.className} ${geistMono.variable} min-h-screen flex flex-col antialiased`}>
-        {/* Google Analytics */}
-        {/* <GoogleAnalytics /> */}
-
-          <Suspense>
-            <Menu />
-          </Suspense>
-            <main className="flex-grow">
-              {children}
-            </main>
-            <Footer />
-      </body>
+        <body className={`${poppins.className} ${geistMono.variable} min-h-screen flex flex-col antialiased`}>
+          {/* Google Analytics */}
+          {/* <GoogleAnalytics /> */}
+          
+          {/* Wrap the application in both providers to ensure UTM and filter parameters work properly */}
+          <UTMParamsProvider>
+            <FilterProvider>
+              <Suspense>
+                <Menu />
+              </Suspense>
+              <main className="flex-grow">
+                {children}
+              </main>
+              <Footer />
+            </FilterProvider>
+          </UTMParamsProvider>
+          
+          {/* Google Tag Manager noscript part */}
+          <noscript>
+            <iframe 
+              src="https://www.googletagmanager.com/ns.html?id=GTM-MXT26WNQ"
+              height="0" 
+              width="0" 
+              style={{ display: 'none', visibility: 'hidden' }}
+            ></iframe>
+          </noscript>
+        </body>
       </Suspense>
-
-    </html>);
+    </html>
+  );
 }

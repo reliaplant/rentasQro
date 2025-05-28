@@ -110,6 +110,7 @@ export interface PropertyData {
   propertyCondoNumber?: string; // Número de propiedad dentro del condominio
   propertyCondoNumberPhoto?: string; // Número de propiedad dentro del condominio
   zone: string;
+  zoneName?: string; // Added missing property
   condo: string;  // ID del condominio
   condoName: string;  // Nombre del condominio
   imageUrls: string[];

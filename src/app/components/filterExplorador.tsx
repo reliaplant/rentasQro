@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, memo, useRef } from 'react';
 import { FaBed, FaBath, FaCheck, FaCar, FaTimes } from 'react-icons/fa';
 import { getZones } from '../shared/firebase';
 import type { ZoneData } from '../shared/interfaces';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useFilters } from '../context/FilterContext';
 import { useExchangeRate } from '../hooks/useExchangeRate';
 
@@ -238,11 +238,15 @@ NumericFilterButton.displayName = 'NumericFilterButton';
 
 const FilterExplorador = () => {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const isExplorarPage = pathname === '/explorar2';
   
   // Use the filter context
   const { filters, updateFilter } = useFilters();
   const [zones, setZones] = useState<ZoneData[]>([]);
+  
+  // Add flag to track if initial URL params have been processed
+  const [initialParamsProcessed, setInitialParamsProcessed] = useState(false);
   
   // State for price dropdown and temporary values
   const [isPriceDropdownOpen, setIsPriceDropdownOpen] = useState(false);
@@ -335,21 +339,22 @@ const FilterExplorador = () => {
     console.log(`FilterExplorador: Current transaction type: ${filters.transactionType}`);
   }, [filters.transactionType]);
 
-  // Simplify the transaction type handling to prevent loops
+  // Simplified transaction type handler to prevent switching back to 'compra'
   const handleTransactionTypeChange = useCallback((type: 'compra' | 'renta') => {
     // Don't update if already set to this value
     if (filters.transactionType === type) return;
     
     console.log(`FilterExplorador: Changing transaction type to ${type}`);
+    
+    // Apply updates directly to filter state
     updateFilter('transactionType', type);
     
-    // Update URL to reflect the change without causing a full page reload
-    if (typeof window !== 'undefined') {
-      const url = new URL(window.location.href);
-      url.searchParams.set('t', type);
-      window.history.pushState({}, '', url);
+    // If switching to renta, also reset preventa flags
+    if (type === 'renta' && (filters.preventa || filters.preventaFilterActive)) {
+      updateFilter('preventa', false);
+      updateFilter('preventaFilterActive', false);
     }
-  }, [filters.transactionType, updateFilter]);
+  }, [filters.transactionType, filters.preventa, filters.preventaFilterActive, updateFilter]);
 
   // Función helper actualizada para manejar la selección/deselección - memoized
   const handleNumericFilter = useCallback((
@@ -561,13 +566,40 @@ const FilterExplorador = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Remove all references to availability in the effect
+  // Only read URL parameters once on initial load
   useEffect(() => {
-    // If transaction type changes to renta, set preventa to false
-    if (filters.transactionType === 'renta' && filters.preventa) {
-      updateFilter('preventa', false);
+    if (!initialParamsProcessed && searchParams) {
+      // Process initial URL parameters
+      const transactionParam = searchParams.get('t');
+      const preventaParam = searchParams.get('preventa') === 'true';
+      
+      console.log('Filter: Initial load, reading URL params', { transactionParam, preventaParam });
+      
+      // Only update filters if URL params exist and are valid
+      if (transactionParam === 'renta' || transactionParam === 'compra') {
+        // Use a timeout to avoid race conditions with Context initialization
+        setTimeout(() => {
+          updateFilter('transactionType', transactionParam);
+          
+          // Handle preventa parameter only if transaction type is 'compra'
+          if (transactionParam === 'compra' && preventaParam) {
+            updateFilter('preventa', true);
+            updateFilter('preventaFilterActive', true);
+          } else if (transactionParam === 'renta') {
+            // Explicitly set these to false for 'renta'
+            updateFilter('preventa', false);
+            updateFilter('preventaFilterActive', false);
+          }
+          
+          // Mark as processed - we won't sync from URL again after this
+          setInitialParamsProcessed(true);
+        }, 0);
+      } else {
+        // Even if no valid params, mark as processed
+        setInitialParamsProcessed(true);
+      }
     }
-  }, [filters.transactionType, filters.preventa, updateFilter]);
+  }, [searchParams, updateFilter, initialParamsProcessed]);
 
   return (
     <div className="w-full bg-white border-b border-gray-200 sticky top-16 z-40 transition-all duration-300 shadow-sm hover:shadow-md">
@@ -585,12 +617,15 @@ const FilterExplorador = () => {
           <div className="overflow-x-auto md:overflow-visible pb-2 md:pb-0 -mx-[5vw] px-[5vw] md:mx-0 md:px-0">
             {/* All filters horizontally scrollable on mobile, wrapping on larger screens */}
             <div className="flex items-center gap-4 flex-nowrap md:flex-wrap min-w-max md:min-w-0 relative">
-              {/* Toggle Renta/Compra */}
+              {/* Toggle Renta/Compra with debugging */}
               <div className="flex bg-gray-50/80 rounded-full p-0.5 shadow-inner">
                 {['compra','renta' ].map((type) => (
                 <button
                   key={type}
-                  onClick={() => handleTransactionTypeChange(type as 'compra' | 'renta' )}
+                  onClick={() => {
+                    console.log(`Clicked: ${type}, Current: ${filters.transactionType}`);
+                    handleTransactionTypeChange(type as 'compra' | 'renta');
+                  }}
                   className={`
                   px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
                   cursor-pointer

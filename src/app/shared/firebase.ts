@@ -2192,4 +2192,82 @@ export const getNegocioAdvisors = async (): Promise<string[]> => {
   }
 };
 
+// Helper function to generate consistent slugs from condo names
+export const generateCondoSlug = (name: string): string => {
+  return name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+};
+
+/**
+ * Creates or updates the condo index document that maps slugs to condo IDs
+ * This is a one-time operation that should be run whenever new condos are added
+ */
+export const buildCondoIndex = async (): Promise<void> => {
+  try {
+    console.log("Building condo index...");
+    
+    // Get all condominiums
+    const condos = await getCondominiums();
+    
+    // Create mappings
+    const slugToIdMap: Record<string, string> = {};
+    const idToSlugMap: Record<string, string> = {};
+    
+    condos.forEach(condo => {
+      if (condo.id && condo.name) {
+        const slug = generateCondoSlug(condo.name);
+        slugToIdMap[slug] = condo.id;
+        idToSlugMap[condo.id] = slug;
+      }
+    });
+    
+    // Create the index document
+    await setDoc(doc(db, "condosMeta", "condoIndex"), {
+      slugToId: slugToIdMap,
+      idToSlug: idToSlugMap,
+      lastUpdated: new Date().toISOString(),
+      condoCount: condos.length
+    });
+    
+    console.log(`Index built successfully with ${condos.length} condos`);
+    return;
+  } catch (error) {
+    console.error("Error building condo index:", error);
+    throw error;
+  }
+};
+
+/**
+ * Gets a condo directly by slug using the index for efficient lookup
+ * @param slug The URL-friendly slug of the condo
+ * @returns The condo data or null if not found
+ */
+export const getCondoBySlug = async (slug: string): Promise<CondoData | null> => {
+  if (!slug) return null;
+  
+  try {
+    // First try to find the condo ID from the index
+    const indexDoc = await getDoc(doc(db, "condosMeta", "condoIndex"));
+    
+    if (indexDoc.exists()) {
+      const indexData = indexDoc.data();
+      const condoId = indexData.slugToId[slug];
+      
+      // If we found the ID in the index, get the condo directly
+      if (condoId) {
+        return await getCondoById(condoId);
+      }
+    }
+    
+    // Fallback method if the index doesn't exist or the slug isn't found
+    console.warn("Condo index missing or slug not found, falling back to legacy method");
+    
+    // Get all condos and find the one with matching slug
+    const allCondos = await getCondominiums();
+    return allCondos.find(c => generateCondoSlug(c.name) === slug) || null;
+  } catch (error) {
+    console.error("Error fetching condo by slug:", error);
+    throw error;
+  }
+};
+
 export { db, auth, storage };

@@ -108,32 +108,54 @@ export default function WhatsAppButton({
     }
   };
 
-  // Simple function to open WhatsApp with name
+  // Updated function to open WhatsApp without being blocked
   const openWhatsAppWithName = async (name: string) => {
-    // First create the lead in the pipeline
-    await createLeadInPipeline(name);
-    
-    // Then continue with WhatsApp message
-    // Handle different property types in the message
-    let propertyTypeText = 'la propiedad';
+    try {
+      // Generate the WhatsApp URL first (before any async operations)
+      let propertyTypeText = 'la propiedad';
+      if (propertyType === 'casa') propertyTypeText = 'la casa';
+      else if (propertyType === 'departamento' || propertyType === 'depa') propertyTypeText = 'el departamento';
+      else if (propertyType === 'terreno') propertyTypeText = 'el terreno';
+      else if (propertyType === 'local') propertyTypeText = 'el local comercial';
 
-    if (propertyType === 'casa') propertyTypeText = 'la casa';
-    else if (propertyType === 'departamento' || propertyType === 'depa') propertyTypeText = 'el departamento';
-    else if (propertyType === 'terreno') propertyTypeText = 'el terreno';
-    else if (propertyType === 'local') propertyTypeText = 'el local comercial';
-
-    // Get current page URL to include in message
-    const currentUrl = typeof window !== 'undefined' ? window.location.href.split('?')[0] : '';
-
-    // Add UTM parameters if available
-    const utmString = formatUtmParamsForUrl();
-    const urlWithUtm = utmString ? `${currentUrl}?${utmString}` : currentUrl;
-
-    // Include user's name in the message
-    const message = `Hola, soy ${name} y me interesa ${propertyTypeText} ${transactionType === 'renta' ? 'en renta' : 'en venta'} ${condoName ? `en ${condoName}` : ''} ${zoneName ? `en ${zoneName}` : ''}\nRef: ${urlWithUtm}`;
-
-    const whatsappUrl = `https://wa.me/${advisorPhone?.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+      const currentUrl = typeof window !== 'undefined' ? window.location.href.split('?')[0] : '';
+      const utmString = formatUtmParamsForUrl();
+      const urlWithUtm = utmString ? `${currentUrl}?${utmString}` : currentUrl;
+      const message = `Hola, soy ${name} y me interesa ${propertyTypeText} ${transactionType === 'renta' ? 'en renta' : 'en venta'} ${condoName ? `en ${condoName}` : ''} ${zoneName ? `en ${zoneName}` : ''}\nRef: ${urlWithUtm}`;
+      const whatsappUrl = `https://wa.me/${advisorPhone?.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+      
+      // Open WhatsApp in a new tab - this needs to happen before any async operation
+      const newWindow = window.open();
+      
+      // Now do the async work to create the lead
+      await createLeadInPipeline(name);
+      
+      // After async work is done, redirect the already-opened window
+      if (newWindow) {
+        newWindow.location.href = whatsappUrl;
+      } else {
+        // Fallback for if the window was blocked
+        console.log("Popup was blocked. Trying direct location change...");
+        
+        // Create a clickable link and simulate click (better for mobile)
+        const link = document.createElement('a');
+        link.href = whatsappUrl;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // As a last resort, try changing window location directly
+        setTimeout(() => {
+          window.location.href = whatsappUrl;
+        }, 100);
+      }
+    } catch (error) {
+      console.error("Error opening WhatsApp:", error);
+      // Final fallback - direct location change
+      window.location.href = `https://wa.me/${advisorPhone?.replace(/\D/g, '')}`;
+    }
   };
 
   // Simple handler to show modal
@@ -148,8 +170,8 @@ export default function WhatsAppButton({
     }, 100);
   };
   
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Alternative implementation for the modal submit handler that avoids async issues
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate name
@@ -158,11 +180,48 @@ export default function WhatsAppButton({
       return;
     }
     
-    // Close modal
+    // Close modal first
     setIsModalOpen(false);
     
-    // Call the updated function to create lead and open WhatsApp
-    await openWhatsAppWithName(userName.trim());
+    // Store the name for use in our functions
+    const nameToUse = userName.trim();
+    
+    // Start lead creation in the background (don't await it)
+    createLeadInPipeline(nameToUse).catch(error => {
+      console.error("Error creating lead:", error);
+    });
+    
+    // Handle different property types in the message
+    let propertyTypeText = 'la propiedad';
+    if (propertyType === 'casa') propertyTypeText = 'la casa';
+    else if (propertyType === 'departamento' || propertyType === 'depa') propertyTypeText = 'el departamento';
+    else if (propertyType === 'terreno') propertyTypeText = 'el terreno';
+    else if (propertyType === 'local') propertyTypeText = 'el local comercial';
+
+    // Get current page URL to include in message
+    const currentUrl = typeof window !== 'undefined' ? window.location.href.split('?')[0] : '';
+    const utmString = formatUtmParamsForUrl();
+    const urlWithUtm = utmString ? `${currentUrl}?${utmString}` : currentUrl;
+    
+    // Include user's name in the message
+    const message = `Hola, soy ${nameToUse} y me interesa ${propertyTypeText} ${transactionType === 'renta' ? 'en renta' : 'en venta'} ${condoName ? `en ${condoName}` : ''} ${zoneName ? `en ${zoneName}` : ''}\nRef: ${urlWithUtm}`;
+    
+    // Create WhatsApp URL
+    const whatsappUrl = `https://wa.me/${advisorPhone?.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+    
+    // Use direct link element for mobile compatibility
+    const link = document.createElement('a');
+    link.href = whatsappUrl;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Fallback: Direct location change after a short delay
+    setTimeout(() => {
+      window.location.href = whatsappUrl;
+    }, 300);
   };
   
   // Handle click outside modal to close it

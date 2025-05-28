@@ -169,8 +169,35 @@ const ListaExplorador = () => {
       } else if (sortOption === 'precio-bajo') {
         return a.price - b.price;
       } else if (sortOption === 'reciente') {
-        // Assuming there's a createdAt timestamp, fallback to id comparison
-        return (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0);
+        // Fix for handling different date formats safely
+        const getTimestamp = (prop: any) => {
+          if (!prop.createdAt) return 0;
+          
+          // Handle Firestore Timestamp objects
+          if (prop.createdAt.toMillis && typeof prop.createdAt.toMillis === 'function') {
+            return prop.createdAt.toMillis();
+          }
+          
+          // Handle JavaScript Date objects
+          if (prop.createdAt instanceof Date) {
+            return prop.createdAt.getTime();
+          }
+          
+          // Handle string dates
+          if (typeof prop.createdAt === 'string') {
+            return new Date(prop.createdAt).getTime();
+          }
+          
+          // Handle numeric timestamps
+          if (typeof prop.createdAt === 'number') {
+            return prop.createdAt;
+          }
+          
+          // Default fallback
+          return 0;
+        };
+        
+        return getTimestamp(b) - getTimestamp(a);
       }
       // Default 'relevante' sorting - could be a combination of factors
       return 0; // No specific sorting for 'relevante'
@@ -223,6 +250,21 @@ const ListaExplorador = () => {
   useEffect(() => {
     setDisplayedProperties(filteredProperties.slice(0, visibleCount));
   }, [filteredProperties, visibleCount]);
+
+  // Listen for sort option updates from the mobile sorting modal
+  useEffect(() => {
+    const handleSortUpdate = (event: any) => {
+      if (event.detail && event.detail.sortOption) {
+        setSortOption(event.detail.sortOption);
+      }
+    };
+    
+    window.addEventListener('updateSort', handleSortUpdate);
+    
+    return () => {
+      window.removeEventListener('updateSort', handleSortUpdate);
+    };
+  }, []);
 
   // Handle image navigation
   const navigateImage = (e: React.MouseEvent, propertyId: string, direction: 'prev' | 'next', maxImages: number) => {
@@ -474,71 +516,71 @@ const ListaExplorador = () => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full pt-16 md:pt-0">
       {/* Header with property count and sorting options */}
-      <div className="bg-white z-10 p-6">
+      <div className="bg-white z-10 p-6 hidden md:block">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
           {/* Property count information */}
           <div className="flex flex-col">
-            <span className="text-xl font-semibold text-gray-800">{formatPropertyCount()}</span>
-            <span className="text-sm text-gray-500">
-              {filters.transactionType === 'renta' ? 'en renta' : 'en venta'} en Querétaro
-              {filters.selectedCondo && (
-                <>
-                  <button
-                    onClick={clearCondoFilter}
-                    className="ml-2 text-violet-600 hover:text-violet-800 text-xs"
-                  >
-                    <FaTimes className="inline w-3 h-3 mr-1" />
-                    Quitar filtro de condominio
-                  </button>
-                </>
-              )}
-            </span>
+        <span className="text-xl font-semibold text-gray-800">{formatPropertyCount()}</span>
+        <span className="text-sm text-gray-500">
+          {filters.transactionType === 'renta' ? 'en renta' : 'en venta'} en Querétaro
+          {filters.selectedCondo && (
+            <>
+          <button
+            onClick={clearCondoFilter}
+            className="ml-2 text-violet-600 hover:text-violet-800 text-xs"
+          >
+            <FaTimes className="inline w-3 h-3 mr-1" />
+            Quitar filtro de condominio
+          </button>
+            </>
+          )}
+        </span>
           </div>
           
-          {/* Sorting selector - Updated with 'relevante' as default */}
+          {/* Sorting selector - Updated with 'relevante' as default and whitespace-nowrap */}
           <div className="flex items-center">
-            <span className="text-sm text-gray-600 mr-2">Ordenar por:</span>
-            <div className="relative">
-              {sortOption === 'relevante' ? (
-                <div className="relative w-36 sm:w-40">
-                  <select
-                    value={sortOption}
-                    onChange={(e) => setSortOption(e.target.value)}
-                    className={`
-                      w-full appearance-none rounded-full
-                      px-3 py-1.5 text-xs font-medium
-                      transition-all cursor-pointer
-                      bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200
-                    `}
-                  >
-                    {sortOptions.map((option) => (
-                      <option 
-                        key={option.id} 
-                        value={option.id}
-                        className={sortOption === option.id ? '!text-violet-600' : ''}
-                      >
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setSortOption('relevante')}
-                  className="flex items-center justify-between bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm rounded-full px-3 py-1.5 text-xs font-medium transition-all"
-                >
-                  <span>{selectedSortLabel}</span>
-                  <FaTimes className="w-3 h-3 ml-2 text-violet-500 hover:scale-125 hover:text-violet-700 transition-all duration-200 cursor-pointer" />
-                </button>
-              )}
+        <span className="text-sm text-gray-600 mr-2 whitespace-nowrap">Ordenar por:</span>
+        <div className="relative">
+          {sortOption === 'relevante' ? (
+            <div className="relative w-36 sm:w-40">
+          <select
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+            className={`
+              w-full appearance-none rounded-full
+              px-3 py-1.5 text-xs font-medium whitespace-nowrap
+              transition-all cursor-pointer
+              bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200
+            `}
+          >
+            {sortOptions.map((option) => (
+              <option 
+            key={option.id} 
+            value={option.id}
+            className={sortOption === option.id ? '!text-violet-600' : ''}
+              >
+            {option.label}
+              </option>
+            ))}
+          </select>
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
             </div>
+          ) : (
+            <button
+          onClick={() => setSortOption('relevante')}
+          className="flex items-center justify-between bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm rounded-full px-3 py-1.5 text-xs font-medium transition-all whitespace-nowrap"
+            >
+          <span>{selectedSortLabel}</span>
+          <FaTimes className="w-3 h-3 ml-2 text-violet-500 hover:scale-125 hover:text-violet-700 transition-all duration-200 cursor-pointer" />
+            </button>
+          )}
+        </div>
           </div>
         </div>
       </div>
@@ -554,8 +596,8 @@ const ListaExplorador = () => {
           </div>
         ) : displayedProperties.length > 0 ? (
           <>
-            {/* Property cards in 3 columns */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Property cards - 2 columns on mobile, 3 on desktop */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
               {displayedProperties.map((property, index) => (
                 <Link 
                   href={`/propiedad/${property.id}`} 

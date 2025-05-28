@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getZoneByName, getCondosByZone, getPropertiesByCondo } from '@/app/shared/firebase';
+import { getZoneByName, getPropertiesByCondo, getCondoBySlug, getCondosByZone } from '@/app/shared/firebase';
 import { Metadata } from 'next';
+import type { CondoData } from '@/app/shared/interfaces';
 
 // Import the client wrapper component
 import ZibataMapWrapper from '@/app/components/ZibataMapWrapper';
@@ -27,10 +28,8 @@ export async function generateMetadata(props: any): Promise<Metadata> {
     const zone = await getZoneByName(zoneid);
     if (!zone) return defaultMetadata();
 
-    const condos = await getCondosByZone(zone.id || '');
-    const condo = condos.find(c =>
-      c.name.toLowerCase().replace(/\s+/g, '-') === condoid.toLowerCase()
-    );
+    // Use the new getCondoBySlug function instead of fetching all condos
+    const condo = await getCondoBySlug(condoid);
 
     if (!condo) return defaultMetadata();
 
@@ -65,7 +64,7 @@ export async function generateStaticParams() {
     const condos = await getCondosByZone(zone.id);
 
     // Generate params for each condo
-    return condos.map(condo => ({
+    return condos.map((condo: CondoData) => ({
       condoid: condo.name.toLowerCase().replace(/\s+/g, '-')
     }));
   } catch (error) {
@@ -94,11 +93,8 @@ export default async function CondoDetailPage(props: any) {
       notFound();
     }
 
-    // Cargar condos y encontrar el que coincide
-    const condos = await getCondosByZone(zone.id || '');
-    const condo = condos.find(c =>
-      c.name.toLowerCase().replace(/\s+/g, '-') === condoid.toLowerCase()
-    );
+    // Use the new getCondoBySlug function
+    const condo = await getCondoBySlug(condoid);
 
     if (!condo) {
       notFound();

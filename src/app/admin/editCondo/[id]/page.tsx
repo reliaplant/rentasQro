@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, X } from 'lucide-react';
 import { CondoData } from '@/app/shared/interfaces';
-import { addCondo, updateCondo, getCondoById } from '@/app/shared/firebase';
+import { addCondo, updateCondo, getCondoById, buildCondoIndex } from '@/app/shared/firebase';
 import CondoBasicInfo from '../components/condoInfo';
 import CondoImages from '../components/condoImages';
 import CondoGoogleData from '../components/condoGoogleData';
@@ -142,6 +142,18 @@ export default function EditCondoPage() {
         
         const newId = await addCondo(condoData, imageFiles, logoFile);
         console.log('Nuevo condominio creado con ID:', newId);
+      }
+      
+      // Update the condo index after successful save (either create or update)
+      if (!autosave) {
+        try {
+          console.log('Actualizando índice de condominios...');
+          await buildCondoIndex();
+          console.log('Índice de condominios actualizado con éxito');
+        } catch (indexError) {
+          console.error('Error al actualizar índice de condominios:', indexError);
+          // Don't block the save process even if index update fails
+        }
       }
       
       setIsDirty(false);

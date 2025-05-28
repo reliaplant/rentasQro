@@ -4,8 +4,8 @@ import AdvisorModal from './AdvisorModal';
 export default function HomeBanner() {
   return (
     <div className="relative w-full min-h-[500px] flex">
-      {/* Left side - Gradient background */}
-      <div className="w-full lg:w-1/2 relative bg-gradient-to-tr from-[#7f5af0] via-[#9b4dff] to-[#ffd700]">
+      {/* Left side - Gradient background - Added pt-16 for mobile */}
+      <div className="w-full lg:w-1/2 relative bg-gradient-to-tr from-[#7f5af0] via-[#9b4dff] to-[#ffd700] pt-16 lg:pt-0">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute w-[400px] h-[200px] bg-purple-600/60 rounded-full blur-3xl animate-[float_8s_ease-in-out_infinite] -top-20 -left-20"></div>
           <div className="absolute w-[300px] h-[200px] bg-cyan-400/70 rounded-full blur-3xl animate-[wave_10s_ease-in-out_infinite] top-40 left-1/2"></div>

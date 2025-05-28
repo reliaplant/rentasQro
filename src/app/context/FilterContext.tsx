@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useReducer, useEffect, ReactNode, useCallback, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import type { ZoneData } from '../shared/interfaces';
 
 // Update this line to use a much higher value
@@ -105,6 +105,23 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
   const [initialized, setInitialized] = useState(false);
   const searchParams = useSearchParams();
   
+  // Add a state to track previous pathname for navigation detection
+  const router = useRouter();
+  const pathname = usePathname();
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  
+  // Track URL changes for navigation between pages
+  useEffect(() => {
+    // If the pathname changes, this means we've navigated to a new page
+    if (pathname !== prevPathname) {
+      console.log('FilterContext: Navigation detected, will read URL params again');
+      
+      // Reset the initialized flag to allow reading URL params again
+      setInitialized(false);
+      setPrevPathname(pathname);
+    }
+  }, [pathname, prevPathname]);
+  
   // Get transaction type from URL without using window
   const getURLTransactionType = useCallback(() => {
     if (!searchParams) return null;
@@ -175,14 +192,66 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
     return updated;
   }, [filters.transactionType, filters.preventa, filters.propertyType, searchParams]);
 
-  // Initialize filters once on client-side
+  // Initialize filters once on client-side - ensure URL parameters are properly read
   useEffect(() => {
     if (initialized) return;
     
-    // First check URL params which take precedence
-    const foundUrlParam = checkURLForParams();
+    console.log("FilterContext: Initializing filters from URL or localStorage");
     
-    // Then try to load from localStorage (only on client)
+    // Parse URL params first - they take precedence
+    const transactionType = searchParams?.get('t');
+    const preventaParam = searchParams?.get('preventa') === 'true';
+    const foundUrlParam = transactionType === 'renta' || transactionType === 'compra';
+    
+    if (foundUrlParam) {
+      console.log(`FilterContext: Setting initial transaction type from URL: ${transactionType}`);
+      
+      // Apply transaction type
+      dispatch({
+        type: 'UPDATE_FILTER',
+        payload: { 
+          key: 'transactionType',
+          value: transactionType
+        },
+      });
+      
+      // Apply preventa parameter
+      if (transactionType === 'compra' && preventaParam) {
+        console.log(`FilterContext: Setting initial preventa to true from URL`);
+        dispatch({
+          type: 'UPDATE_FILTER',
+          payload: { 
+            key: 'preventa',
+            value: true
+          },
+        });
+        dispatch({
+          type: 'UPDATE_FILTER',
+          payload: { 
+            key: 'preventaFilterActive',
+            value: true
+          },
+        });
+      } else {
+        // Explicitly set to false for clarity
+        dispatch({
+          type: 'UPDATE_FILTER',
+          payload: { 
+            key: 'preventa',
+            value: false
+          },
+        });
+        dispatch({
+          type: 'UPDATE_FILTER',
+          payload: { 
+            key: 'preventaFilterActive',
+            value: false
+          },
+        });
+      }
+    }
+    
+    // Then try to load from localStorage for any params not set by URL
     if (typeof window !== 'undefined') {
       try {
         const savedFilters = localStorage.getItem('propertyFilters');
@@ -191,10 +260,9 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
           
           // Update each filter individually to ensure type safety
           Object.keys(parsedFilters).forEach((key) => {
-            // Skip transaction type if we already set it from URL
-            if (key === 'transactionType' && foundUrlParam) {
-              return;
-            }
+            // Skip params already set by URL
+            if (key === 'transactionType' && foundUrlParam) return;
+            if ((key === 'preventa' || key === 'preventaFilterActive') && foundUrlParam) return;
             
             if (key in defaultFilters) {
               dispatch({
@@ -213,35 +281,31 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
     }
     
     setInitialized(true);
-  }, [checkURLForParams, initialized]);
+  }, [searchParams, initialized, pathname]); // Add pathname to dependencies
 
-  // Watch for URL parameter changes
+  // Simplify this effect to not force reset preventa - let the user's actions control it directly
   useEffect(() => {
-    if (!initialized) return;
-    
-    // Check for URL parameter changes
-    checkURLForParams();
-  }, [searchParams, checkURLForParams, initialized]);
-
-  // Add effect to ensure preventa is false when transaction type is renta
-  useEffect(() => {
-    // Only force reset preventa if transaction type is renta and 
-    // preventa was previously set to true
+    // Only run on first initialization and when the transaction type changes to 'renta'
     if (filters.transactionType === 'renta' && filters.preventa) {
-      console.log('FilterContext: Forcing preventa to false because transaction type is renta');
+      console.log('FilterContext: Setting preventa to false because transaction type is renta');
       
-      // Don't dispatch immediately to avoid race conditions
-      setTimeout(() => {
-        dispatch({
-          type: 'UPDATE_FILTER',
-          payload: { 
-            key: 'preventa',
-            value: false
-          },
-        });
-      }, 0);
+      dispatch({
+        type: 'UPDATE_FILTER',
+        payload: { 
+          key: 'preventa',
+          value: false
+        },
+      });
+      
+      dispatch({
+        type: 'UPDATE_FILTER',
+        payload: { 
+          key: 'preventaFilterActive',
+          value: false
+        },
+      });
     }
-  }, [filters.transactionType]); // Only run when transaction type changes, not when preventa changes
+  }, [filters.transactionType, filters.preventa]); 
 
   // Add debug logging for filter updates
   const updateFilter = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
