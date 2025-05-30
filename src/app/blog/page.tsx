@@ -2,9 +2,16 @@ import Link from 'next/link';
 import { getPublishedBlogPosts, getAllContributors } from '@/app/shared/firebase';
 import { BlogPost, BlogContributor } from '@/app/admin/blog-editor/types';
 import Pagination from './components/Pagination';
+import { Metadata } from 'next';
 
 // Define posts per page
 const POSTS_PER_PAGE = 9;
+
+// Add metadata for better SEO
+export const metadata: Metadata = {
+  title: 'Blog - Rentas Querétaro',
+  description: 'Artículos y noticias sobre el mercado inmobiliario en Querétaro',
+};
 
 // Updated function to get paginated blog data
 async function getBlogData(page = 1) {
@@ -52,7 +59,9 @@ async function getBlogData(page = 1) {
   }
 }
 
-export default async function BlogPage({ searchParams }: { searchParams: { page?: string } }) {
+export default async function BlogPage({ searchParams }: {
+  searchParams?: { [key: string]: string | undefined };
+}) {
   try {
     // Get page from URL params or default to 1
     const page = searchParams?.page ? parseInt(searchParams.page, 10) : 1;

@@ -91,7 +91,8 @@ export default function PropertiesSection({ properties, condoName }: PropertiesS
               property={property} 
               index={index}
               currency="MXN"
-              linkTo={`/qro/propiedades/${property.id}`}
+              linkTo={`/propiedad/${property.id}`} // Correct link path
+              openInNewTab={true} // Open in new tab
               type="compact"
               size={index < 2 ? 'default' : 'default'}
             />

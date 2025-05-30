@@ -333,7 +333,7 @@ export default function MapaZibata2({
         >
           <div class="marker-container">
             <div 
-              class="rounded-lg px-2 py-1 bg-white text-left shadow-md border border-gray-200"
+              class="rounded-lg px-2 py-1 bg-white text-left shadow-md border border-gray-200 cursor-pointer js-marker-clickable"
             >
               ${priceRangeText ? `<div class="text-[10px] font-bold text-gray-700 leading-tight">${priceRangeText}</div>` : ''}
               <div class="flex items-center justify-between leading-tight">
@@ -349,58 +349,74 @@ export default function MapaZibata2({
       // Create marker with simplified click handling
       const marker = new mapboxgl.Marker({
         element: el,
-        anchor: 'bottom'
+        anchor: 'bottom',
+        clickTolerance: 3 // Reduce click tolerance to be more precise
       })
         .setLngLat(location.coordinates)
         .addTo(map.current!);
       
-      // Simplify click handler
-      el.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        // Handle mobile vs desktop modes differently
-        if (!allowCondoFilter) {
-          // Mobile mode - show property cards
-          const properties = isRentView 
-            ? location.propiedadesRentaResumen || []
-            : location.propiedadesVentaResumen || [];
-            
-          const enhancedProperties = properties.map(prop => ({
-            ...prop,
-            id: prop.id || '',
-            condoName: location.name,
-            zone: location.zoneId || 'X5oWujYupjRKx0tF8Hlj',
-            zoneId: location.zoneId || 'X5oWujYupjRKx0tF8Hlj',
-            zoneName: 'Zibatá',
-            propertyType: prop.propertyType || 'casa',
-            bedrooms: prop.bedrooms || 0,
-            bathrooms: prop.bathrooms || 0,
-            construccionM2: prop.construccionM2 || 0,
-            terrenoM2: prop.terrenoM2 || 0,
-            parkingSpots: prop.parkingSpots || 0,
-            imageUrls: prop.imageUrl ? [prop.imageUrl] : [],
-            transactionType: isRentView ? 'renta' : 'venta',
-            price: prop.price || 0,
-            preventa: prop.preventa || false,
-            descripcion: prop.descripcion || `Propiedad en ${location.name}`
-          }));
-          onCondoClick(location.condoId, location.name, enhancedProperties);
-        } else {
-          // Desktop mode - toggle filter
-          updateFilter('selectedCondo', 
-            filters.selectedCondo === location.condoId ? '' : location.condoId
-          );
-        }
-        
-        // Always fly to the marker location with reduced zoom level
-        map.current?.flyTo({
-          center: location.coordinates,
-          zoom: 14,  // Reducido de 16 a 14 para una vista menos cercana
-          duration: 800,
-          essential: true
+      // Create reference to clickable element
+      const clickableElement = el.querySelector('.js-marker-clickable');
+      
+      // Only apply hover events to the clickable element
+      if (clickableElement) {
+        // Add hover events to control z-index precisely
+        clickableElement.addEventListener('mouseenter', () => {
+          el.style.zIndex = '1000'; // Set a high z-index on hover
         });
-      });
+        
+        clickableElement.addEventListener('mouseleave', () => {
+          el.style.zIndex = ''; // Reset z-index when not hovering
+        });
+        
+        // Handle clicks on the card
+        clickableElement.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          // Handle mobile vs desktop modes differently
+          if (!allowCondoFilter) {
+            // Mobile mode - show property cards
+            const properties = isRentView 
+              ? location.propiedadesRentaResumen || []
+              : location.propiedadesVentaResumen || [];
+            
+            const enhancedProperties = properties.map(prop => ({
+              ...prop,
+              id: prop.id || '',
+              condoName: location.name,
+              zone: location.zoneId || 'X5oWujYupjRKx0tF8Hlj',
+              zoneId: location.zoneId || 'X5oWujYupjRKx0tF8Hlj',
+              zoneName: 'Zibatá',
+              propertyType: prop.propertyType || 'casa',
+              bedrooms: prop.bedrooms || 0,
+              bathrooms: prop.bathrooms || 0,
+              construccionM2: prop.construccionM2 || 0,
+              terrenoM2: prop.terrenoM2 || 0,
+              parkingSpots: prop.parkingSpots || 0,
+              imageUrls: prop.imageUrl ? [prop.imageUrl] : [],
+              transactionType: isRentView ? 'renta' : 'venta',
+              price: prop.price || 0,
+              preventa: prop.preventa || false,
+              descripcion: prop.descripcion || `Propiedad en ${location.name}`
+            }));
+            onCondoClick(location.condoId, location.name, enhancedProperties);
+          } else {
+            // Desktop mode - toggle filter
+            updateFilter('selectedCondo', 
+              filters.selectedCondo === location.condoId ? '' : location.condoId
+            );
+          }
+          
+          // Always fly to the marker location with reduced zoom level
+          map.current?.flyTo({
+            center: location.coordinates,
+            zoom: 14,
+            duration: 800,
+            essential: true
+          });
+        });
+      }
       
       // Store marker reference
       markersRef.current.push(marker);
@@ -487,14 +503,14 @@ export default function MapaZibata2({
       {/* Custom CSS for markers */}
       <style jsx global>{`
         .custom-marker {
-          cursor: pointer;
+          cursor: default;
         }
-        .custom-marker:hover {
-          z-index: 100;
-        }
+        
+        /* Remove hover z-index from here - we'll handle it with JS */
         .marker-container {
           position: relative;
         }
+        
         .marker-pointer {
           width: 0;
           height: 0;
@@ -505,12 +521,23 @@ export default function MapaZibata2({
           bottom: -6px;
           left: 50%;
           transform: translateX(-50%);
+          pointer-events: none;
         }
-        .selected-marker .marker-container > div:first-child {
+        
+        /* Make clickable area precise */
+        .js-marker-clickable {
+          pointer-events: auto;
+          cursor: pointer;
+          position: relative;
+        }
+        
+        .selected-marker .js-marker-clickable {
           transform: scale(1.1);
           box-shadow: 0 0 0 2px #8B5CF6;
           transition: all 0.2s ease-in-out;
+          z-index: 1000 !important; /* Force selected markers to stay on top */
         }
+        
         .selected-marker .marker-pointer {
           transform: translateX(-50%);
           box-shadow: none;
@@ -518,6 +545,7 @@ export default function MapaZibata2({
           transition: all 0.2s ease-in-out;
         }
         
+        /* Existing map styles */
         .mapboxgl-map {
           position: absolute;
           top: 0;
