@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { FaHeart, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaHeart, FaChevronLeft, FaChevronRight, FaBed, FaBath, FaHome } from 'react-icons/fa';
 import { useFavorites } from '@/app/hooks/useFavorites';
 import { useExchangeRate } from '@/app/hooks/useExchangeRate';
 import type { PropertyData } from '@/app/shared/interfaces';
@@ -26,7 +26,11 @@ interface PropertyCardProps {
   linkTo?: string;
   className?: string;
   showAsFavorite?: boolean;
-  transactionOverride?: 'renta' | 'venta'; // Add this new prop
+  transactionOverride?: 'renta' | 'venta';
+  type?: 'default' | 'compact' | 'featured';
+  size?: 'default' | 'large';
+  openInNewTab?: boolean;
+  onFavoriteClick?: (id: string) => void; // Add this new prop for custom favorite action
 }
 
 export default function PropertyCard({ 
@@ -36,7 +40,11 @@ export default function PropertyCard({
   linkTo,
   className = '',
   showAsFavorite,
-  transactionOverride
+  transactionOverride,
+  type = 'default',
+  size = 'default',
+  openInNewTab = false,
+  onFavoriteClick
 }: PropertyCardProps) {
   // Add favorites functionality
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -57,7 +65,12 @@ export default function PropertyCard({
     e.stopPropagation();
     
     if (property.id) {
-      toggleFavorite(property.id);
+      // If custom handler provided, use it instead of the default toggle
+      if (onFavoriteClick) {
+        onFavoriteClick(property.id);
+      } else {
+        toggleFavorite(property.id);
+      }
       setIsFav(!isFav);
     }
   };
@@ -97,25 +110,32 @@ export default function PropertyCard({
   // Determine transaction type - use override if provided
   const displayTransactionType = transactionOverride || property.transactionType;
 
+  // Determine size-based classes
+  const sizeClasses = {
+    badgeText: size === 'large' ? 'text-xs sm:text-sm' : 'text-[10px] sm:text-xs',
+    titleText: size === 'large' ? 'text-base sm:text-lg' : 'text-sm sm:text-base',
+    subtitleText: size === 'large' ? 'text-sm' : 'text-xs sm:text-sm',
+    detailsText: size === 'large' ? 'text-sm' : 'text-xs sm:text-sm',
+    priceText: size === 'large' ? 'text-base sm:text-lg' : 'text-sm sm:text-base',
+    iconSize: size === 'large' ? 'w-4 h-4' : 'w-3 h-3 sm:w-4 sm:h-4',
+    spacing: size === 'large' ? 'gap-3' : 'gap-2 sm:gap-3',
+    padding: size === 'large' ? 'pt-3 sm:pt-4' : 'pt-2 sm:pt-3'
+  };
+
   // Wrap the card content in Link if linkTo is provided
   const cardContent = (
     <div className="group block">
       <div className="relative rounded-lg sm:rounded-xl overflow-hidden">
-        {/* Transaction type badge */}
+        {/* Combined transaction type and preventa badge */}
         <div className="absolute top-1.5 sm:top-3 left-1.5 sm:left-3 z-20">
-          <span className="bg-white/90 backdrop-blur-sm text-gray-800 text-[10px] sm:text-xs font-medium px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-sm">
-            {displayTransactionType === 'renta' ? 'En renta' : 'En venta'}
+          <span className={`bg-white/90 backdrop-blur-sm text-gray-800 ${sizeClasses.badgeText} font-medium px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-sm`}>
+            {property.preventa 
+              ? 'Preventa' 
+              : displayTransactionType === 'renta' 
+                ? 'En renta' 
+                : 'En venta'}
           </span>
         </div>
-
-        {/* Add Preventa badge if property is preventa */}
-        {property.preventa && (
-          <div className="absolute top-1.5 sm:top-3 left-[85px] sm:left-[100px] z-20">
-            <span className="bg-yellow-400/90 backdrop-blur-sm text-yellow-800 text-[10px] sm:text-xs font-medium px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-sm">
-              Preventa
-            </span>
-          </div>
-        )}
 
         {/* Favorite button with hover effect */}
         <button 
@@ -123,7 +143,7 @@ export default function PropertyCard({
           className="absolute top-2 sm:top-3 right-2 sm:right-3 z-20 p-1.5 sm:p-2 rounded-full bg-white/90 backdrop-blur-sm hover:scale-110 transition-all duration-200 cursor-pointer group/btn"
           aria-label={isFav ? "Eliminar de favoritos" : "Añadir a favoritos"}
         >
-          <FaHeart className={`w-3 h-3 sm:w-4 sm:h-4 ${isFav ? "text-pink-500" : "text-gray-400"} group-hover/btn:text-pink-500 transition-colors duration-200`} />
+          <FaHeart className={`${sizeClasses.iconSize} ${isFav ? "text-pink-500" : "text-gray-400"} group-hover/btn:text-pink-500 transition-colors duration-200`} />
         </button>
 
         {/* Image container with hover darkening overlay */}
@@ -196,19 +216,26 @@ export default function PropertyCard({
         </div>
 
         {/* Property information */}
-        <div className="pt-2 sm:pt-3 space-y-0.5 sm:space-y-1">
+        <div className={`${sizeClasses.padding} space-y-0.5 sm:space-y-1`}>
           <div className="flex items-start justify-between">
             <div className="w-full">
-              <h3 className="font-medium text-sm sm:text-base text-gray-900 truncate">
-                {formatPropertyType(property.propertyType)} en {property.condoName}
-              </h3>
-              <p className="text-xs sm:text-sm text-gray-500 truncate">
+              <div className="flex flex-wrap items-center">
+                <h3 className={`font-medium ${sizeClasses.titleText} text-gray-900 truncate`}>
+                  {formatPropertyType(property.propertyType)} en {property.condoName}
+                </h3>
+                {property.modelo && (
+                  <span className={`ml-1.5 bg-violet-100 text-violet-700 ${sizeClasses.subtitleText} font-medium px-1.5 py-0.5 rounded-md`}>
+                    {property.modelo}
+                  </span>
+                )}
+              </div>
+              <p className={`${sizeClasses.subtitleText} text-gray-500 truncate`}>
                 {property.zone === 'X5oWujYupjRKx0tF8Hlj' ? 'Zibatá' : property.zone || 'Zona no especificada'}
               </p>
               
               {/* Show different metrics based on property type */}
               {property.propertyType === 'terreno' ? (
-                <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">
+                <div className={`flex items-center ${sizeClasses.spacing} ${sizeClasses.detailsText} text-gray-500 mt-0.5 sm:mt-1`}>
                   <span>{property.terrenoM2 || 0}m² terreno</span>
                   {(property.construccionM2 ?? 0) > 0 && (
                     <>
@@ -218,26 +245,36 @@ export default function PropertyCard({
                   )}
                 </div>
               ) : (
-                <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">
-                  <span>{property.bedrooms} rec</span>
+                <div className={`flex flex-wrap items-center ${sizeClasses.spacing} ${sizeClasses.detailsText} text-gray-500 mt-0.5 sm:mt-1`}>
+                  <div className="flex items-center">
+                    <FaBed className={`mr-1 text-gray-400 ${size === 'large' ? 'w-4 h-4' : ''}`} />
+                    <span>{property.bedrooms}</span>
+                  </div>
                   <span>•</span>
-                  <span>{property.bathrooms} baños</span>
+                  <div className="flex items-center">
+                    <FaBath className={`mr-1 text-gray-400 ${size === 'large' ? 'w-4 h-4' : ''}`} />
+                    <span>{property.bathrooms}</span>
+                  </div>
                   <span>•</span>
-                  <span>{property.construccionM2}m²</span>
+                  <div className="flex items-center">
+                    <FaHome className={`mr-1 text-gray-400 ${size === 'large' ? 'w-4 h-4' : ''}`} />
+                    <span>{property.construccionM2}m²</span>
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="flex items-baseline gap-0.5 sm:gap-1 pt-1 sm:pt-2">
-            <span className="font-semibold text-sm sm:text-base text-black">
+          {/* Price section - removed extra padding to maintain consistent spacing */}
+          <div className="flex items-baseline gap-0.5 sm:gap-1">
+            <span className={`font-semibold ${sizeClasses.priceText} text-black`}>
               {currency === 'USD' ? '$' : '$'}
               {getDisplayPrice().toLocaleString(undefined, {
                 minimumFractionDigits: currency === 'USD' ? 0 : 0,
                 maximumFractionDigits: currency === 'USD' ? 0 : 0
               })}
             </span>
-            <span className="text-xs sm:text-sm text-gray-500">
+            <span className={`${sizeClasses.detailsText} text-gray-500`}>
               {currency} {displayTransactionType === 'renta' ? '/mes' : ''}
             </span>
           </div>
@@ -249,7 +286,12 @@ export default function PropertyCard({
   // If linkTo is provided, wrap the card in a Link
   if (href) {
     return (
-      <Link href={href} className={`cursor-pointer mb-2 sm:mb-4 ${className}`}>
+      <Link 
+        href={href} 
+        className={`cursor-pointer mb-2 sm:mb-4 ${className}`}
+        target={openInNewTab ? "_blank" : undefined} 
+        rel={openInNewTab ? "noopener noreferrer" : undefined}
+      >
         {cardContent}
       </Link>
     );

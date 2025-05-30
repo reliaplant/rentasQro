@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Eye, MessageSquare, ChevronDown, ChevronUp, UserCheck, PlusCircle, Percent, UserPlus, RefreshCw, Download } from 'lucide-react';
+import { Eye, MessageSquare, ChevronDown, ChevronUp, UserCheck, PlusCircle, Percent, UserPlus, RefreshCw, Download, Star } from 'lucide-react';
 import Link from 'next/link';
 import { 
   getProperties, 
@@ -21,6 +21,7 @@ export default function AllProperties() {
   const [updatingAdvisor, setUpdatingAdvisor] = useState<string | null>(null);
   const [updatingCounts, setUpdatingCounts] = useState(false);
   const [updateMessage, setUpdateMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
+  const [updatingFeatured, setUpdatingFeatured] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -215,6 +216,43 @@ export default function AllProperties() {
     }
   };
 
+  // Function to toggle featured status
+  const toggleFeaturedStatus = async (propertyId: string | undefined, currentStatus: boolean | undefined) => {
+    if (!propertyId) return;
+    
+    setUpdatingFeatured(propertyId);
+    try {
+      const newStatus = !currentStatus;
+      await updateProperty(propertyId, { featured: newStatus });
+      
+      // Update local state
+      setProperties(prevProps => 
+        prevProps.map(p => 
+          p.id === propertyId ? { ...p, featured: newStatus } : p
+        )
+      );
+      
+      // Show brief success message
+      setUpdateMessage({
+        type: 'success',
+        text: `Propiedad ${newStatus ? 'destacada' : 'no destacada'} actualizada`
+      });
+      
+      // Clear success message after 2 seconds
+      setTimeout(() => {
+        setUpdateMessage(null);
+      }, 2000);
+    } catch (error) {
+      console.error('Error updating featured status:', error);
+      setUpdateMessage({
+        type: 'error',
+        text: 'Error al actualizar estado destacado'
+      });
+    } finally {
+      setUpdatingFeatured(null);
+    }
+  };
+
   return (
     <div className="overflow-x-auto">
       <div className="flex justify-between items-center mb-4">
@@ -282,6 +320,9 @@ export default function AllProperties() {
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Estado
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Destacada
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Asesor
@@ -376,6 +417,27 @@ export default function AllProperties() {
                   }`}>
                   {property.status}
                 </span>
+              </td>
+              
+              <td className="px-6 py-4">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => toggleFeaturedStatus(property.id, property.featured)}
+                    disabled={updatingFeatured === property.id}
+                    className={`p-2 rounded-full transition-all ${
+                      property.featured 
+                        ? 'bg-yellow-100 text-yellow-600 hover:bg-yellow-200' 
+                        : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                    } ${updatingFeatured === property.id ? 'opacity-50' : ''}`}
+                    title={property.featured ? 'Quitar destacado' : 'Marcar como destacada'}
+                  >
+                    <Star className={`w-5 h-5 ${property.featured ? 'fill-yellow-500' : ''}`} />
+                  </button>
+                  
+                  <span className={`text-xs ${property.featured ? 'text-yellow-700 font-medium' : 'text-gray-500'}`}>
+                    {property.featured ? 'Destacada' : 'No destacada'}
+                  </span>
+                </div>
               </td>
               
               <td className="px-6 py-4">

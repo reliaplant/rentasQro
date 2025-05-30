@@ -143,7 +143,7 @@ const PropertyTypeSelect = memo(({
 
 PropertyTypeSelect.displayName = 'PropertyTypeSelect';
 
-// Replace PreventaToggle with a component that has 3 states
+// Replace PreventaToggle with a dropdown version
 const PreventaToggle = memo(({ 
   isPreventa,
   isFilterActive,
@@ -153,46 +153,87 @@ const PreventaToggle = memo(({
   isFilterActive: boolean,
   onChange: (value: boolean, isActive: boolean) => void 
 }) => {
-  // If filter is not active, show unselected state
-  // If filter is active, show the appropriate button as selected based on isPreventa
-  return (
-    <div className="flex gap-2">
-      <button
-        onClick={() => onChange(false, true)} // explicitly select inmediata
-        className={`
-          px-3 py-1.5 rounded-full text-xs font-medium transition-all
-          ${isFilterActive && !isPreventa
-            ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
-            : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
-          flex items-center gap-2 cursor-pointer
-        `}
-      >
-        {isFilterActive && !isPreventa && <FaCheck className="w-3 h-3 text-violet-600" />}
-        Inmediata
-      </button>
-      <button
-        onClick={() => onChange(true, true)} // explicitly select preventa  
-        className={`
-          px-3 py-1.5 rounded-full text-xs font-medium transition-all
-          ${isFilterActive && isPreventa
-            ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
-            : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
-          flex items-center gap-2 cursor-pointer
-        `}
-      >
-        {isFilterActive && isPreventa && <FaCheck className="w-3 h-3 text-violet-600" />}
-        Preventa
-      </button>
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Display text based on current filter state
+  const buttonText = !isFilterActive 
+    ? "Disponibilidad" 
+    : isPreventa 
+      ? "Preventa" 
+      : "Inmediata";
       
-      {/* Clear filter button - only shown when filter is active */}
-      {isFilterActive && (
-        <button
-          onClick={() => onChange(false, false)} // clear filter
-          className="px-2 py-1.5 rounded-full text-xs text-gray-500 hover:text-gray-700"
-          title="Limpiar filtro"
-        >
-          <FaTimes className="w-3 h-3" />
-        </button>
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        className={`
+          flex items-center justify-between gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all
+          ${isFilterActive
+            ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
+            : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
+        `}
+      >
+        <span>{buttonText}</span>
+        <svg className={`w-3.5 h-3.5 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {isDropdownOpen && (
+        <div className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 w-44">
+          <div className="p-2">
+            <button
+              onClick={() => {
+                onChange(false, true);
+                setIsDropdownOpen(false);
+              }}
+              className={`w-full text-left px-3 py-2 rounded-md text-xs ${!isPreventa && isFilterActive ? 'bg-violet-50 text-violet-700' : 'hover:bg-gray-50'}`}
+            >
+              Inmediata
+            </button>
+            <button
+              onClick={() => {
+                onChange(true, true);
+                setIsDropdownOpen(false);
+              }}
+              className={`w-full text-left px-3 py-2 rounded-md text-xs ${isPreventa && isFilterActive ? 'bg-violet-50 text-violet-700' : 'hover:bg-gray-50'}`}
+            >
+              Preventa
+            </button>
+            
+            {isFilterActive && (
+              <div className="border-t border-gray-100 mt-1 pt-1">
+                <button
+                  onClick={() => {
+                    onChange(false, false);
+                    setIsDropdownOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-md text-xs text-gray-500 hover:bg-gray-50"
+                >
+                  Borrar filtro
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
@@ -200,46 +241,394 @@ const PreventaToggle = memo(({
 
 PreventaToggle.displayName = 'PreventaToggle';
 
-// Memoized numeric filter buttons for better performance
-// Moving this BEFORE FilterExplorador to fix the TypeScript errors
-const NumericFilterButton = memo(({ 
+// Create a new BedroomsDropdown component
+const BedroomsDropdown = memo(({ 
   value, 
-  currentValue, 
-  onClick 
+  onChange 
 }: { 
-  value: string | number, 
-  currentValue: number | null, 
-  onClick: () => void 
+  value: number | null, 
+  onChange: (value: number | null) => void 
 }) => {
-  const isSelected = currentValue === (value === '3+' ? 3 : value === '2+' ? 2 : Number(value));
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   
+  // Options for the dropdown
+  const options = [
+    { value: 1, label: '1 Recámara' },
+    { value: 2, label: '2 Recámaras' },
+    { value: 3, label: '3+ Recámaras' }
+  ];
+  
+  // Button text based on current selection
+  const selectedOption = value ? options.find(opt => 
+    (value === 3 && opt.value === 3) || (value === opt.value)
+  ) : null;
+  
+  const buttonText = selectedOption ? selectedOption.label : 'Recámaras';
+  
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+
   return (
-    <button
-      onClick={onClick}
-      className={`
-        w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium
-        transition-all duration-200 cursor-pointer relative group
-        ${isSelected
-          ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
-          : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
-      `}
-    >
-      <span className={isSelected ? 'group-hover:opacity-0' : ''}>
-        {value}
-      </span>
-      {isSelected && (
-        <FaTimes className="w-3 h-3 absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        className={`
+          flex items-center justify-between gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all
+          ${value !== null
+            ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
+            : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
+        `}
+      >
+        <div className="flex items-center gap-2">
+          <FaBed className={value !== null ? "text-violet-500" : "text-gray-400"} />
+          <span>{buttonText}</span>
+        </div>
+        <svg className={`w-3.5 h-3.5 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {isDropdownOpen && (
+        <div className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 w-44">
+          <div className="p-2">
+            {options.map(option => (
+              <button
+                key={option.value}
+                onClick={() => {
+                  // Deselect if already selected, otherwise select this option
+                  onChange(value === option.value ? null : option.value);
+                  setIsDropdownOpen(false);
+                }}
+                className={`w-full text-left px-3 py-2 rounded-md text-xs flex justify-between items-center ${value === option.value ? 'bg-violet-50 text-violet-700' : 'hover:bg-gray-50'}`}
+              >
+                <span>{option.label}</span>
+                {value === option.value && <FaCheck className="text-violet-500 w-3 h-3" />}
+              </button>
+            ))}
+            
+            {value !== null && (
+              <div className="border-t border-gray-100 mt-1 pt-1">
+                <button
+                  onClick={() => {
+                    onChange(null);
+                    setIsDropdownOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-md text-xs text-gray-500 hover:bg-gray-50"
+                >
+                  Borrar filtro
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       )}
-    </button>
+    </div>
   );
 });
 
-NumericFilterButton.displayName = 'NumericFilterButton';
+BedroomsDropdown.displayName = 'BedroomsDropdown';
+
+// Create a new BathroomsDropdown component
+const BathroomsDropdown = memo(({ 
+  value, 
+  onChange 
+}: { 
+  value: number | null, 
+  onChange: (value: number | null) => void 
+}) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Options for the dropdown
+  const options = [
+    { value: 1, label: '1 Baño' },
+    { value: 2, label: '2+ Baños' }
+  ];
+  
+  // Button text based on current selection
+  const selectedOption = value ? options.find(opt => 
+    (value === 2 && opt.value === 2) || (value === opt.value)
+  ) : null;
+  
+  const buttonText = selectedOption ? selectedOption.label : 'Baños';
+  
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        className={`
+          flex items-center justify-between gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all
+          ${value !== null
+            ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
+            : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
+        `}
+      >
+        <div className="flex items-center gap-2">
+          <FaBath className={value !== null ? "text-violet-500" : "text-gray-400"} />
+          <span>{buttonText}</span>
+        </div>
+        <svg className={`w-3.5 h-3.5 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {isDropdownOpen && (
+        <div className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 w-40">
+          <div className="p-2">
+            {options.map(option => (
+              <button
+                key={option.value}
+                onClick={() => {
+                  // Deselect if already selected, otherwise select this option
+                  onChange(value === option.value ? null : option.value);
+                  setIsDropdownOpen(false);
+                }}
+                className={`w-full text-left px-3 py-2 rounded-md text-xs flex justify-between items-center ${value === option.value ? 'bg-violet-50 text-violet-700' : 'hover:bg-gray-50'}`}
+              >
+                <span>{option.label}</span>
+                {value === option.value && <FaCheck className="text-violet-500 w-3 h-3" />}
+              </button>
+            ))}
+            
+            {value !== null && (
+              <div className="border-t border-gray-100 mt-1 pt-1">
+                <button
+                  onClick={() => {
+                    onChange(null);
+                    setIsDropdownOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-md text-xs text-gray-500 hover:bg-gray-50"
+                >
+                  Borrar filtro
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
+
+BathroomsDropdown.displayName = 'BathroomsDropdown';
+
+// Create a new ParkingSpotsDropdown component
+const ParkingSpotsDropdown = memo(({ 
+  value, 
+  onChange 
+}: { 
+  value: number | null, 
+  onChange: (value: number | null) => void 
+}) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Options for the dropdown
+  const options = [
+    { value: 1, label: '1 Cajón' },
+    { value: 2, label: '2 Cajones' },
+    { value: 3, label: '3+ Cajones' }
+  ];
+  
+  // Button text based on current selection
+  const selectedOption = value ? options.find(opt => 
+    (value === 3 && opt.value === 3) || (value === opt.value)
+  ) : null;
+  
+  const buttonText = selectedOption ? selectedOption.label : 'Estacionamiento';
+  
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        className={`
+          flex items-center justify-between gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all
+          ${value !== null
+            ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
+            : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
+        `}
+      >
+        <div className="flex items-center gap-2">
+          <FaCar className={value !== null ? "text-violet-500" : "text-gray-400"} />
+          <span>{buttonText}</span>
+        </div>
+        <svg className={`w-3.5 h-3.5 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {isDropdownOpen && (
+        <div className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 w-44">
+          <div className="p-2">
+            {options.map(option => (
+              <button
+                key={option.value}
+                onClick={() => {
+                  // Deselect if already selected, otherwise select this option
+                  onChange(value === option.value ? null : option.value);
+                  setIsDropdownOpen(false);
+                }}
+                className={`w-full text-left px-3 py-2 rounded-md text-xs flex justify-between items-center ${value === option.value ? 'bg-violet-50 text-violet-700' : 'hover:bg-gray-50'}`}
+              >
+                <span>{option.label}</span>
+                {value === option.value && <FaCheck className="text-violet-500 w-3 h-3" />}
+              </button>
+            ))}
+            
+            {value !== null && (
+              <div className="border-t border-gray-100 mt-1 pt-1">
+                <button
+                  onClick={() => {
+                    onChange(null);
+                    setIsDropdownOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-md text-xs text-gray-500 hover:bg-gray-50"
+                >
+                  Borrar filtro
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
+
+ParkingSpotsDropdown.displayName = 'ParkingSpotsDropdown';
+
+// Create a component for boolean filters (amueblado, mascotas)
+const BooleanFilterDropdown = memo(({ 
+  value,
+  label,
+  onChange 
+}: { 
+  value: boolean,
+  label: string,
+  onChange: (value: boolean) => void 
+}) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        className={`
+          flex items-center justify-between gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all
+          ${value
+            ? 'bg-violet-50 text-violet-700 ring-2 ring-violet-200 shadow-sm'
+            : 'bg-gray-50/80 text-gray-600 border border-gray-200/75 hover:bg-violet-50 hover:ring-2 hover:ring-violet-200'}
+        `}
+      >
+        <span>{label}</span>
+        <svg className={`w-3.5 h-3.5 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {isDropdownOpen && (
+        <div className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 w-44">
+          <div className="p-2">
+            <button
+              onClick={() => {
+                onChange(true);
+                setIsDropdownOpen(false);
+              }}
+              className={`w-full text-left px-3 py-2 rounded-md text-xs flex justify-between items-center ${value ? 'bg-violet-50 text-violet-700' : 'hover:bg-gray-50'}`}
+            >
+              <span>Sí</span>
+              {value && <FaCheck className="text-violet-500 w-3 h-3" />}
+            </button>
+            
+            <button
+              onClick={() => {
+                onChange(false);
+                setIsDropdownOpen(false);
+              }}
+              className="w-full text-left px-3 py-2 rounded-md text-xs text-gray-500 hover:bg-gray-50"
+            >
+              Borrar filtro
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
+
+BooleanFilterDropdown.displayName = 'BooleanFilterDropdown';
 
 const FilterExplorador = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const isExplorarPage = pathname === '/explorar2';
+  const isExplorarPage = pathname === '/explorar' || pathname === '/explorar2';
   
   // Use the filter context
   const { filters, updateFilter } = useFilters();
@@ -356,18 +745,9 @@ const FilterExplorador = () => {
     }
   }, [filters.transactionType, filters.preventa, filters.preventaFilterActive, updateFilter]);
 
-  // Función helper actualizada para manejar la selección/deselección - memoized
-  const handleNumericFilter = useCallback((
-    value: NumericValue,
-    currentValue: number | null,
-    filterKey: 'bedrooms' | 'bathrooms' | 'parkingSpots'
-  ) => {
-    const numValue = value === '2+' ? 2 : value === '3+' ? 3 : Number(value);
-    if (currentValue === numValue) {
-      updateFilter(filterKey, null); // Deseleccionar si ya está seleccionado
-    } else {
-      updateFilter(filterKey, numValue);
-    }
+  // Simplified function to handle numeric filters
+  const handleNumericFilter = useCallback((value: number | null, filterKey: 'bedrooms' | 'bathrooms' | 'parkingSpots') => {
+    updateFilter(filterKey, value);
   }, [updateFilter]);
 
   // Handle min price input change - memoized
@@ -656,7 +1036,7 @@ const FilterExplorador = () => {
                 />
               )}
 
-              {/* Add Preventa filter - updated to use the new component */}
+              {/* Add Preventa filter - updated to use the new dropdown component */}
               {isClient && filters.transactionType === 'compra' && (
                 <PreventaToggle
                   isPreventa={filters.preventa}
@@ -665,7 +1045,7 @@ const FilterExplorador = () => {
                 />
               )}
 
-              {/* Precio - with improved mobile dropdown visibility */}
+              {/* Precio - unchanged */}
               {isClient && (
                 <div className="relative" ref={priceDropdownRef}>
                   {/* Price Button */}
@@ -787,81 +1167,46 @@ const FilterExplorador = () => {
                 </div>
               )}
 
-              {/* Recámaras with memoized buttons */}
-              <div className="flex items-center gap-2">
-                <FaBed className="text-gray-400" />
-                <div className="flex gap-2">
-                  {bedroomOptions.map((num) => (
-                    <NumericFilterButton
-                      key={num}
-                      value={num}
-                      currentValue={filters.bedrooms}
-                      onClick={() => handleNumericFilter(num, filters.bedrooms, 'bedrooms')}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Baños with memoized buttons */}
-              <div className="flex items-center gap-2">
-                <FaBath className="text-gray-400" />
-                <div className="flex gap-2">
-                  {bathroomOptions.map((num) => (
-                    <NumericFilterButton
-                      key={num}
-                      value={num}
-                      currentValue={filters.bathrooms}
-                      onClick={() => handleNumericFilter(num, filters.bathrooms, 'bathrooms')}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Amueblado - Solo en /explorar y cuando el tipo de transacción es renta */}
-              {isExplorarPage && filters.transactionType === 'renta' && (
-                <button
-                  onClick={() => handleToggle('isFurnished')}
-                  className={`
-                    ${baseButtonStyles}
-                    ${filters.isFurnished ? selectedButtonStyles : unselectedButtonStyles}
-                    flex items-center gap-2 cursor-pointer
-                  `}
-                >
-                  {filters.isFurnished && <FaCheck className="w-3 h-3 text-violet-600" />}
-                  Amueblado
-                </button>
+              {/* Replace Recámaras buttons with dropdown */}
+              {isClient && (
+                <BedroomsDropdown
+                  value={filters.bedrooms}
+                  onChange={(value) => handleNumericFilter(value, 'bedrooms')}
+                />
               )}
 
-              {/* Mascotas - Solo en /explorar y cuando el tipo de transacción es renta */}
-              {isExplorarPage && filters.transactionType === 'renta' && (
-                <button
-                  onClick={() => handleToggle('petsAllowed')}
-                  className={`
-                    ${baseButtonStyles}
-                    ${filters.petsAllowed ? selectedButtonStyles : unselectedButtonStyles}
-                    flex items-center gap-2 cursor-pointer
-                  `}
-                >
-                  {filters.petsAllowed && <FaCheck className="w-3 h-3 text-violet-600" />}
-                  Mascotas
-                </button>
+              {/* Replace Baños buttons with dropdown */}
+              {isClient && (
+                <BathroomsDropdown
+                  value={filters.bathrooms}
+                  onChange={(value) => handleNumericFilter(value, 'bathrooms')}
+                />
               )}
 
-              {/* Estacionamientos with memoized buttons */}
-              {isExplorarPage && (
-                <div className="flex items-center gap-2">
-                  <FaCar className="text-gray-400" />
-                  <div className="flex gap-2">
-                    {parkingOptions.map((num) => (
-                      <NumericFilterButton
-                        key={num}
-                        value={num}
-                        currentValue={filters.parkingSpots}
-                        onClick={() => handleNumericFilter(num, filters.parkingSpots, 'parkingSpots')}
-                      />
-                    ))}
-                  </div>
-                </div>
+              {/* Amueblado - Make sure it's visible in desktop when transaction type is renta */}
+              {isClient && filters.transactionType === 'renta' && (
+                <BooleanFilterDropdown
+                  value={filters.isFurnished}
+                  label="Amueblado"
+                  onChange={(value) => updateFilter('isFurnished', value)}
+                />
+              )}
+
+              {/* Mascotas - Make sure it's visible in desktop when transaction type is renta */}
+              {isClient && filters.transactionType === 'renta' && (
+                <BooleanFilterDropdown
+                  value={filters.petsAllowed}
+                  label="Mascotas"
+                  onChange={(value) => updateFilter('petsAllowed', value)}
+                />
+              )}
+
+              {/* Replace Estacionamientos buttons with dropdown */}
+              {isClient && isExplorarPage && (
+                <ParkingSpotsDropdown
+                  value={filters.parkingSpots}
+                  onChange={(value) => handleNumericFilter(value, 'parkingSpots')}
+                />
               )}
             </div>
           </div>

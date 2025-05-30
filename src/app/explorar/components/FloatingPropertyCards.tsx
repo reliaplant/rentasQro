@@ -30,17 +30,16 @@ const FloatingPropertyCards: React.FC<FloatingPropertyCardsProps> = ({
     <div className="fixed left-0 right-0 bottom-20 z-[105] px-[10vw]">
       <div className="bg-white rounded-xl shadow-xl overflow-hidden max-h-[500px]">
         {/* Header with condo name */}
-        <div className="flex items-center justify-between px-2 py-2 bg-violet-50">
+        <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">
           <div> 
-            <h3 className="font-bold text-base text-violet-900">{condoName}</h3>
-            <p className="text-xs text-violet-700">{properties.length} propiedades</p>
+            <h3 className="font-semibold text-base">{condoName}</h3>
           </div>
           <button 
             onClick={onClose} 
             className="p-2 rounded-full hover:bg-violet-100"
             aria-label="Cerrar"
           >
-            <FaTimes className="w-5 h-5 text-violet-800" />
+            <FaTimes className="w-4 h-4 text-gray-800" />
           </button>
         </div>
         

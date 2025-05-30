@@ -1,12 +1,10 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { Bed, Bath, MapPin } from 'lucide-react';
 import { PropertyData } from '@/app/shared/interfaces';
 import { getSimilarProperties, getZoneById } from '@/app/shared/firebase';
 import { useExchangeRate } from '@/app/hooks/useExchangeRate';
+import PropertyCard from '@/app/components/PropertyCard'; // Import the shared PropertyCard component
 
 interface SimilarPropertiesProps {
   currentPropertyId: string;
@@ -121,7 +119,6 @@ export default function SimilarProperties({
 
   // Don't show anything while loading
   if (loading) {
- 
     return (
       <div className="bg-white p-6 rounded-lg shadow-sm">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Propiedades similares</h3>
@@ -138,37 +135,10 @@ export default function SimilarProperties({
     );
   }
 
-
-
   // Hide completely if no properties found
   if (properties.length === 0) {
-
     return null;
   }
-
-  // Format price based on currency and value
-  const formatPrice = (priceValue: number) => {
-    if (selectedCurrency === 'USD') {
-      // Convert MXN to USD
-      const usdPrice = convertMXNtoUSD(priceValue);
-      
-      // Format based on value range
-      if (usdPrice < 1000) {
-        return `USD ${usdPrice.toFixed(0)}`;
-      } else if (usdPrice < 1000000) {
-        return `USD ${(usdPrice / 1000).toFixed(usdPrice % 1000 === 0 ? 0 : 1)} K`;
-      } else {
-        return `USD ${(usdPrice / 1000000).toFixed(1)} M`;
-      }
-    } else {
-      // MXN formatting
-      if (priceValue < 1000000) {
-        return `${(priceValue / 1000).toFixed(priceValue % 1000 === 0 ? 0 : 1)} K`;
-      } else {
-        return `${(priceValue / 1000000).toFixed(1)} MDP`;
-      }
-    }
-  };
 
   return (
     <div className="">
@@ -176,113 +146,19 @@ export default function SimilarProperties({
       
       {/* Grid layout - 2x2 grid */}
       <div className="grid grid-cols-2 gap-3">
-        {properties.map(property => (
+        {properties.map((property, index) => (
           <PropertyCard 
-            key={property.id} 
-            property={property} 
-            zoneName={property.zone ? zoneNames[property.zone] : undefined}
-            selectedCurrency={selectedCurrency}
-            formatPrice={formatPrice}
+            key={property.id || index}
+            property={property}
+            index={index}
+            currency={selectedCurrency as 'MXN' | 'USD'}
+            linkTo={`/propiedad/${property.id}`}
+            className="w-full h-full"
+            type="compact" // Use a compact style for the similar properties grid
+            showAsFavorite={false} // Don't show favorite button in similar properties
           />
         ))}
       </div>
     </div>
-  );
-}
-
-// Separate component for property card to improve readability
-function PropertyCard({ 
-  property, 
-  zoneName, 
-  selectedCurrency, 
-  formatPrice 
-}: { 
-  property: PropertyData, 
-  zoneName?: string,
-  selectedCurrency: 'MXN' | 'USD',
-  formatPrice: (price: number) => string
-}) {
-  // Handle dummy properties
-  if (property.isDummy) {
-    return (
-      <div className="block group">
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden h-full">
-          <div className="relative h-28 w-full bg-gray-100">
-            <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-xs">
-              Ver más propiedades
-            </div>
-          </div>
-          <div className="p-2">
-            <h4 className="font-medium text-gray-500 text-sm truncate">
-              {property.propertyType === 'casa' ? 'Casas similares' : 'Propiedades similares'}
-            </h4>
-            <p className="text-xs text-gray-400 truncate">
-              {property.transactionType === 'renta' ? 'En renta' : 'En venta'}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  
-  // Regular property card
-  return (
-    <Link href={`/propiedad/${property.id}`} className="block group">
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow h-full">
-        {/* Property Image */}
-        <div className="relative h-28 w-full">
-          {property.imageUrls && property.imageUrls[0] ? (
-            <div className="relative w-full h-full">
-              <Image 
-                src={property.imageUrls[0]} 
-                alt="Propiedad"
-                fill
-                className="object-cover"
-                priority={false}
-                unoptimized
-              />
-            </div>
-          ) : (
-            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-              <span className="text-gray-400 text-xs">Propiedad</span>
-            </div>
-          )}
-          {property.price && property.price > 0 && (
-            <div className="absolute bottom-1 right-1 bg-white/80 rounded border border-white px-1 text-xs font-medium">
-              {formatPrice(property.price)}
-            </div>
-          )}
-        </div>
-        
-        {/* Property Info - Simplified for smaller cards */}
-        <div className="p-2">
-            <h4 className="font-medium text-gray-900 text-xs truncate">
-            {property.propertyType === 'departamento' ? 'Depa' : 'Casa'}
-            {property.modelo && ` ${property.modelo}`}
-            {property.condoName && ` en ${property.condoName}`}
-            </h4>
-          <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
-            {property.bedrooms && (
-              <div className="flex items-center gap-1">
-                <Bed size={12} />
-                <span>{property.bedrooms}</span>
-              </div>
-            )}
-            {property.bathrooms && (
-              <div className="flex items-center gap-1">
-                <Bath size={12} />
-                <span>{property.bathrooms}</span>
-              </div>
-            )}
-            {zoneName && (
-              <div className="flex items-center gap-1 truncate">
-                <MapPin size={12} />
-                <span className="truncate text-[11px]">{zoneName}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </Link>
   );
 }

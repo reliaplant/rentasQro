@@ -154,6 +154,7 @@ export interface PropertyData {
   comision?: number; // Added for commission
   modelo?: string; // Added for model
   availability?: 'inmediata' | 'preventa' | string; // Add availability field
+  featured?: boolean; // New field to mark properties as featured
 }
 
 export interface resumenCondo{

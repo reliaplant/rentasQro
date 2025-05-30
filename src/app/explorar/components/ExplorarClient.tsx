@@ -54,19 +54,21 @@ function ExplorarClientInner() {
     };
   }, []);
   
-  // Handle map toggle more smoothly without transitions
+  // Handle map toggle more smoothly with simplified logic
   const handleMapToggle = () => {
-    if (showMobileMap) {
-      setShowMobileMap(false);
-      // Clear selected properties when hiding map
-      setSelectedCondoProps(null);
-    } else {
-      setShowMobileMap(true);
-      // Trigger map resize after a short delay
-      setTimeout(() => {
-        setTriggerMapResize(prev => prev + 1);
-      }, 100);
-    }
+    // Simple toggle without extra state management
+    setShowMobileMap(prevState => {
+      const newState = !prevState;
+      
+      // Clear properties and trigger resize in one place
+      if (!newState) {
+        setSelectedCondoProps(null);
+      } else {
+        setTimeout(() => setTriggerMapResize(prev => prev + 1), 100);
+      }
+      
+      return newState;
+    });
   };
   
   // Add a mapping of sort options to user-friendly labels

@@ -18,7 +18,7 @@ interface Location {
   forRent: number;
   forSale: number;
   condoId: string;
-  zoneId?: string; // Add this property to fix the type error
+  zoneId?: string;
   propiedadesRentaResumen?: any[];
   propiedadesVentaResumen?: any[];
   rentPriceMin?: number;
@@ -45,10 +45,10 @@ export default function MapaZibata2({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Get filters from context instead of using local state
+  // Get filters from context
   const { filters, updateFilter } = useFilters();
   
-  // Define a fixed center point for Zibatá that won't change
+  // Define a fixed center point for Zibatá
   const ZIBATA_CENTER: [number, number] = [-100.335007, 20.680079];
 
   // Helper function to parse property list
@@ -85,7 +85,7 @@ export default function MapaZibata2({
         
         const zoneCondos = await getZoneCondos(ZIBATA_ZONE_ID);
         
-        // Filter out condos with (0,0) coordinates or invalid coordinates
+        // Filter out condos with invalid coordinates
         const validCondos = zoneCondos.filter((condo: resumenCondo) => 
           condo && 
           condo.coordX !== undefined && 
@@ -141,29 +141,45 @@ export default function MapaZibata2({
     }
   };
 
-  // Add state to track user interactions with markers
-  const [userInteracted, setUserInteracted] = useState(false);
-  const [lastPosition, setLastPosition] = useState<{center: mapboxgl.LngLat, zoom: number} | null>(null);
-  // Add a ref to store the currently focused condo coordinates
-  const focusedMarkerRef = useRef<[number, number] | null>(null);
-  // Add this state to track if map interactions are in progress
-  const [mapTransitionInProgress, setMapTransitionInProgress] = useState(false);
+  // Initialize map once locations are loaded
+  useEffect(() => {
+    if (map.current || !mapContainer.current || loading) return;
+    if (locations.length === 0) return;
 
-  // Add a ref to track if we need to skip the next resize
-  const skipNextResizeRef = useRef(false);
+    // Initialize map
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current!,
+      style: 'mapbox://styles/mapbox/streets-v11',
+      center: ZIBATA_CENTER,
+      zoom: 13,
+    });
+    
+    map.current.on('load', () => {
+      createMarkers();
+      
+      // Resize map to fit container properly
+      if (immediateResize) {
+        map.current?.resize();
+      }
+    });
 
-  // Add a function to detect significant map movement
-  const hasMapMovedSignificantly = (oldCenter: mapboxgl.LngLat, newCenter: mapboxgl.LngLat) => {
-    // Check if the movement is significant (> 0.001 degrees ~ roughly 100m)
-    return Math.abs(oldCenter.lng - newCenter.lng) > 0.001 || 
-           Math.abs(oldCenter.lat - newCenter.lat) > 0.001;
-  };
+    map.current.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
 
-  // Create and display markers on the map
-  const createMarkers = (shouldRecenter = true) => {
+    return () => {
+      // Clean up markers when map unmounts
+      if (markersRef.current.length > 0) {
+        markersRef.current.forEach(marker => marker.remove());
+        markersRef.current = [];
+      }
+      map.current?.remove();
+    };
+  }, [loading, locations]);
+
+  // Create and display markers on the map - simplified function
+  const createMarkers = () => {
     if (!map.current) return;
     
-    // Clear existing markers but keep the map position
+    // Clear existing markers
     if (markersRef.current.length > 0) {
       markersRef.current.forEach(marker => marker.remove());
       markersRef.current = [];
@@ -172,7 +188,7 @@ export default function MapaZibata2({
     // Use the transaction type from filters context
     const isRentView = filters.transactionType === 'renta';
     
-    // Filter locations based on current transaction type from filters
+    // Filter locations based on current transaction type
     let filteredLocations = locations.filter(location => 
       isRentView ? location.forRent > 0 : location.forSale > 0
     );
@@ -202,7 +218,6 @@ export default function MapaZibata2({
       
       // Apply preventa filter (using the boolean field, not availability)
       if (filters.preventa) {
-        console.log(`Filtering for preventa properties in map`);
         filteredProps = filteredProps.filter((prop: any) => prop.preventa === true);
       }
       
@@ -331,7 +346,7 @@ export default function MapaZibata2({
         </div>
       `;
       
-      // Create marker
+      // Create marker with simplified click handling
       const marker = new mapboxgl.Marker({
         element: el,
         anchor: 'bottom'
@@ -339,273 +354,75 @@ export default function MapaZibata2({
         .setLngLat(location.coordinates)
         .addTo(map.current!);
       
-      // Modify the click handlers to preserve the current position
+      // Simplify click handler
       el.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         
-        // Prevent multiple interactions simultaneously
-        if (mapTransitionInProgress) return;
-        
-        console.log(`Marker clicked: allowCondoFilter=${allowCondoFilter}, condo=${location.name}`);
-        
-        // Set flag to prevent interruptions
-        setMapTransitionInProgress(true);
-        
-        // Save these coordinates as the focused marker
-        focusedMarkerRef.current = location.coordinates;
-        
-        // Store current position before any interaction
-        if (map.current) {
-          setLastPosition({
-            center: map.current.getCenter(),
-            zoom: map.current.getZoom()
-          });
-          setUserInteracted(true);
+        // Handle mobile vs desktop modes differently
+        if (!allowCondoFilter) {
+          // Mobile mode - show property cards
+          const properties = isRentView 
+            ? location.propiedadesRentaResumen || []
+            : location.propiedadesVentaResumen || [];
+            
+          const enhancedProperties = properties.map(prop => ({
+            ...prop,
+            id: prop.id || '',
+            condoName: location.name,
+            zone: location.zoneId || 'X5oWujYupjRKx0tF8Hlj',
+            zoneId: location.zoneId || 'X5oWujYupjRKx0tF8Hlj',
+            zoneName: 'Zibatá',
+            propertyType: prop.propertyType || 'casa',
+            bedrooms: prop.bedrooms || 0,
+            bathrooms: prop.bathrooms || 0,
+            construccionM2: prop.construccionM2 || 0,
+            terrenoM2: prop.terrenoM2 || 0,
+            parkingSpots: prop.parkingSpots || 0,
+            imageUrls: prop.imageUrl ? [prop.imageUrl] : [],
+            transactionType: isRentView ? 'renta' : 'venta',
+            price: prop.price || 0,
+            preventa: prop.preventa || false,
+            descripcion: prop.descripcion || `Propiedad en ${location.name}`
+          }));
+          onCondoClick(location.condoId, location.name, enhancedProperties);
+        } else {
+          // Desktop mode - toggle filter
+          updateFilter('selectedCondo', 
+            filters.selectedCondo === location.condoId ? '' : location.condoId
+          );
         }
         
-        // For both mobile and desktop: explicitly center on clicked marker with smoother animation
+        // Always fly to the marker location with reduced zoom level
         map.current?.flyTo({
           center: location.coordinates,
-          zoom: 16,
-          duration: 800,  // Slightly shorter duration
-          essential: true // Make this animation essential
+          zoom: 14,  // Reducido de 16 a 14 para una vista menos cercana
+          duration: 800,
+          essential: true
         });
-        
-        // Wait until the animation is complete before handling the rest of the logic
-        setTimeout(() => {
-          // STRICTLY SEPARATE MOBILE AND DESKTOP BEHAVIOR
-          if (!allowCondoFilter) {
-            // ---------- MOBILE MODE ONLY ----------
-            console.log('Mobile mode marker click - showing properties only');
-            
-            // Get properties for the current transaction type
-            const properties = isRentView 
-              ? location.propiedadesRentaResumen || []
-              : location.propiedadesVentaResumen || [];
-            
-            // Transform the properties
-            const enhancedProperties = properties.map(prop => ({
-              ...prop,
-              id: prop.id || '',
-              condoName: location.name,
-              zone: location.zoneId || 'X5oWujYupjRKx0tF8Hlj',
-              zoneId: location.zoneId || 'X5oWujYupjRKx0tF8Hlj',
-              zoneName: 'Zibatá',
-              propertyType: prop.propertyType || 'casa',
-              bedrooms: prop.bedrooms || 0,
-              bathrooms: prop.bathrooms || 0,
-              construccionM2: prop.construccionM2 || 0,
-              terrenoM2: prop.terrenoM2 || 0,
-              parkingSpots: prop.parkingSpots || 0,
-              imageUrls: prop.imageUrl ? [prop.imageUrl] : [],
-              transactionType: isRentView ? 'renta' : 'venta',
-              price: prop.price || 0,
-              preventa: prop.preventa || false,
-              descripcion: prop.descripcion || `Propiedad en ${location.name}`
-            }));
-            
-            // Call the callback with the enhanced property data
-            onCondoClick(location.condoId, location.name, enhancedProperties);
-            
-            // CRITICAL: ALWAYS clear any selected markers in mobile mode
-            markersRef.current.forEach(marker => {
-              marker.getElement().classList.remove('selected-marker');
-            });
-            
-            // CRITICAL: ALWAYS ensure no filter is applied in mobile mode
-            if (filters.selectedCondo) {
-              console.log('Clearing selectedCondo filter in mobile mode');
-              updateFilter('selectedCondo', '');
-            }
-          } else {
-            // ---------- DESKTOP MODE ONLY ----------
-            console.log('Desktop mode marker click - filtering');
-            
-            // Only toggle filter if in desktop mode
-            if (filters.selectedCondo === location.condoId) {
-              updateFilter('selectedCondo', '');
-              
-              // Remove selected-marker class from all markers
-              markersRef.current.forEach(marker => {
-                marker.getElement().classList.remove('selected-marker');
-              });
-            } else {
-              // Otherwise, select this condo
-              updateFilter('selectedCondo', location.condoId);
-              
-              // Remove selected-marker class from all markers first
-              markersRef.current.forEach(marker => {
-                marker.getElement().classList.remove('selected-marker');
-              });
-              
-              // Add selected-marker class to this marker
-              el.classList.add('selected-marker');
-            }
-          }
-          
-          // Reset the transition flag
-          setMapTransitionInProgress(false);
-        }, 850); // Slightly longer than the flyTo duration to ensure animation completes
       });
       
       // Store marker reference
       markersRef.current.push(marker);
     });
-    
-    // After creating all markers, restore focus if we have a previously clicked marker
-    if (map.current && focusedMarkerRef.current && shouldRecenter && !mapTransitionInProgress) {
-      // Use a very short timeout to ensure markers are fully rendered
-      setTimeout(() => {
-        if (map.current && focusedMarkerRef.current) {
-          map.current.setCenter(focusedMarkerRef.current);
-        }
-      }, 50);
-    }
   };
 
-  // Initialize map once locations are loaded
+  // Handle map resize when resizeTrigger changes
   useEffect(() => {
-    if (map.current || !mapContainer.current || loading) return;
-    if (locations.length === 0) return;
-
-    // Initialize map
-    const initMap = () => {
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current!,
-        style: 'mapbox://styles/mapbox/streets-v11',
-        center: ZIBATA_CENTER,
-        zoom: 13,
-      });
-      
-      map.current.on('load', () => {
-        map.current?.setCenter(ZIBATA_CENTER);
-        createMarkers();
-        
-        // Immediately resize the map to avoid delay
-        if (immediateResize) {
-          map.current?.resize();
-        }
-      });
-
-      map.current.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
-    };
-
-    initMap();
-
-    return () => {
-      // Clean up markers when map unmounts
-      if (markersRef.current.length > 0) {
-        markersRef.current.forEach(marker => marker.remove());
-        markersRef.current = [];
+    if (!map.current || resizeTrigger <= 0) return;
+    
+    // Simple resize with minimal interruption
+    setTimeout(() => {
+      if (map.current) {
+        map.current.resize();
       }
-      map.current?.remove();
-    };
-  }, [loading, locations, immediateResize]);
+    }, 100);
+  }, [resizeTrigger]);
 
-  // Add an immediate resize effect to fix map when it becomes visible
-  useEffect(() => {
-    if (immediateResize && map.current) {
-      // Resize immediately and then a few more times to ensure proper rendering
-      map.current.resize();
-      
-      // Additional resize attempts with short intervals
-      const timers = [50, 100, 200, 300].map(ms => 
-        setTimeout(() => {
-          if (map.current) {
-            map.current.resize();
-            map.current.setCenter(ZIBATA_CENTER);
-          }
-        }, ms)
-      );
-      
-      return () => timers.forEach(timer => clearTimeout(timer));
-    }
-  }, [immediateResize, ZIBATA_CENTER]);
-
-  // Add a new effect to resize the map when it becomes visible in mobile view
-  useEffect(() => {
-    // Check if map exists and container is visible
-    if (map.current && mapContainer.current) {
-      // Use setTimeout to allow time for the DOM to update and container to be fully visible
-      const resizeTimer = setTimeout(() => {
-        map.current?.resize();
-        // Re-center the map to make sure it's showing the correct location
-        map.current?.setCenter(ZIBATA_CENTER);
-      }, 300);
-      
-      return () => clearTimeout(resizeTimer);
-    }
-  }, []);
-
-  // Listen for parent container visibility changes (for mobile view)
-  useEffect(() => {
-    if (!map.current) return;
-    
-    // Create a ResizeObserver to detect container size changes
-    const resizeObserver = new ResizeObserver(entries => {
-      if (entries.length > 0) {
-        // Resize the map whenever the container size changes
-        map.current?.resize();
-      }
-    });
-    
-    // Start observing the container
-    if (mapContainer.current) {
-      resizeObserver.observe(mapContainer.current);
-    }
-    
-    return () => {
-      // Clean up the observer when component unmounts
-      resizeObserver.disconnect();
-    };
-  }, []);
-
-  // Update markers when filters change (including availability)
+  // Update markers when filters change
   useEffect(() => {
     if (!map.current || locations.length === 0) return;
-    
-    // If a map transition is in progress, don't recreate markers
-    if (mapTransitionInProgress) return;
-    
-    // Store current position before recreating markers
-    let currentPosition = null;
-    if (userInteracted && map.current) {
-      currentPosition = {
-        center: map.current.getCenter(),
-        zoom: map.current.getZoom()
-      };
-    }
-    
-    // Save the marker elements before clearing them
-    const oldMarkerElements = markersRef.current.map(marker => {
-      const el = marker.getElement();
-      const position = marker.getLngLat();
-      const isSelected = el.classList.contains('selected-marker');
-      return { position, isSelected, condoId: el.getAttribute('data-condo-id') };
-    });
-    
-    // Create new markers without clearing the view
-    let shouldPreservePosition = currentPosition !== null ||
-                                focusedMarkerRef.current !== null;
-    
-    if (shouldPreservePosition) {
-      createMarkers(false); // Pass flag to indicate we should preserve position
-    } else {
-      createMarkers(true); // Default behavior
-    }
-    
-    // Only restore position if needed and not during an animation
-    if (shouldPreservePosition && !mapTransitionInProgress) {
-      if (focusedMarkerRef.current) {
-        // Prioritize the focused marker
-        map.current.setCenter(focusedMarkerRef.current);
-      } else if (currentPosition) {
-        // Fall back to the last interaction position
-        map.current.setCenter(currentPosition.center);
-        map.current.setZoom(currentPosition.zoom);
-      }
-    }
+    createMarkers();
   }, [
     filters.transactionType,
     filters.propertyType, 
@@ -616,127 +433,30 @@ export default function MapaZibata2({
     filters.parkingSpots,
     filters.isFurnished,
     filters.petsAllowed,
-    filters.preventa,
-    locations,
-    userInteracted,
-    mapTransitionInProgress // Add the new state as a dependency
-  ]);
+    filters.preventa
+  ]); 
 
-  // Completely rework the resizeTrigger effect to be much more conservative
-  useEffect(() => {
-    if (resizeTrigger <= 0 || !map.current) return;
-    
-    // NEVER resize during transitions or if we should skip this resize
-    if (mapTransitionInProgress || skipNextResizeRef.current) {
-      console.log('Skipping map resize - interaction in progress or skip flag set');
-      skipNextResizeRef.current = false;
-      return;
-    }
-    
-    console.log(`Map resize #${resizeTrigger} triggered`);
-    
-    // Store current position before resize
-    const currentCenter = map.current.getCenter();
-    const currentZoom = map.current.getZoom();
-    
-    // ONLY resize the map, don't change the view yet
-    map.current.resize();
-    
-    // Wait for the resize to complete naturally, then check if we need to adjust
-    // Use a longer timeout to give the map time to stabilize
-    const resizeTimer = setTimeout(() => {
-      if (!map.current) return;
-      
-      // Check if the map moved during resize
-      const newCenter = map.current.getCenter();
-      const newZoom = map.current.getZoom();
-      const mapMoved = hasMapMovedSignificantly(currentCenter, newCenter);
-      
-      console.log(`Map resize complete. Map moved: ${mapMoved}`);
-      
-      // If map didn't move significantly, do nothing!
-      if (!mapMoved && newZoom === currentZoom) {
-        console.log('Position maintained after resize, no adjustment needed');
-        return;
-      }
-      
-      // For positions with active user interaction, prioritize maintaining current view
-      // instead of jumping to preset positions
-      if (userInteracted) {
-        console.log('User has interacted - maintaining current position');
-        // Quietly restore position with no animation
-        map.current.setCenter(currentCenter);
-        map.current.setZoom(currentZoom);
-        return;
-      }
-      
-      // If we get here and have a focused marker, only use it if necessary
-      if (focusedMarkerRef.current) {
-        // Skip if the current view is already near the focused marker
-        // Convert to proper LngLat object using mapboxgl.LngLat.convert()
-        const focusedPos = mapboxgl.LngLat.convert({
-          lng: focusedMarkerRef.current[0], 
-          lat: focusedMarkerRef.current[1]
-        });
-        
-        if (!hasMapMovedSignificantly(currentCenter, focusedPos)) {
-          console.log('Already near focused marker, skipping repositioning');
-          return;
-        }
-        
-        // If we need to move to the marker, do it very smoothly
-        console.log('Moving to focused marker with smooth transition');
-        map.current.flyTo({
-          center: focusedMarkerRef.current,
-          zoom: currentZoom,
-          duration: 1000, // Much longer, smoother animation
-          essential: true
-        });
-        return;
-      }
-      
-      // Last resort - fall back to Zibatá center
-      console.log('Default position - no user interaction or focused marker');
-      map.current.setCenter(ZIBATA_CENTER);
-    }, 200); // Longer timeout to ensure map is stable
-    
-    return () => clearTimeout(resizeTimer);
-  }, [resizeTrigger]); // Minimal dependencies
-
-  // Add effect to handle when flyTo animation completes to prevent multiple recenters
+  // Make sure map resizes when container becomes visible
   useEffect(() => {
     if (!map.current) return;
     
-    const handleMoveEnd = () => {
-      // After a flyTo completes, skip the next resize-triggered movement
-      // This prevents "double movements" when both flyTo and resize happen
-      skipNextResizeRef.current = true;
-      
-      // Auto-clear the skip flag after a brief period
-      setTimeout(() => {
-        skipNextResizeRef.current = false;
-      }, 500);
-    };
+    const resizeObserver = new ResizeObserver(() => {
+      if (map.current) map.current.resize();
+    });
     
-    map.current.on('moveend', handleMoveEnd);
+    if (mapContainer.current) {
+      resizeObserver.observe(mapContainer.current);
+    }
     
     return () => {
-      map.current?.off('moveend', handleMoveEnd);
+      resizeObserver.disconnect();
     };
-  }, [map.current]);
+  }, []);
 
-  // Add an effect to ensure selectedCondo is always cleared when entering mobile mode
+  // Clear selectedCondo when entering mobile mode
   useEffect(() => {
     if (!allowCondoFilter && filters.selectedCondo) {
-      console.log('Mobile mode detected - clearing any selectedCondo filter');
       updateFilter('selectedCondo', '');
-      
-      // Also clear any marker selections
-      if (markersRef.current.length > 0) {
-        markersRef.current.forEach(marker => {
-          marker.getElement().classList.remove('selected-marker');
-        });
-      }
     }
   }, [allowCondoFilter, filters.selectedCondo, updateFilter]);
 
@@ -786,13 +506,11 @@ export default function MapaZibata2({
           left: 50%;
           transform: translateX(-50%);
         }
-        /* Add back selected marker styles */
         .selected-marker .marker-container > div:first-child {
           transform: scale(1.1);
           box-shadow: 0 0 0 2px #8B5CF6;
           transition: all 0.2s ease-in-out;
         }
-        /* Ensure the pointer doesn't get the outline or scale effect */
         .selected-marker .marker-pointer {
           transform: translateX(-50%);
           box-shadow: none;
@@ -800,7 +518,6 @@ export default function MapaZibata2({
           transition: all 0.2s ease-in-out;
         }
         
-        /* Add styles to ensure map container and mapboxgl-map both fill the container */
         .mapboxgl-map {
           position: absolute;
           top: 0;
@@ -811,14 +528,13 @@ export default function MapaZibata2({
           width: 100% !important;
         }
 
-        /* Force map container to fill available space */
         .map-container {
           height: 100% !important;
           width: 100% !important;
         }
       `}</style>
       
-      {/* Map container - ensure it takes full height and width */}
+      {/* Map container */}
       <div
         ref={mapContainer}
         className="map-container absolute inset-0 w-full h-full shadow-md"

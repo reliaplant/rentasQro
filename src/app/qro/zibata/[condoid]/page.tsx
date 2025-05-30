@@ -30,13 +30,57 @@ export async function generateMetadata(props: any): Promise<Metadata> {
 
     // Use the new getCondoBySlug function instead of fetching all condos
     const condo = await getCondoBySlug(condoid);
-
     if (!condo) return defaultMetadata();
+    
+    // Fetch properties to count them for the description
+    const propertiesData = await getPropertiesByCondo(condo.id || '');
+    
+    // Count properties by type (only published properties)
+    const publishedProperties = propertiesData.filter(p => p.status === 'publicada');
+    const rentProperties = publishedProperties.filter(p => 
+      (p.transactionType === 'renta' || p.transactionType === 'ventaRenta') && !p.preventa
+    );
+    const saleProperties = publishedProperties.filter(p => 
+      (p.transactionType === 'venta' || p.transactionType === 'ventaRenta') && !p.preventa
+    );
+    const preventaProperties = publishedProperties.filter(p => p.preventa === true);
+    
+    // Build dynamic description based on property counts
+    let dynamicDescription = ``;
+    
+    if (rentProperties.length > 0) {
+      dynamicDescription += `${rentProperties.length} propiedad${rentProperties.length !== 1 ? 'es' : ''} disponible${rentProperties.length !== 1 ? 's' : ''} en renta`;
+    }
+    
+    if (saleProperties.length > 0) {
+      if (dynamicDescription) dynamicDescription += ` y `;
+      dynamicDescription += `${saleProperties.length} propiedad${saleProperties.length !== 1 ? 'es' : ''} en venta`;
+    }
+    
+    if (preventaProperties.length > 0) {
+      if (dynamicDescription) dynamicDescription += `, además de `;
+      dynamicDescription += `${preventaProperties.length} propiedad${preventaProperties.length !== 1 ? 'es' : ''} en preventa`;
+    }
+    
+    if (dynamicDescription) {
+      dynamicDescription = `${dynamicDescription} en ${condo.name}, Zibatá. `;
+    }
+    
+    // Add condo description if available
+    if (condo.description) {
+      dynamicDescription += condo.description;
+    } else {
+      dynamicDescription += `Encuentra las mejores opciones de vivienda en ${condo.name}, ubicado en Zibatá, Querétaro.`;
+    }
 
     return {
-      title: `Propiedades en venta y renta en ${condo.name}, ${zone.name}`,
-      description: condo.description ||
-        `Encuentra propiedades en ${condo.name}, ubicado en ${zone.name}, Querétaro.`
+      title: `Propiedades en venta y renta en ${condo.name}, Zibatá`,
+      description: dynamicDescription,
+      openGraph: {
+        title: `Propiedades en ${condo.name}, Zibatá - Querétaro`,
+        description: dynamicDescription,
+        images: condo.portada ? [{ url: condo.portada }] : undefined,
+      },
     };
   } catch (error) {
     return defaultMetadata();

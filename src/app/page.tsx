@@ -46,7 +46,13 @@ export default function Home() {
             (p.transactionType === 'venta' || p.transactionType === 'ventaRenta') && 
             p.preventa !== true
           )
+          // Sort first by featured flag, then by publication date
           .sort((a, b) => {
+            // Prioritize featured properties
+            if (a.featured && !b.featured) return -1;
+            if (!a.featured && b.featured) return 1;
+            
+            // Then sort by date for properties with the same featured status
             const dateA = a.publicationDate?.toDate?.() || new Date();
             const dateB = b.publicationDate?.toDate?.() || new Date();
             return dateB.getTime() - dateA.getTime();
@@ -58,7 +64,13 @@ export default function Home() {
           .filter(p => 
             (p.transactionType === 'renta' || p.transactionType === 'ventaRenta')
           )
+          // Sort first by featured flag, then by publication date
           .sort((a, b) => {
+            // Prioritize featured properties
+            if (a.featured && !b.featured) return -1;
+            if (!a.featured && b.featured) return 1;
+            
+            // Then sort by date for properties with the same featured status
             const dateA = a.publicationDate?.toDate?.() || new Date();
             const dateB = b.publicationDate?.toDate?.() || new Date();
             return dateB.getTime() - dateA.getTime();

@@ -62,7 +62,9 @@ export default function FeaturedProperties({
           key={property.id || index} 
           property={property} 
           index={index}
-          currency={filters.currency} 
+          currency={filters.currency}
+          // Remove the type prop - we just want the featured properties to appear first 
+          // without having a different appearance
         />
       ))}
     </div>
