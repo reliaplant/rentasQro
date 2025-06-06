@@ -59,12 +59,19 @@ async function getBlogData(page = 1) {
   }
 }
 
-export default async function BlogPage({ searchParams }: {
-  searchParams?: { [key: string]: string | undefined };
-}) {
+// Use a generic type that works with Next.js
+export default async function BlogPage(props: any) {
+  // Extract searchParams from props
+  const { searchParams } = props;
+  
   try {
-    // Get page from URL params or default to 1
-    const page = searchParams?.page ? parseInt(searchParams.page, 10) : 1;
+    // Handle the page parameter properly
+    const pageParam = searchParams?.page;
+    const page = typeof pageParam === 'string' 
+      ? parseInt(pageParam, 10) 
+      : Array.isArray(pageParam) && pageParam.length > 0
+      ? parseInt(pageParam[0], 10)
+      : 1;
     
     // Fetch blog data with pagination
     const { posts, contributorsMap, pagination } = await getBlogData(page);
