@@ -22,36 +22,138 @@ export default function CondoImages({
   onFormDataChange 
 }: CondoImagesProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [imageTags, setImageTags] = useState<Record<string, string>>(
-    formData.imageAmenityTags || {}
-  );
-
-  // Sync image tags when formData changes
+  
+  // Better handling for different types of imageAmenityTags
+  const [imageTags, setImageTags] = useState<Record<number, string>>({});
+  
+  // Initialize tags on mount and when formData changes
   useEffect(() => {
+    console.log("formData tags:", formData.imageAmenityTags);
+    
+    // Initialize from formData
     if (formData.imageAmenityTags) {
-      setImageTags(formData.imageAmenityTags);
+      const newTags: Record<number, string> = {};
+      
+      // Check if tags are already index-based (numeric keys)
+      const isIndexBased = Object.keys(formData.imageAmenityTags).some(key => !isNaN(Number(key)));
+      
+      if (isIndexBased) {
+        // Direct copy for index-based tags
+        Object.entries(formData.imageAmenityTags).forEach(([idx, tag]) => {
+          newTags[Number(idx)] = tag as string;
+        });
+      } else {
+        // Convert URL-based tags to index-based
+        previewUrls.forEach((url, index) => {
+          if (formData.imageAmenityTags[url]) {
+            const tag = formData.imageAmenityTags[url];
+            newTags[index] = Array.isArray(tag) ? tag[0] : tag;
+          }
+        });
+      }
+      
+      console.log("Setting tags:", newTags);
+      setImageTags(newTags);
     }
-  }, [formData.imageAmenityTags]);
+  }, [formData, previewUrls]);
 
+  // Function to ensure we always maintain index-based tags
+  useEffect(() => {
+    if (previewUrls.length > 0) {
+      // We need to ensure tags are always index-based
+      const newImageTags: Record<number, string> = {};
+      
+      // First convert any existing tags
+      if (formData.imageAmenityTags) {
+        // Check if tags are already index-based
+        const hasIndexBasedTags = Object.keys(formData.imageAmenityTags).some(
+          key => !isNaN(parseInt(key))
+        );
+
+        if (hasIndexBasedTags) {
+          // Already using index-based tags, preserve them
+          Object.entries(formData.imageAmenityTags).forEach(([key, value]) => {
+            if (!isNaN(parseInt(key))) {
+              const index = parseInt(key);
+              if (index < previewUrls.length) {
+                const amenityId = Array.isArray(value) ? value[0] : value;
+                newImageTags[index] = amenityId;
+              }
+            }
+          });
+        } else {
+          // Convert URL-based tags to index-based
+          previewUrls.forEach((url, index) => {
+            if (url in formData.imageAmenityTags!) {
+              const amenityId = formData.imageAmenityTags![url];
+              const amenityIdString = Array.isArray(amenityId) ? amenityId[0] : amenityId;
+              newImageTags[index] = amenityIdString;
+            }
+          });
+        }
+      }
+      
+      // Update form data with consistent index-based tags
+      onFormDataChange({
+        ...formData,
+        imageAmenityTags: newImageTags
+      });
+    }
+  }, [previewUrls.length]);
+
+  // Sort images by their amenity tags
   const sortByAmenities = () => {
-    const sorted = [...previewUrls].sort((a, b) => {
-      const tagA = imageTags[a] || 'general';
-      const tagB = imageTags[b] || 'general';
-      return tagA.localeCompare(tagB);
+    // Create pairs of [url, tag] for sorting
+    const urlsWithTags = previewUrls.map((url, index) => ({
+      url,
+      tag: imageTags[index] || 'general'
+    }));
+    
+    // Sort by tag name
+    const sorted = [...urlsWithTags].sort((a, b) => a.tag.localeCompare(b.tag));
+    
+    // Extract just the URLs in the new order
+    const sortedUrls = sorted.map(item => item.url);
+    
+    // Create new imageTags object based on the new order
+    const newImageTags: Record<number, string> = {};
+    sorted.forEach((item, index) => {
+      if (item.tag !== 'general') {
+        newImageTags[index] = item.tag;
+      }
     });
-    onReorderImages(sorted);
+    
+    // Update local state
+    setImageTags(newImageTags);
+    
+    // Update parent state with new tags and order
+    onReorderImages(sortedUrls);
+    onFormDataChange({
+      ...formData,
+      imageAmenityTags: newImageTags
+    });
   };
 
-  const handleTagChange = (url: string, amenityId: string) => {
-    // Create new tags object with the updated tag
-    const newTags = {
-      ...imageTags,
-      [url]: amenityId || 'general'
-    };
-
+  // Handle tag change with more robust error handling
+  const handleTagChange = (index: number, amenityId: string) => {
+    console.log(`Changing tag for index ${index} to ${amenityId}`);
+    
+    // Create new tags object
+    const newTags = { ...imageTags };
+    
+    if (amenityId === 'general') {
+      // Remove the tag if it's set to general
+      delete newTags[index];
+    } else {
+      // Set the tag
+      newTags[index] = amenityId;
+    }
+    
+    console.log("New tags:", newTags);
+    
     // Update local state
     setImageTags(newTags);
-
+    
     // Update parent component state
     onFormDataChange({
       ...formData,
@@ -63,11 +165,20 @@ export default function CondoImages({
     // Remove from preview URLs
     const newPreviewUrls = previewUrls.filter((_, i) => i !== index);
     
-    // Remove from image tags
-    const removedUrl = previewUrls[index];
-    const newImageTags = { ...imageTags };
-    delete newImageTags[removedUrl];
-
+    // Remap all image tags to account for the removed image
+    const newImageTags: Record<number, string> = {};
+    Object.keys(imageTags).forEach(idx => {
+      const currentIdx = parseInt(idx);
+      if (currentIdx < index) {
+        // Indices before the deleted one stay the same
+        newImageTags[currentIdx] = imageTags[currentIdx];
+      } else if (currentIdx > index) {
+        // Indices after the deleted one shift down by 1
+        newImageTags[currentIdx - 1] = imageTags[currentIdx];
+      }
+      // The index itself gets removed
+    });
+    
     // Update parent state
     onFormDataChange({
       ...formData,
@@ -99,7 +210,6 @@ export default function CondoImages({
             {previewUrls.length} {previewUrls.length === 1 ? 'imagen' : 'imágenes'} en la galería
           </p>
           <motion.button
-
             type="button"
             onClick={sortByAmenities}
             className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200  flex items-center gap-2 transition-colors"
@@ -111,45 +221,49 @@ export default function CondoImages({
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
-        {previewUrls.map((url, index) => (
-          <motion.div 
-            key={url} 
-            whileHover={{ y: -4, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
-            className="relative aspect-[4/3]  overflow-hidden border border-gray-200 group"
-          >
-            <Image
-              src={url}
-              alt={`Preview ${index + 1}`}
-              fill
-              className="object-cover"
-            />
-
-            <motion.button
-
-              onClick={() => handleRemoveImage(index)}
-              className="absolute top-2 right-2 p-1.5 bg-black/50 backdrop-blur-sm rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
+        {previewUrls.map((url, index) => {
+          // Get the current tag for this image
+          const currentTag = imageTags[index] || 'general';
+          
+          return (
+            <motion.div 
+              key={`${index}-${url.slice(-8)}`} 
+              whileHover={{ y: -4, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+              className="relative aspect-[4/3] overflow-hidden border border-gray-200 group"
             >
-              <X size={14} />
-            </motion.button>
+              <Image
+                src={url}
+                alt={`Preview ${index + 1}`}
+                fill
+                className="object-cover"
+              />
 
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent pt-8 pb-1 px-1">
-              <select
-                value={imageTags[url] || 'general'}
-                onChange={(e) => handleTagChange(url, e.target.value)}
-                className="w-full text-sm bg-white/20 text-white backdrop-blur-sm 
-                border border-white/30  py-1.5 px-3 appearance-none cursor-pointer
-                transition-all focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+              <motion.button
+                onClick={() => handleRemoveImage(index)}
+                className="absolute top-2 right-2 p-1.5 bg-black/50 backdrop-blur-sm rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
               >
-                <option value="general">✨ General</option>
-                {condoAmenities.map((amenity) => (
-                  <option key={amenity.id} value={amenity.id}>
-                    {amenity.icon} {amenity.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </motion.div>
-        ))}
+                <X size={14} />
+              </motion.button>
+
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent pt-8 pb-1 px-1">
+                <select
+                  value={currentTag}
+                  onChange={(e) => handleTagChange(index, e.target.value)}
+                  className="w-full text-sm bg-white/20 text-white backdrop-blur-sm 
+                  border border-white/30 py-1.5 px-3 appearance-none cursor-pointer
+                  transition-all focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                >
+                  <option value="general">✨ General</option>
+                  {condoAmenities.map((amenity) => (
+                    <option key={amenity.id} value={amenity.id}>
+                      {amenity.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </motion.div>
+          );
+        })}
 
         <motion.button
 

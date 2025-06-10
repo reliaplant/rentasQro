@@ -58,7 +58,7 @@ export default function Contacto({
   
   // Create fallback data when advisor info is missing
   const advisorName = advisor?.name || 'Asesor Pizo';
-  const advisorPhone = advisor?.phone || '4421234567';
+  const advisorPhone = advisor?.phone || '+525537362098';
   const advisorPhoto = advisor?.photo || '';
   const isVerified = advisor?.verified !== false; // Default to true unless explicitly false
   

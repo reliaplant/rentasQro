@@ -9,22 +9,23 @@ import Head from 'next/head'; // Add this for SEO metadata
 
 export default function ZibataInfo() {
   const parkImages = [
-    '/assets/zibata/parqueJamadi2.jpg',
-    '/assets/zibata/parqueNanduZibata.jpg',
-    '/assets/zibata/parqueSaaki.jpg',
+    '/assets/zibata/jamadi1.webp',
+    '/assets/zibata/nandu.webp',
+    '/assets/zibata/saaki.webp',
     '/assets/zibata/parqueJamadi2.jpg'
   ];
 
   const mallImages = [
-    '/assets/zibata/plazaCentroZibata.jpeg',
+    '/assets/zibata/plazaCentro.jpg',
+       '/assets/zibata/plazaXentric.webp',
     '/assets/zibata/PlazaPaseoZibata.jpg',
     '/assets/zibata/plazaXentricMirador.jpeg',
-    '/assets/zibata/plazaXentricZibata.jpg'
+ 
   ];
 
   const sportsImages = [
     '/assets/zibata/zibataGolf.jpeg',
-    '/assets/zibata/canchaPadelZibata.jpg',
+    '/assets/zibata/canchaPadel.webp',
     '/assets/zibata/CampoGolfZibata.jpg',
     '/assets/zibata/zibataGolf.jpeg',
   ];
@@ -72,7 +73,7 @@ export default function ZibataInfo() {
       "longitude": "-100.3236"
     },
     "image": [
-      "https://www.pizo.mx/assets/zibata/zibata.jpg",
+      "https://www.pizo.mx/assets/zibata/zibata.webp",
       "https://www.pizo.mx/assets/zibata/parqueJamadi2.jpg",
       "https://www.pizo.mx/assets/zibata/zibataGolf.jpeg"
     ],
@@ -108,13 +109,13 @@ export default function ZibataInfo() {
         <meta property="og:description" content="Descubre por qué Zibatá se ha convertido en el mejor lugar para vivir en Querétaro. Amplia oferta de casas y departamentos en exclusivos condominios residenciales." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://www.pizo.mx/zibata" />
-        <meta property="og:image" content="https://www.pizo.mx/assets/zibata/zibata.jpg" />
+        <meta property="og:image" content="https://www.pizo.mx/assets/zibata/zibata.webp" />
 
         {/* Twitter tags */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Zibatá | El mejor fraccionamiento para vivir en Querétaro" />
         <meta name="twitter:description" content="Descubre por qué Zibatá se ha convertido en el mejor lugar para vivir en Querétaro. Amplia oferta de casas y departamentos en exclusivos condominios residenciales." />
-        <meta name="twitter:image" content="https://www.pizo.mx/assets/zibata/zibata.jpg" />
+        <meta name="twitter:image" content="https://www.pizo.mx/assets/zibata/zibata.webp" />
 
         {/* Canonical URL */}
         <link rel="canonical" href="https://www.pizo.mx/zibata" />
@@ -130,7 +131,7 @@ export default function ZibataInfo() {
         {/* Hero Section */}
         <div className="relative h-[280px] md:h-[400px] w-full overflow-hidden rounded-xl">
           <Image
-            src="/assets/zibata/zibata.jpg"
+            src="/assets/zibata/zibata.webp"
             alt="Zibatá - Vista aérea"
             fill
             className="object-cover"
@@ -270,7 +271,7 @@ export default function ZibataInfo() {
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
                     <p className="!text-white text-xs">
-                      {index === 0 ? "Plaza Centro Zibatá" : "Paseo Zibatá"}
+                      {index === 0 ? "Plaza Centro Zibatá" : "Paseo Xentric"}
                     </p>
                   </div>
                 </div>

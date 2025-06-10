@@ -413,7 +413,7 @@ const ListaExplorador = () => {
       </div>
       
       {/* Property list */}
-      <div className="p-6">
+      <div className="p-6 bg-white">
         {isLoading ? (
           // Loading skeletons - adjust mobile layout to 1 column
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">

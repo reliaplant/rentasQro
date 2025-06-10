@@ -4,11 +4,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, X } from 'lucide-react';
-import { CondoData } from '@/app/shared/interfaces';
 import { addCondo, updateCondo, getCondoById, buildCondoIndex } from '@/app/shared/firebase';
 import CondoBasicInfo from '../components/condoInfo';
 import CondoImages from '../components/condoImages';
 import CondoGoogleData from '../components/condoGoogleData';
+import { CondoData } from '../../../shared/interfaces';
 
 const steps = [
   { id: 'info', label: 'Información básica' },
@@ -119,25 +119,30 @@ export default function EditCondoPage() {
         throw new Error('La zona del condominio es obligatoria');
       }
       
-      console.log('Datos a guardar:', formData);
+      // Prepare data for saving
+      const dataToSave = {
+        ...formData,
+        // Ensure the imageAmenityTags are stored correctly
+        imageAmenityTags: formData.imageAmenityTags || {}
+      };
+      
+      console.log('Datos a guardar:', dataToSave);
       console.log('Archivos de imágenes:', imageFiles.length, 'imágenes');
-      console.log('Portada:', formData.portada ? 'Presente' : 'No presente');
-      console.log('PolygonId:', formData.polygonId || 'No presente');
       
       if (id !== 'new') {
         // Actualizar condominio existente
-        await updateCondo(id as string, formData, imageFiles.length > 0 ? imageFiles : undefined, logoFile);
+        await updateCondo(id as string, dataToSave, imageFiles.length > 0 ? imageFiles : undefined, logoFile);
         console.log('Condominio actualizado con éxito');
       } else {
-        // Crear nuevo condominio - ensure all data is passed correctly
+        // Crear nuevo condominio
         const condoData: CondoData = {
-          ...formData,
-          name: formData.name || '',
-          zoneId: formData.zoneId || '',
+          ...dataToSave,
+          name: dataToSave.name || '',
+          zoneId: dataToSave.zoneId || '',
           status: 'active',
-          polygonId: formData.polygonId || '',
-          polygonPath: formData.polygonPath || '',
-          portada: formData.portada || '',
+          polygonId: dataToSave.polygonId || '',
+          polygonPath: dataToSave.polygonPath || '',
+          portada: dataToSave.portada || '',
         } as CondoData;
         
         const newId = await addCondo(condoData, imageFiles, logoFile);

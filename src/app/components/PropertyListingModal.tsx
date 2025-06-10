@@ -12,7 +12,7 @@ interface PropertyListingModalProps {
 type UserType = 'advisor' | 'owner' | null;
 
 // WhatsApp configuration
-const WHATSAPP_NUMBER = '+524428549775'; 
+const WHATSAPP_NUMBER = '++525537362098'; 
 const MESSAGE = 'Hola, me gustaría publicar una propiedad que tengo.';
 
 export default function PropertyListingModal({ isOpen, onClose }: PropertyListingModalProps) {

@@ -192,9 +192,9 @@ export default function ZibataPage() {
   }
 
   const parkImages = [
-    '/assets/zibata/parqueJamadi2.jpg',
-    '/assets/zibata/parqueNanduZibata.jpg',
-    '/assets/zibata/parqueSaaki.jpg',
+    '/assets/zibata/jamadi1.webp',
+    '/assets/zibata/nandu.webp',
+    '/assets/zibata/saaki.webp',
     '/assets/zibata/parqueJamadi2.jpg'
   ];
 
@@ -240,7 +240,7 @@ export default function ZibataPage() {
 
         <div className="relative h-[200px] sm:h-[280px] md:h-[400px] w-full overflow-hidden rounded-xl">
           <Image
-            src="/assets/zibata/zibata.jpg"
+            src="/assets/zibata/zibata.webp"
             alt="Zibatá - Vista aérea"
             priority={true}
             sizes="100vw"

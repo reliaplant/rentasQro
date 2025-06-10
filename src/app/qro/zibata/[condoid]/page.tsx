@@ -190,7 +190,7 @@ export default async function CondoDetailPage(props: any) {
         />
 
 
-        <div className='w-full px-4 sm:px-[5vw] py-8 lg:py-16'>
+        <div className='w-full bg-white  px-4 sm:px-[5vw] py-8 lg:py-16'>
 
 
           <PropertiesSection

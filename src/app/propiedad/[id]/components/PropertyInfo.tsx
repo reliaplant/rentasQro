@@ -138,37 +138,37 @@ export default function PropertyInfo({
                 {property.cuartoEstudio && (
                   <div className="flex items-center gap-2">
                     <Tv className="w-5 h-5 text-gray-500" />
-                    <span className="text-sm">Cuarto de estudio/TV</span>
+                    <span className="text-sm text-gray-800">Cuarto de estudio/TV</span>
                   </div>
                 )}
                 {property.cuartoLavado && (
                   <div className="flex items-center gap-2">
                     <WashingMachine className="w-5 h-5 text-gray-500" />
-                    <span className="text-sm">Cuarto de lavado</span>
+                    <span className="text-sm text-gray-800">Cuarto de lavado</span>
                   </div>
                 )}
                 {property.balcon && (
                   <div className="flex items-center gap-2">
                     <MdBalcony className="w-5 h-5 text-gray-500" />
-                    <span className="text-sm">Balcón/Terraza</span>
+                    <span className="text-sm text-gray-800">Balcón/Terraza</span>
                   </div>
                 )}
                 {property.jardin && (
                   <div className="flex items-center gap-2">
                     <Flower className="w-5 h-5 text-gray-500" />
-                    <span className="text-sm">Jardín</span>
+                    <span className="text-sm text-gray-800">Jardín</span>
                   </div>
                 )}
                 {property.bodega && (
                   <div className="flex items-center gap-2">
                     <DoorOpen className="w-5 h-5 text-gray-500" />
-                    <span className="text-sm">Bodega</span>
+                    <span className="text-sm text-gray-800">Bodega</span>
                   </div>
                 )}
                 {property.roofGarden && (
                   <div className="flex items-center gap-2">
                     <MdRoofing className="w-5 h-5 text-gray-500" />
-                    <span className="text-sm">Roof Garden</span>
+                    <span className="text-sm text-gray-800">Roof Garden</span>
                   </div>
                 )}
               </div>
@@ -180,19 +180,19 @@ export default function PropertyInfo({
                 {property.cocinaEquipada && (
                   <div className="flex items-center gap-2">
                     <ChefHat className="w-5 h-5 text-gray-500" />
-                    <span className="text-sm">Cocina equipada</span>
+                    <span className="text-sm text-gray-800">Cocina equipada</span>
                   </div>
                 )}
                 {property.calentadorAgua && (
                   <div className="flex items-center gap-2">
                     <Flame className="w-5 h-5 text-gray-500" />
-                    <span className="text-sm">Calentador de agua {property.calentadorAgua}</span>
+                    <span className="text-sm text-gray-800">Calentador de agua {property.calentadorAgua}</span>
                   </div>
                 )}
                 {property.tipoGas && (
                   <div className="flex items-center gap-2">
                     <Droplets className="w-5 h-5 text-gray-500" />
-                    <span className="text-sm">Gas {property.tipoGas}</span>
+                    <span className="text-sm text-gray-800">Gas {property.tipoGas}</span>
                   </div>
                 )}
               </div>

@@ -57,7 +57,7 @@ const translations = {
 };
 
 // Update WhatsApp number
-const WHATSAPP_NUMBER = '+524428549775';
+const WHATSAPP_NUMBER = '++525537362098';
 
 const AdvisorModal: FC<AdvisorModalProps> = ({ 
   isOpen: externalIsOpen, 

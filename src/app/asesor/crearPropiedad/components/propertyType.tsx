@@ -793,34 +793,6 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
             </p>
           </div>
 
-          {/* Comisión */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Comisión
-            </label>
-            <div className="relative">
-              <input
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
-                value={data.comision !== undefined ? data.comision : ''}
-                onChange={(e) => {
-                  const value = e.target.value === '' ? undefined : parseFloat(e.target.value);
-                  onChange({ comision: value });
-                }}
-                className="py-3 px-4 pr-10 block w-full rounded-lg border border-gray-300 focus:ring-violet-500 focus:border-violet-500"
-                placeholder="Porcentaje de comisión"
-              />
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <span className="text-gray-500">%</span>
-              </div>
-            </div>
-            <p className="mt-1 text-xs text-gray-500">
-              Porcentaje de comisión para esta propiedad.
-            </p>
-          </div>
-
           {/* Modelo */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -838,51 +810,7 @@ export default function PropertyType({ data, onChange, onError }: PropertyTypePr
             </p>
           </div>
 
-          {/* Porcentaje Pizo */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Porcentaje Pizo
-            </label>
-            <div className="relative">
-              <input
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
-                value={data.porcentajePizo !== undefined ? data.porcentajePizo : ''}
-                onChange={(e) => {
-                  const value = e.target.value === '' ? undefined : parseFloat(e.target.value);
-                  onChange({ porcentajePizo: value });
-                  
-                  // Validate the input
-                  if (value !== undefined && (value < 0 || value > 100)) {
-                    setValidationErrors({
-                      ...validationErrors,
-                      porcentajePizo: 'El porcentaje debe estar entre 0 y 100'
-                    });
-                  } else {
-                    setValidationErrors({
-                      ...validationErrors,
-                      porcentajePizo: undefined
-                    });
-                  }
-                }}
-                className={`py-3 px-4 pr-10 block w-full rounded-lg border ${
-                  validationErrors.porcentajePizo ? 'border-red-500' : 'border-gray-300'
-                } focus:ring-violet-500 focus:border-violet-500`}
-                placeholder="Porcentaje para Pizo"
-              />
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <span className="text-gray-500">%</span>
-              </div>
-            </div>
-            {validationErrors.porcentajePizo && (
-              <p className="text-sm text-red-600 mt-1">{validationErrors.porcentajePizo}</p>
-            )}
-            <p className="mt-1 text-xs text-gray-500">
-              Deja vacío si no aplica un porcentaje para Pizo.
-            </p>
-          </div>
+    
         </div>
       </div>
       

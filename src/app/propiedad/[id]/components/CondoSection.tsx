@@ -8,7 +8,6 @@ import {
   Sprout, Tree, Box, Temperature, Fire, Restaurant, Basketball
 } from '@carbon/icons-react';
 import { PiXFill } from 'react-icons/pi';
-import ZibataMap from '@/app/components/ZibataMap';
 import GaleriaPropiedad from './galeriaPropiedad';
 import { useState } from 'react';
 
@@ -36,68 +35,79 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
 
   // Get ordered amenities for the gallery
   const organizedImages = () => {
-    if (!condoData.imageUrls || condoData.imageUrls.length === 0) {
-      return [];
-    }
+    
 
-    if (!condoData.amenities || condoData.amenities.length === 0) {
-      return condoData.imageUrls;
-    }
+    return condoData.imageUrls || [];
+    // if (!condoData.imageUrls || condoData.imageUrls.length === 0) {
+    //   return [];
+    // }
 
-    // Get amenities sorted by priority
-    const sortedAmenities = sortAmenitiesByPriority(condoData.amenities);
+    // if (!condoData.amenities || condoData.amenities.length === 0) {
+    //   return condoData.imageUrls;
+    // }
+
+    // // Get amenities sorted by priority
+    // const sortedAmenities = sortAmenitiesByPriority(condoData.amenities);
     
-    // Map of images to their amenities (if available)
-    const imageAmenityMap: Record<string, string> = {};
+    // // Map of images to their amenities (if available)
+    // const imageAmenityMap: Record<string, string> = {};
     
-    if (condoData.imageAmenityTags) {
-      // Map all explicitly tagged images
-      for (const [imgUrl, amenityId] of Object.entries(condoData.imageAmenityTags)) {
-        const amenityIdString = Array.isArray(amenityId) ? amenityId[0] : amenityId;
-        imageAmenityMap[imgUrl] = amenityIdString;
-      }
-    }
+    // if (condoData.imageAmenityTags) {
+    //   // Map all explicitly tagged images
+    //   for (const [imgUrl, amenityId] of Object.entries(condoData.imageAmenityTags)) {
+    //     const amenityIdString = Array.isArray(amenityId) ? amenityId[0] : amenityId;
+    //     imageAmenityMap[imgUrl] = amenityIdString;
+    //   }
+    // }
     
-    // Create an ordered list of images based on amenity priority
-    const orderedImages: string[] = [];
+    // // Create an ordered list of images based on amenity priority
+    // const orderedImages: string[] = [];
     
-    // Add explicitly tagged images in priority order
-    sortedAmenities.forEach(amenityId => {
-      const matchingImages = Object.entries(imageAmenityMap)
-        .filter(([_, tagAmenityId]) => tagAmenityId === amenityId)
-        .map(([imgUrl]) => imgUrl);
+    // // Add explicitly tagged images in priority order
+    // sortedAmenities.forEach(amenityId => {
+    //   const matchingImages = Object.entries(imageAmenityMap)
+    //     .filter(([_, tagAmenityId]) => tagAmenityId === amenityId)
+    //     .map(([imgUrl]) => imgUrl);
       
-      orderedImages.push(...matchingImages);
-    });
+    //   orderedImages.push(...matchingImages);
+    // });
     
-    // Add remaining images that don't have explicit tags
-    const untaggedImages = condoData.imageUrls.filter(img => !imageAmenityMap[img]);
-    orderedImages.push(...untaggedImages);
+    // // Add remaining images that don't have explicit tags
+    // const untaggedImages = condoData.imageUrls.filter(img => !imageAmenityMap[img]);
+    // orderedImages.push(...untaggedImages);
     
-    // Ensure we're not duplicating images and maintain original ones if we're missing any
-    const uniqueOrderedImages = [...new Set(orderedImages)];
-    const missingImages = condoData.imageUrls.filter(img => !uniqueOrderedImages.includes(img));
+    // // Ensure we're not duplicating images and maintain original ones if we're missing any
+    // const uniqueOrderedImages = [...new Set(orderedImages)];
+    // const missingImages = condoData.imageUrls.filter(img => !uniqueOrderedImages.includes(img));
     
-    return [...uniqueOrderedImages, ...missingImages];
+    // return [...uniqueOrderedImages, ...missingImages];
   };
 
-  // Function to get amenity for an image
-  const getImageAmenity = (imgUrl: string, index: number) => {
-    // First check if there's an explicit tag
-    if (condoData.imageAmenityTags && imgUrl in condoData.imageAmenityTags) {
-      const amenityId = condoData.imageAmenityTags[imgUrl];
+  // Simplified function to get amenity for an image
+  const getImageAmenity = (img: string, index: number) => {
+    if (!condoData.imageAmenityTags) return null;
+
+    // The tags are stored with the index as key
+    const indexKey = index.toString();
+    if (indexKey in condoData.imageAmenityTags) {
+      const amenityId = condoData.imageAmenityTags[indexKey];
+      // Handle both string and array cases
       const amenityIdString = Array.isArray(amenityId) ? amenityId[0] : amenityId;
       return condoAmenities.find(a => a.id === amenityIdString);
-    } 
-    
-    // If no explicit tag, assign based on priority ordered amenities
-    if (condoData.amenities && condoData.amenities.length > 0) {
-      const sortedAmenities = sortAmenitiesByPriority(condoData.amenities);
-      const amenityId = sortedAmenities[index % sortedAmenities.length];
-      return condoAmenities.find(a => a.id === amenityId);
     }
     
     return null;
+  };
+  
+  // Helper function to get a default amenity based on priority
+  const getDefaultAmenity = (index: number) => {
+    if (!condoData.amenities || condoData.amenities.length === 0) {
+      return null;
+    }
+    
+    const sortedAmenities = sortAmenitiesByPriority(condoData.amenities);
+    const amenityId = sortedAmenities[index % sortedAmenities.length];
+    return condoAmenities.find(a => a.id === amenityId);
   };
 
   // Get the organized images
@@ -271,16 +281,16 @@ export default function CondoSection({ condoData }: CondoSectionProps) {
 
             return (
               <div 
-                key={index} 
+                key={`image-${index}`} 
                 className="relative cursor-pointer"
                 onClick={() => {
-                  setInitialIndex(images.indexOf(img));
+                  setInitialIndex(index);
                   setIsGalleryOpen(true);
                 }}
               >
                 <div className="aspect-[16/10.5] relative group">
                   <Image
-                    src={img || '/placeholder-image.png'}
+                    src={img}
                     alt={`${condoData.name} ${amenity ? amenity.label : `vista ${index + 1}`}`}
                     fill
                     className="object-cover rounded-xl transition-all duration-200 group-hover:brightness-75"

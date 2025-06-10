@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Eye, MessageSquare, ChevronDown, ChevronUp, UserCheck, PlusCircle, Percent, UserPlus, RefreshCw, Download, Star } from 'lucide-react';
+import { Eye, MessageSquare, ChevronDown, ChevronUp, UserCheck, PlusCircle, Percent, UserPlus, RefreshCw, Download, Star, X } from 'lucide-react';
 import Link from 'next/link';
 import { 
   getProperties, 
@@ -22,6 +22,9 @@ export default function AllProperties() {
   const [updatingCounts, setUpdatingCounts] = useState(false);
   const [updateMessage, setUpdateMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
   const [updatingFeatured, setUpdatingFeatured] = useState<string | null>(null);
+  const [editingPizo, setEditingPizo] = useState<string | null>(null);
+  const [pizoValue, setPizoValue] = useState<number>(0);
+  const [savingPizo, setSavingPizo] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -253,6 +256,52 @@ export default function AllProperties() {
     }
   };
 
+  // Add function to handle porcentaje pizo updates
+  const updatePorcentajePizo = async (propertyId: string | undefined, newValue: number) => {
+    if (!propertyId) return;
+    
+    setSavingPizo(propertyId);
+    try {
+      await updateProperty(propertyId, { porcentajePizo: newValue });
+      
+      // Update local state
+      setProperties(prevProps => 
+        prevProps.map(p => 
+          p.id === propertyId ? { ...p, porcentajePizo: newValue } : p
+        )
+      );
+      
+      setUpdateMessage({
+        type: 'success',
+        text: 'Porcentaje Pizo actualizado correctamente'
+      });
+      
+      // Clear message after 2 seconds
+      setTimeout(() => {
+        setUpdateMessage(null);
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Error updating porcentaje pizo:', error);
+      setUpdateMessage({
+        type: 'error',
+        text: 'Error al actualizar porcentaje Pizo'
+      });
+    } finally {
+      setSavingPizo(null);
+      setEditingPizo(null);
+    }
+  };
+  
+  const startEditingPizo = (property: PropertyData) => {
+    setEditingPizo(property.id || null);
+    setPizoValue(property.porcentajePizo !== undefined ? property.porcentajePizo : 0);
+  };
+  
+  const cancelEditPizo = () => {
+    setEditingPizo(null);
+  };
+
   return (
     <div className="overflow-x-auto">
       <div className="flex justify-between items-center mb-4">
@@ -457,12 +506,70 @@ export default function AllProperties() {
                     </div>
                   )}
                   
-                  {property.porcentajePizo !== undefined && (
-                    <div className="flex items-center gap-1">
-                      <Percent size={16} className="text-green-500" />
-                      <span className="text-sm">{property.porcentajePizo}%</span>
-                    </div>
-                  )}
+                  {/* Editable porcentaje pizo */}
+                  <div className="flex items-center gap-1">
+                    {editingPizo === property.id ? (
+                      <div className="flex items-center gap-1">
+                        <Percent size={16} className="text-green-500" />
+                        <input
+                          type="number"
+                          value={pizoValue}
+                          onChange={(e) => setPizoValue(Number(e.target.value))}
+                          min="0"
+                          max="100"
+                          className="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                          autoFocus
+                        />
+                        <div className="flex gap-1 ml-1">
+                          <button
+                            onClick={() => updatePorcentajePizo(property.id, pizoValue)}
+                            disabled={savingPizo === property.id}
+                            className="p-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
+                          >
+                            {savingPizo === property.id ? (
+                              <RefreshCw className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            )}
+                          </button>
+                          <button
+                            onClick={cancelEditPizo}
+                            className="p-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1">
+                        {property.porcentajePizo !== undefined ? (
+                          <>
+                            <Percent size={16} className="text-green-500" />
+                            <span className="text-sm">{property.porcentajePizo}%</span>
+                            <button
+                              onClick={() => startEditingPizo(property)}
+                              className="ml-2 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded"
+                              title="Editar porcentaje Pizo"
+                            >
+                              <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                              </svg>
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => startEditingPizo(property)}
+                            className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 py-1 px-2 hover:bg-gray-100 rounded-md"
+                          >
+                            <Percent size={12} />
+                            <span>Añadir %</span>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   
                   {!property.asesorAliado && property.porcentajePizo === undefined && (
                     <span className="text-xs text-gray-500">No especificado</span>

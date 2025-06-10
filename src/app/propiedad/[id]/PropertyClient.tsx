@@ -208,7 +208,7 @@ export default function PropertyClient({
           transactionType={property.transactionType}
           condoName={condoData?.name}
           zoneName={zoneData?.name}
-          advisorPhone={advisor?.phone || ''}
+          advisorPhone={'+525537362098'}
           propertyId={property.id!}
           price={property.price}
           contactRef={contactRef as React.RefObject<HTMLDivElement>}

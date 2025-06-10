@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { ArrowUpRight } from 'lucide-react';
 import { condoAmenities } from '@/app/constants/amenities';
@@ -29,8 +29,8 @@ const amenityPriorityOrder = [
 interface GalleryProps {
   name: string;
   imageUrls?: string[];
-  amenities?: string[] | Record<string, string>; // Update to accept both array and object formats
-  imageAmenityTags?: Record<string, string> | Record<string, string[]>; // Allow both string and string[] values
+  amenities?: string[] | Record<string, string>;
+  imageAmenityTags?: Record<string, string> | Record<string, string[]>;
 }
 
 export default function Gallery({ name, imageUrls, amenities, imageAmenityTags }: GalleryProps) {
@@ -38,119 +38,157 @@ export default function Gallery({ name, imageUrls, amenities, imageAmenityTags }
   const [initialIndex, setInitialIndex] = useState(0);
   const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set());
 
-  // Log what we received to help debug
-  console.log('Gallery component received:', { 
-    imageUrlsCount: imageUrls?.length,
-    amenitiesFormat: amenities ? (Array.isArray(amenities) ? 'array' : 'object') : 'undefined',
-    imageAmenityTagsExists: !!imageAmenityTags
-  });
-
-  // A more robust function to get the amenity ID for an image
-  const getAmenityIdForImage = (img: string, index: number) => {
-    // If we have imageAmenityTags (from editCondo), use that
+  // Log the available amenity tags for debugging
+  useEffect(() => {
     if (imageAmenityTags) {
-      // Try direct match first
-      if (imageAmenityTags[img]) {
-        const tagValue = imageAmenityTags[img];
-        // Handle both string and string[] types
+      console.log('Image tags format check:', {
+        isIndexBased: Object.keys(imageAmenityTags).some(key => !isNaN(parseInt(key))),
+        tagKeys: Object.keys(imageAmenityTags).slice(0, 3), // Just show first 3 keys to avoid clutter
+      });
+    }
+  }, [imageAmenityTags]);
+
+  // Enhanced debugging for amenity tags - add this to see what's happening
+  useEffect(() => {
+    if (!imageAmenityTags) return;
+    
+    // Log all the amenity tags for inspection
+    console.log('All image amenity tags:', imageAmenityTags);
+    
+    // Check if all amenity IDs are valid
+    const validAmenityIds = condoAmenities.map(a => a.id);
+    const tagValues = Object.values(imageAmenityTags).flat();
+    const invalidTags = tagValues.filter(tag => 
+      !validAmenityIds.includes(Array.isArray(tag) ? tag[0] : tag)
+    );
+    
+    if (invalidTags.length > 0) {
+      console.warn('Found invalid amenity tags:', invalidTags);
+      console.warn('Valid amenity IDs are:', validAmenityIds);
+    }
+  }, [imageAmenityTags]);
+
+  // Add this debugging function to inspect ALL data structures
+  useEffect(() => {
+    console.log('🔍 DEBUGGING GALLERY COMPONENT:');
+    console.log('- condoAmenities available:', condoAmenities.map(a => ({ id: a.id, label: a.label })));
+    console.log('- imageAmenityTags structure:', imageAmenityTags);
+    
+    // Check if there's any mismatch that could cause wrong categories
+    if (imageAmenityTags) {
+      const tagValues = Object.entries(imageAmenityTags).map(([key, value]) => ({
+        key,
+        value: Array.isArray(value) ? value[0] : value
+      }));
+      
+      // Find any tags that don't match valid amenity IDs
+      const matchingAmenities = tagValues.map(tag => {
+        const matchedAmenity = condoAmenities.find(a => 
+          a.id.toLowerCase() === (tag.value || '').toLowerCase()
+        );
+        return {
+          key: tag.key,
+          tagValue: tag.value,
+          matched: !!matchedAmenity,
+          matchedTo: matchedAmenity ? matchedAmenity.id : 'none'
+        };
+      });
+      
+      const mismatches = matchingAmenities.filter(item => !item.matched);
+      if (mismatches.length > 0) {
+        console.warn('⚠️ TAG MISMATCHES:', mismatches);
+        console.warn('This could be causing unexpected categories!');
+      }
+    }
+  }, [imageAmenityTags]);
+
+  // Modified function to use "general" for all untagged images
+  const getAmenityIdForImage = (img: string, index: number): string | undefined => {
+    // Priority 1: Check for index-based tags (new format)
+    if (imageAmenityTags) {
+      const indexKey = index.toString();
+      if (indexKey in imageAmenityTags) {
+        const tagValue = imageAmenityTags[indexKey];
         const amenityId = Array.isArray(tagValue) ? tagValue[0] : tagValue;
-        console.log('Direct match found in imageAmenityTags');
-        return amenityId;
-      }
-      
-      // Firebase URLs contain the filename but with encoding - try to extract and match
-      if (img.includes('firebasestorage.googleapis.com')) {
-        const imgFilename = img.split('%2F').pop()?.split('?')[0];
         
-        // Look through all keys in imageAmenityTags
-        for (const [tagUrl, amenityId] of Object.entries(imageAmenityTags)) {
-          // For Firebase URLs, check if any saved key includes the filename
-          if (imgFilename && tagUrl.includes(imgFilename)) {
-            console.log(`Matched Firebase URL by filename: ${imgFilename}`);
-            return amenityId;
-          }
-          
-          // For blob URLs that have been replaced with Firebase URLs
-          // Extract the filename from both and compare
-          if (tagUrl.startsWith('blob:')) {
-            const tagFilename = tagUrl.split('/').pop();
-            const storedFilename = img.split('%2F').pop()?.split('?')[0];
-            
-            // Check for any image index pattern like number at end of filename
-            const tagNumber = tagFilename?.match(/\d+/)?.[0];
-            const storedNumber = storedFilename?.match(/\d+/)?.[0];
-            
-            if (tagNumber && storedNumber && tagNumber === storedNumber) {
-              console.log(`Matched blob URL to Firebase URL by number pattern: ${tagNumber}`);
-              return amenityId;
-            }
-          }
+        // Case insensitive match against valid amenities
+        const matchedAmenity = condoAmenities.find(a => 
+          a.id.toLowerCase() === (amenityId || '').toLowerCase()
+        );
+        
+        if (matchedAmenity) {
+          // Use the CORRECT casing from the constants, not from the data
+          return matchedAmenity.id;
+        } else {
+          console.warn(`Image at index ${index} has invalid/unknown amenity ID: "${amenityId}"`);
         }
       }
     }
     
-    // If amenities is an array, use the corresponding index
-    if (amenities && Array.isArray(amenities) && amenities[index]) {
-      console.log('Using amenities array match');
-      return amenities[index];
-    }
-    
-    // If amenities is an object (like imageAmenityTags), try to find a match
-    if (amenities && typeof amenities === 'object' && !Array.isArray(amenities)) {
-      // Try exact match
-      if ((amenities as Record<string, string>)[img]) {
-        console.log('Exact match in amenities object');
-        return (amenities as Record<string, string>)[img];
-      }
-      
-      // Extract filename or key parts for matching
-      const filename = img.split('/').pop()?.split('?')[0] || '';
-      for (const [key, value] of Object.entries(amenities as Record<string, string>)) {
-        // Try matching by filename
-        const keyFilename = key.split('/').pop()?.split('?')[0] || '';
-        if (filename && keyFilename && (filename.includes(keyFilename) || keyFilename.includes(filename))) {
-          console.log(`Matched by filename parts: ${filename} - ${keyFilename}`);
-          return value;
-        }
-      }
-    }
-    
-    // Default to null (which will be categorized as "General")
-    console.log('No match found, defaulting to General');
-    return null;
+    // Default to "general" for all untagged images
+    return "general";
   };
 
-  // Filter out broken images before grouping
+  // Filter out broken images - moved up before it's used
   const validImageUrls = imageUrls?.filter(url => !brokenImages.has(url));
 
-  // Group images by amenity with our more robust method
-  const groupedImages = validImageUrls?.reduce((acc, img, index) => {
-    const amenityId = getAmenityIdForImage(img, index);
+  // For debugging - log what tags we found
+  useEffect(() => {
+    if (!validImageUrls) return;
     
-    // Log for debugging
-    console.log(`Processing image ${index}:`, {
-      img: img?.substring(0, 50), // Truncate for readability
-      amenityId,
-      source: imageAmenityTags?.[img] ? 'imageAmenityTags' : 
-              (Array.isArray(amenities) && amenities[index]) ? 'amenities array' : 
-              'fallback',
-      matchedAmenity: condoAmenities.find(a => a.id === amenityId)?.label
-    });
-    
-    const amenity = amenityId ? condoAmenities.find(a => a.id === amenityId) : null;
-    const category = amenity?.label || 'General';
-    
-    if (!acc[category]) acc[category] = [];
-    acc[category].push({ img, index, amenityId });
-    return acc;
-  }, {} as Record<string, { img: string; index: number; amenityId?: string }[]>);
+    console.log("Image Tags Found:", validImageUrls.map((img, i) => ({
+      index: i,
+      amenityId: getAmenityIdForImage(img, i)
+    })));
+  }, [validImageUrls, imageAmenityTags]);
 
-  // Debug the final grouping result
-  console.log('Grouped by category:', Object.keys(groupedImages || {}));
+  // Modified grouping logic to use the "general" amenity for untagged images
+  const groupedImages = useMemo(() => {
+    if (!validImageUrls) return {};
+    
+    // Find the "General" label from condoAmenities
+    const generalAmenity = condoAmenities.find(a => a.id === 'general');
+    const generalLabel = generalAmenity ? generalAmenity.label : 'General';
+    
+    const result = validImageUrls.reduce((acc, img, index) => {
+      // Get amenity details for this image
+      const amenityId = getAmenityIdForImage(img, index);
+      const amenity = condoAmenities.find(a => a.id === amenityId);
+      
+      // Use the amenity label or fallback to the General label
+      const category = amenity?.label || generalLabel;
+      
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      
+      acc[category].push({ img, index, amenityId });
+      
+      return acc;
+    }, {} as Record<string, { img: string; index: number; amenityId?: string }[]>);
+    
+    // Log the final groupings with their amenity IDs for debugging
+    console.log('Grouped images by category:', 
+      Object.entries(result).map(([category, images]) => ({
+        category,
+        count: images.length,
+        amenityIds: images.map(img => img.amenityId).filter(Boolean)
+      }))
+    );
+    
+    return result;
+  }, [validImageUrls, imageAmenityTags]);
+
+  // Log the grouping results for debugging
+  console.log('Image grouping results:', 
+    Object.keys(groupedImages || {}).map(category => ({
+      category,
+      count: groupedImages?.[category]?.length || 0
+    }))
+  );
 
   // Function to sort categories by amenity priority
   const sortCategoriesByPriority = (a: string, b: string) => {
-    // Find the amenity IDs corresponding to these categories
     const getAmenityIdFromCategory = (category: string) => {
       const foundAmenity = condoAmenities.find(amenity => amenity.label === category);
       return foundAmenity?.id || 'general';
@@ -159,15 +197,12 @@ export default function Gallery({ name, imageUrls, amenities, imageAmenityTags }
     const aId = getAmenityIdFromCategory(a);
     const bId = getAmenityIdFromCategory(b);
 
-    // Get their positions in the priority array
     const aPosition = amenityPriorityOrder.indexOf(aId);
     const bPosition = amenityPriorityOrder.indexOf(bId);
 
-    // If not found, put at the end
     const aPriority = aPosition === -1 ? 999 : aPosition;
     const bPriority = bPosition === -1 ? 999 : bPosition;
 
-    // Sort by priority
     return aPriority - bPriority;
   };
 
@@ -186,14 +221,12 @@ export default function Gallery({ name, imageUrls, amenities, imageAmenityTags }
           fill
           className="object-cover transition-all duration-200 group-hover:brightness-90"
           onError={() => {
-            console.log(`Image failed to load: ${img}`);
             setBrokenImages(prev => {
               const updated = new Set(prev);
               updated.add(img);
               return updated;
             });
           }}
-          
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -302,17 +335,21 @@ export default function Gallery({ name, imageUrls, amenities, imageAmenityTags }
         )}
       </div>
 
-      <div className="space-y-4 md:space-y-2">
-        {groupedImages && 
+      <div className="space-y-4 md:space-y-6">
+        {Object.keys(groupedImages).length > 0 ? (
           Object.entries(groupedImages)
             .sort(([catA, _], [catB, __]) => sortCategoriesByPriority(catA, catB))
             .map(([category, images]) => (
               <div key={category} className="flex flex-col md:flex-row gap-2">
-                {/* Category Label - Mobile optimized */}
+                {/* Category Label with count - no special styling for general/uncategorized */}
                 <div className="w-full md:w-96 md:flex-shrink-0">
-                  <div className="bg-white rounded-lg">
-                    <h4 className="font-medium text-lg md:text-xl text-gray-900">{category}</h4>
-                    <p className="text-xs md:text-sm text-gray-500 mt-1">{images.length} fotos</p>
+                  <div className="rounded-lg p-3 bg-white">
+                    <h4 className="font-medium text-lg md:text-xl text-gray-900">
+                      {category}
+                    </h4>
+                    <p className="text-xs md:text-sm text-gray-500 mt-1">
+                      {images.length} {images.length === 1 ? 'foto' : 'fotos'}
+                    </p>
                   </div>
                 </div>
 
@@ -322,7 +359,18 @@ export default function Gallery({ name, imageUrls, amenities, imageAmenityTags }
                 </div>
               </div>
             ))
-        }
+        ) : (
+          <div className="text-center py-10 text-gray-500">
+            {validImageUrls && validImageUrls.length > 0 ? (
+              <div>
+                <p>No se pudieron categorizar las imágenes correctamente</p>
+                <p className="text-sm mt-2">Etiquetas disponibles: {JSON.stringify(imageAmenityTags ? Object.keys(imageAmenityTags).length : 0)}</p>
+              </div>
+            ) : (
+              'No hay imágenes disponibles'
+            )}
+          </div>
+        )}
       </div>
 
       <GaleriaPropiedad

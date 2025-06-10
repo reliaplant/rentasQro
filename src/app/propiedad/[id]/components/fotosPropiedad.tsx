@@ -219,7 +219,7 @@ export default function FotosPropiedad({ images, propertyType }: FotosPropiedadP
         {/* View all photos button */}
         <button 
           onClick={() => setShowAllPhotos(true)}
-          className="absolute bottom-4 left-4 bg-white px-3 py-2 rounded-lg shadow-md text-sm font-medium flex items-center gap-1 hover:bg-gray-50"
+          className="absolute bottom-4 left-4 bg-white px-3 py-2 rounded-lg shadow-md text-sm font-medium flex text-gray-800 items-center gap-1 hover:bg-gray-50"
           aria-label="View all photos"
         >
           Ver todas las fotos ({images.length})
@@ -233,7 +233,6 @@ export default function FotosPropiedad({ images, propertyType }: FotosPropiedadP
           images={images}
           onClose={() => setShowAllPhotos(false)}
           initialIndex={currentIndex}
-          preloadedImages={preloadedImages}
         />
       )}
     </>

@@ -47,7 +47,7 @@ export default function ContactPage() {
                 {/* Líneas directas group */}
                 <div className="space-y-4">
                   <a 
-                    href="tel:+524428549775" 
+                    href="tel:++525537362098" 
                     className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-violet-100 hover:bg-violet-50/50 transition-colors group"
                   >
                     <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center group-hover:bg-violet-200">
@@ -55,7 +55,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">Teléfono</p>
-                      <p className="text-gray-600">(442) 854 9775</p>
+                      <p className="text-gray-600">+52 55 3736 2098</p>
                     </div>
                   </a>
 
@@ -70,7 +70,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">WhatsApp</p>
-                      <p className="text-gray-600">+52 (442) 854 9775</p>
+                      <p className="text-gray-600">+52 55 3736 2098</p>
                     </div>
                   </a>
 
