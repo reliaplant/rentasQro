@@ -17,14 +17,14 @@ function MenuModals({
   closePropertyListingModal: () => void;
 }) {
   return (
-    <>
+    <div style={{ zIndex: 10000 }}>
       {isPropertyListingModalOpen && (
         <PropertyListingModal
           isOpen={isPropertyListingModalOpen}
           onClose={closePropertyListingModal}
         />
       )}
-    </>
+    </div>
   );
 }
 
@@ -125,6 +125,11 @@ export default function Menu() {
   const openPropertyListingModal = useCallback(() => setIsPropertyListingModalOpen(true), []);
   const closePropertyListingModal = useCallback(() => setIsPropertyListingModalOpen(false), []);
 
+  // Memoized handler for advisor modal
+  const [isAdvisorModalOpen, setIsAdvisorModalOpen] = useState(false);
+  const openAdvisorModal = useCallback(() => setIsAdvisorModalOpen(true), []);
+  const closeAdvisorModal = useCallback(() => setIsAdvisorModalOpen(false), []);
+  
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -188,14 +193,13 @@ export default function Menu() {
     return false;
   }, [pathname, searchParams]);
 
-  // Updated handlers to use hard navigation with page reload
+  // Make sure the tab click handler directly uses router without custom logic
   const handleTabClick = useCallback((url: string, e: React.MouseEvent) => {
     e.preventDefault();
-    console.log('Menu: Hard navigating to', url);
+    console.log('Menu: Navigating to', url);
     setIsMobileMenuOpen(false);
-    // Use window.location for a hard reload/navigation
-    window.location.href = url;
-  }, []);
+    router.push(url);
+  }, [router]);
 
   return (
     <>
@@ -333,15 +337,17 @@ export default function Menu() {
               )}
             </Link>
             <button
-              onClick={() => {
-                openPropertyListingModal();
-                // No filter update logic
-              }}
+              onClick={openPropertyListingModal}
               className="text-sm font-medium text-gray-700 hover:text-violet-800 cursor-pointer"
             >
               Publica tu propiedad
             </button>
-            <AdvisorModal />
+            <button 
+              onClick={openAdvisorModal}
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-violet-800 to-violet-700 rounded-lg hover:opacity-90 transition-all duration-200 shadow-sm hover:shadow cursor-pointer"
+            >
+              ¿Necesitas un asesor?
+            </button>
           </div>
         </div>
 
@@ -361,7 +367,7 @@ export default function Menu() {
           ref={mobileMenuRef}
           className="md:hidden bg-white border-t border-gray-100 shadow-lg fixed inset-0 z-[9990] overflow-y-auto"
           style={{ 
-            top: '64px', // Height of the nav bar
+            top: '64px',
             height: 'calc(100vh - 64px)'
           }}
         >
@@ -452,6 +458,21 @@ export default function Menu() {
 
           </div>
         </div>
+      )}
+
+      {/* Render modals at the root level */}
+      {isPropertyListingModalOpen && (
+        <PropertyListingModal
+          isOpen={isPropertyListingModalOpen}
+          onClose={closePropertyListingModal}
+        />
+      )}
+      
+      {isAdvisorModalOpen && (
+        <AdvisorModal 
+          isOpen={isAdvisorModalOpen}
+          onClose={closeAdvisorModal}
+        />
       )}
     </>
   );

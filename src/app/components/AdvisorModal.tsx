@@ -4,6 +4,7 @@ import { FC, useState, useEffect } from 'react';
 import { FaWhatsapp, FaTimes } from 'react-icons/fa';
 import { IconType } from 'react-icons';
 import * as Icons from 'react-icons/fa';
+import { useUtmParams } from '@/app/hooks/useUtmParams'; // Add this import
 
 interface AdvisorModalProps {
   isOpen?: boolean;
@@ -57,7 +58,7 @@ const translations = {
 };
 
 // Update WhatsApp number
-const WHATSAPP_NUMBER = '++525537362098';
+const WHATSAPP_NUMBER = '+525537362098';
 
 const AdvisorModal: FC<AdvisorModalProps> = ({ 
   isOpen: externalIsOpen, 
@@ -76,6 +77,7 @@ const AdvisorModal: FC<AdvisorModalProps> = ({
   const [formData, setFormData] = useState<FormData>({ name: '', email: '' });
   const [nameError, setNameError] = useState('');
   const [emailError, setEmailError] = useState('');
+  const { utmParams, formatUtmParamsForUrl } = useUtmParams(); // Add this hook
   
   const isControlledExternally = externalIsOpen !== undefined && externalOnClose !== undefined;
   const isOpen = isControlledExternally ? externalIsOpen : internalIsOpen;
@@ -149,8 +151,16 @@ const AdvisorModal: FC<AdvisorModalProps> = ({
     // Use the direct message without name replacement
     const message = langTranslations.whatsappMessage;
     
+    // Get current page URL and add UTM parameters
+    const currentUrl = typeof window !== 'undefined' ? window.location.href.split('?')[0] : '';
+    const utmString = formatUtmParamsForUrl();
+    const urlWithUtm = utmString ? `${currentUrl}?${utmString}` : currentUrl;
+    
+    // Include URL with UTM parameters in the message
+    const fullMessage = `${message}\nRef: ${urlWithUtm}`;
+    
     // Immediately redirect to WhatsApp
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`);
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(fullMessage)}`);
     
     // Close the modal
     handleClose();
@@ -185,7 +195,7 @@ const AdvisorModal: FC<AdvisorModalProps> = ({
       {!isControlledExternally && (
         <button
           onClick={handleOpen}
-          className={`inline-flex items-center px-4 py-2 text-sm font-medium ${textColor} ${backgroundColor} rounded-${rounded} hover:opacity-90 transition-all duration-200 shadow-sm hover:shadow cursor-pointer`}
+          className={`inline-flex items-center px-4 py-2 text-sm font-medium ${textColor} ${backgroundColor} rounded-${rounded} hover:opacity-90 transition-all duration-200 shadow-sm hover:shadow cursor-pointer btn-whatsapp`}
         >
           {IconComponent && iconPosition === 'left' && (
             <IconComponent className="w-4 h-4 mr-2" />
@@ -198,48 +208,55 @@ const AdvisorModal: FC<AdvisorModalProps> = ({
       )}
 
       {isOpen && (
-        <div className="fixed inset-0 z-50">
-          <div className="fixed inset-0 bg-black/30" onClick={handleClose} />
+        <div 
+          className="fixed inset-0 z-[10000] flex items-center justify-center"
+          aria-modal="true" 
+          role="dialog"
+        >
+          {/* Semi-transparent overlay/backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={handleClose}
+          ></div>
 
-          <div className="fixed inset-0 flex items-center justify-center ">
-            <div className="relative bg-white p-6 rounded-xl shadow-lg max-w-md w-full">
+          {/* Modal content container - added mx-4 to ensure horizontal spacing on mobile */}
+          <div className="relative bg-white rounded-xl shadow-2xl p-6 max-w-md w-[calc(100%-2rem)] mx-4 z-[10001]">
+            <button
+              onClick={handleClose}
+              className="absolute right-4 top-4 p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-50 transition-colors cursor-pointer"
+            >
+              <FaTimes className="w-4 h-4" />
+            </button>
+
+            {/* Only showing language selection, form step will be skipped */}
+            <h3 className="text-lg font-medium mb-2 text-center">
+              Selecciona tu idioma
+            </h3>
+            <p className="text-xs text-gray-500 text-center mb-4">
+              Select your language
+            </p>
+            <div className="flex justify-around gap-4">
               <button
-                onClick={handleClose}
-                className="absolute right-4 top-4 p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-50 transition-colors cursor-pointer"
+                onClick={() => handleLanguageSelect('es')}
+                className="w-[120px] flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg cursor-pointer hover:outline hover:outline-2 hover:outline-violet-500 transition-all border-2 border-gray-100"
               >
-                <FaTimes className="w-4 h-4" />
+                <span className="text-2xl">🇲🇽</span>
+                <span className="mt-2 text-sm">Español</span>
               </button>
-
-              {/* Only showing language selection, form step will be skipped */}
-              <h3 className="text-lg font-medium mb-2 text-center">
-                Selecciona tu idioma
-              </h3>
-              <p className="text-xs text-gray-500 text-center mb-4">
-                Select your language
-              </p>
-              <div className="flex justify-around gap-4">
-                <button
-                  onClick={() => handleLanguageSelect('es')}
-                  className="w-[120px] flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg cursor-pointer hover:outline hover:outline-2 hover:outline-violet-500 transition-all border-2 border-gray-100"
-                >
-                  <span className="text-2xl">🇲🇽</span>
-                  <span className="mt-2 text-sm">Español</span>
-                </button>
-                <button
-                  onClick={() => handleLanguageSelect('en')}
-                  className="w-[120px] flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg cursor-pointer hover:outline hover:outline-2 hover:outline-violet-500 transition-all border-2 border-gray-100"
-                >
-                  <span className="text-2xl">🇺🇸</span>
-                  <span className="mt-2 text-sm">English</span>
-                </button>
-                <button
-                  onClick={() => handleLanguageSelect('pt')}
-                  className="w-[120px] flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg cursor-pointer hover:outline hover:outline-2 hover:outline-violet-500 transition-all border-2 border-gray-100"
-                >
-                  <span className="text-2xl">🇧🇷</span>
-                  <span className="mt-2 text-sm">Português</span>
-                </button>
-              </div>
+              <button
+                onClick={() => handleLanguageSelect('en')}
+                className="w-[120px] flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg cursor-pointer hover:outline hover:outline-2 hover:outline-violet-500 transition-all border-2 border-gray-100"
+              >
+                <span className="text-2xl">🇺🇸</span>
+                <span className="mt-2 text-sm">English</span>
+              </button>
+              <button
+                onClick={() => handleLanguageSelect('pt')}
+                className="w-[120px] flex flex-col items-center p-4 hover:bg-gray-50 rounded-lg cursor-pointer hover:outline hover:outline-2 hover:outline-violet-500 transition-all border-2 border-gray-100"
+              >
+                <span className="text-2xl">🇧🇷</span>
+                <span className="mt-2 text-sm">Português</span>
+              </button>
             </div>
           </div>
         </div>

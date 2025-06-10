@@ -34,7 +34,7 @@ const Footer = () => {
               <a href="https://www.instagram.com/pizomx/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-violet-600">
                 <FaInstagram size={16} className="w-4 h-4 md:w-5 md:h-5" />
               </a>
-                <a href="https://wa.me/524428549775" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-violet-600">
+                <a href="https://wa.me/525537362098" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-violet-600">
                 <FaWhatsapp size={16} className="w-4 h-4 md:w-5 md:h-5" />
                 </a>
             </div>

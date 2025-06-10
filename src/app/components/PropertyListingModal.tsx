@@ -12,7 +12,7 @@ interface PropertyListingModalProps {
 type UserType = 'advisor' | 'owner' | null;
 
 // WhatsApp configuration
-const WHATSAPP_NUMBER = '++525537362098'; 
+const WHATSAPP_NUMBER = '+525537362098'; 
 const MESSAGE = 'Hola, me gustaría publicar una propiedad que tengo.';
 
 export default function PropertyListingModal({ isOpen, onClose }: PropertyListingModalProps) {
@@ -127,16 +127,25 @@ export default function PropertyListingModal({ isOpen, onClose }: PropertyListin
   };
   
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-full items-center justify-center p-4">
-        {/* Backdrop */}
+    <div 
+      className="fixed inset-0 z-[10000] overflow-hidden"
+      aria-modal="true" 
+      role="dialog"
+      style={{ pointerEvents: 'auto' }}
+    >
+      {/* Backdrop with high z-index */}
+      <div 
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm" 
+        onClick={onClose}
+        style={{ pointerEvents: 'auto' }}
+      />
+      
+      {/* Centered modal container */}
+      <div className="fixed inset-0 flex items-center justify-center p-4">
         <div 
-          className="fixed inset-0 bg-black/10 backdrop-blur-sm cursor-pointer" 
-          onClick={onClose}
-        />
-        
-        {/* Modal */}
-        <div className="relative bg-white rounded-2xl shadow-xl w-[28rem] p-6">
+          className="relative bg-white rounded-xl shadow-2xl max-w-md w-full p-6"
+          style={{ pointerEvents: 'auto' }}
+        >
           {/* Close button */}
           <button
             type="button"

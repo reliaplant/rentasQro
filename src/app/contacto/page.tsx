@@ -1,6 +1,24 @@
+'use client';
+
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaWhatsapp } from 'react-icons/fa';
+import { useUtmParams } from '@/app/hooks/useUtmParams';
 
 export default function ContactPage() {
+  const { utmParams, formatUtmParamsForUrl } = useUtmParams();
+  
+  // Create WhatsApp message with URL and UTM parameters
+  const createWhatsAppLink = () => {
+    // Get current page URL
+    const currentUrl = typeof window !== 'undefined' ? window.location.href.split('?')[0] : '';
+    const utmString = formatUtmParamsForUrl();
+    const urlWithUtm = utmString ? `${currentUrl}?${utmString}` : currentUrl;
+    
+    // Create message with URL reference
+    const message = `Hola, necesito información sobre sus propiedades.\nRef: ${urlWithUtm}`;
+    
+    return `https://wa.me/525537362098?text=${encodeURIComponent(message)}`;
+  };
+  
   return (
     <div className="min-h-screen bg-white">
       <div className="container mx-auto px-4 py-24">
@@ -47,7 +65,7 @@ export default function ContactPage() {
                 {/* Líneas directas group */}
                 <div className="space-y-4">
                   <a 
-                    href="tel:++525537362098" 
+                    href="tel:+525537362098" 
                     className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-violet-100 hover:bg-violet-50/50 transition-colors group"
                   >
                     <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center group-hover:bg-violet-200">
@@ -60,10 +78,10 @@ export default function ContactPage() {
                   </a>
 
                   <a 
-                    href="https://wa.me/524428549775" 
+                    href="https://wa.me/525537362098" 
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-violet-100 hover:bg-violet-50/50 transition-colors group"
+                    className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-violet-100 hover:bg-violet-50/50 transition-colors group btn-whatsapp"
                   >
                     <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center group-hover:bg-violet-200">
                       <FaWhatsapp className="w-4 h-4 text-violet-600" />
